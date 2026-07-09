@@ -1,0 +1,490 @@
+{
+  "briefing_date": "2026년 07월 09일",
+  "market_summary": "전일(7월 8일) 국내 증시는 반도체 피크아웃 논란과 단일 종목 2배 레버리지 ETF 발(發) 변동성 확대로 코스피와 코스닥 모두 큰 폭의 하락세를 보였다. 삼성전자가 역대급 깜짝 실적을 발표했음에도 주가는 급락하는 역설적 흐름이 연출됐으며, 코스피는 7,200선, 코스닥은 780선 부근에서 마감했다. 외국인은 14거래일 만에 매수로 전환하며 삼성전기·SK하이닉스 등을 순매수했고, 이후 반등 기대가 일부 유입됐다.\n\n전전일(7월 7일)부터 이어진 미국의 이란 이틀 연속 공습 소식이 중동 리스크를 재점화시켜 국제 유가가 급등(브렌트유 5.2%↑, 78달러대)하고 원·달러 환율도 40일 만에 1,400원대를 회복했다가 트럼프 대통령의 추가 공습 발언 한마디에 다시 1,500원대로 급반등했다. 한편 IMF는 한국의 올해 성장률 전망치를 1.9%에서 2.6%로 0.7%포인트 대폭 상향하며 선진국 중 최고 수준 상승폭을 기록했다. KB국민은행은 10일부터 주택담보대출 한도를 6억 원에서 3억 원으로 반토막 내는 조치를 전격 발표해 부동산 시장에 파장이 번지고 있다.\n\n긍정 요인으로는 IMF의 한국 성장률 대폭 상향과 AI 하드웨어 수출 상위 4개국 편입, 삼성전자·LG전자의 잇따른 어닝 서프라이즈, SK하이닉스 미국 ADR 상장 호재, 외국인 매수 전환 등이 꼽힌다. 반면 단일 종목 레버리지 ETF 수급 변동성, 반도체 피크아웃 논란, 미·이란 군사 충돌에 따른 유가 급등과 인플레이션 재확산 우려, 원화값 불안정, 한국은행 7월 16일 금리 인상 유력론 부상, KB국민은행의 주담대 한도 축소로 인한 부동산·소비심리 위축 등은 부정 요인으로 작용하고 있다.\n\n단기적으로 시장은 반도체 실적 시즌(SK하이닉스 2분기 실적 발표 임박)과 한국은행 금통위(7월 16일) 금리 결정을 핵심 변수로 주시할 전망이다. 변동성 장세가 아직 완전히 해소되지 않은 만큼 추격 매수보다는 낙폭과대 실적주 중심의 저점 분할 매수 전략과 방어적 섹터 비중 확대가 유효하다는 시각이 다수다. 중동 지정학 리스크 향방과 원·달러 환율 안정 여부가 향후 수급 방향을 결정하는 핵심 분기점이 될 것으로 보인다.",
+  "hot_sectors": [
+    {
+      "name": "반도체",
+      "reason": "실적·변동성"
+    },
+    {
+      "name": "AI인프라·전력",
+      "reason": "메가프로젝트"
+    },
+    {
+      "name": "방산·조선",
+      "reason": "지정학 수혜"
+    },
+    {
+      "name": "금융·증권",
+      "reason": "금리인상 기대"
+    },
+    {
+      "name": "가전·소비",
+      "reason": "어닝서프라이즈"
+    }
+  ],
+  "market_leaders": [
+    {
+      "rank": 1,
+      "name": "삼성전자",
+      "code": "005930",
+      "signal": "중립",
+      "summary": "2분기 영업이익이 시장 컨센서스를 크게 웃도는 역대급 깜짝 실적을 발표했으나, 단일 종목 2배 레버리지 ETF 수급 이슈와 반도체 피크아웃 논란이 맞물리며 주가는 급락했다. 외국인이 전일 14거래일 만에 순매수로 전환하는 등 하단 지지 시도가 나타나고 있다.",
+      "catalyst": "분기 영업이익 세계 1위 수준의 깜짝 실적 발표로 펀더멘털 훼손 우려는 제한적이라는 평가가 있다. IMF의 한국 성장률 상향과 AI 하드웨어 수출 확대 흐름이 중장기 수요 지지 요인으로 작용한다. 젠슨 황이 예고한 AI 고성장 사이클이 메모리 수요를 구조적으로 뒷받침할 전망이다.",
+      "risk": "단일 종목 2배 레버리지 ETF 출시 이후 변동성이 극대화되고 있으며, 반도체 피크아웃 찬반 논란이 팽팽히 맞서 단기 방향성이 불투명하다.",
+      "channel_mentions": [
+        {
+          "source_type": "경제방송",
+          "source_name": "이데일리TV",
+          "content": "삼성전자 역대급 실적에도 폭락한 이유를 분석하며, 단일 종목 레버리지 ETF 발 변동성 문제와 반도체 피크아웃 논란을 핵심 배경으로 지목했다.",
+          "url": "https://www.youtube.com/watch?v=RHBSyTXaHoA"
+        },
+        {
+          "source_type": "경제방송",
+          "source_name": "이데일리TV",
+          "content": "코스피 조정 시작 가능성과 삼성전자 목표가 논란, 레버리지 ETF 변수 속 살아남는 투자 전략을 논의했다.",
+          "url": "https://www.youtube.com/watch?v=NeJDe-QPVUc"
+        },
+        {
+          "source_type": "경제방송",
+          "source_name": "TomatoTV",
+          "content": "삼성전자 깜짝 실적 후 반도체 급락의 진짜 의미를 분석하며, 공포보다 기회로 접근하되 추격 매수는 금물이라고 강조했다.",
+          "url": "https://www.youtube.com/watch?v=1xLBjrwczUk"
+        },
+        {
+          "source_type": "뉴스",
+          "source_name": "매일경제",
+          "content": "국힘 박수영 의원이 삼성전자·SK하이닉스 2배 ETF 출시 이후 증시 변동성 급증과 피해 속출을 지적하며 국정조사를 요구했다.",
+          "url": "https://www.mk.co.kr/news/economy/12094090"
+        }
+      ],
+      "channel_counts": {
+        "뉴스": 2,
+        "경제방송": 21,
+        "유튜브": 33
+      },
+      "total_count": 56,
+      "weighted_score": 102.69,
+      "overlap_count": 2,
+      "reasons": [],
+      "price": 273000,
+      "change_pct": -1.62,
+      "price_label": "현재가"
+    },
+    {
+      "rank": 2,
+      "name": "SK하이닉스",
+      "code": "000660",
+      "signal": "긍정",
+      "summary": "미국 ADR 상장이 임박하며 기업가치 재평가 기대가 높아지고 있고, 2분기 역대급 어닝 서프라이즈가 예상되고 있다. 외국인이 전일 순매수 상위에 이름을 올리며 수급 개선 신호를 보냈다.",
+      "catalyst": "미국 ADR 상장으로 글로벌 투자자 접근성이 확대되고 기업가치 재평가 모멘텀이 기대된다. HBM(고대역폭 메모리) 중심의 AI 반도체 수요 구조적 성장이 지속되고 있으며, 2분기 실적 발표를 앞두고 어닝 서프라이즈 가능성이 제기되고 있다.",
+      "risk": "반도체 피크아웃 논란과 단일 종목 레버리지 ETF로 인한 수급 변동성이 단기 주가 불확실성을 높이고 있다.",
+      "channel_mentions": [
+        {
+          "source_type": "경제방송",
+          "source_name": "이데일리TV",
+          "content": "SK하이닉스 ADR 상장을 앞두고 기업가치 재평가 조건과 메모리 업황 진단을 심층 분석했다.",
+          "url": "https://www.youtube.com/watch?v=RZfLPlUZ0pM"
+        },
+        {
+          "source_type": "경제방송",
+          "source_name": "이데일리TV",
+          "content": "마켓나우 3부에서 SK하이닉스를 종목 레이더 주요 종목으로 집중 조명했다.",
+          "url": "https://www.youtube.com/watch?v=Sxf4gqC6F8k"
+        },
+        {
+          "source_type": "경제방송",
+          "source_name": "TomatoTV",
+          "content": "SK하이닉스 2분기 실적 발표 임박과 역대급 어닝 서프라이즈 기대, 미국 ADR 상장 호재가 불러올 수급 변화를 집중 분석했다.",
+          "url": "https://www.youtube.com/watch?v=2V2wGQkC1GM"
+        },
+        {
+          "source_type": "경제방송",
+          "source_name": "TomatoTV",
+          "content": "외국인이 14거래일 만에 매수 전환하며 SK하이닉스를 순매수 상위에 올렸다고 보도했다.",
+          "url": "https://www.youtube.com/watch?v=2V2wGQkC1GM"
+        }
+      ],
+      "channel_counts": {
+        "뉴스": 3,
+        "경제방송": 21,
+        "유튜브": 27
+      },
+      "total_count": 51,
+      "weighted_score": 99.0,
+      "overlap_count": 2,
+      "reasons": [],
+      "price": 2141000,
+      "change_pct": 3.13,
+      "price_label": "현재가"
+    }
+  ],
+  "stocks": [
+    {
+      "rank": 1,
+      "name": "LG전자",
+      "code": "051910",
+      "signal": "긍정",
+      "summary": "2분기 잠정 영업이익이 1조 5,788억 원으로 전년 동기 대비 146% 급증하며 시장 컨센서스를 47% 웃도는 깜짝 실적을 기록했다. 이에 따라 다수 증권사가 목표주가를 줄상향하고 있다.",
+      "catalyst": "가전 부문의 견조한 실적 시현과 에어케어 중심의 로보틱스 포트폴리오, AI 데이터센터향 칠러 공급 확대 등이 긍정적으로 평가됐다. DB증권은 목표주가를 24만 5천 원으로 69% 대폭 상향 조정하며 중장기 성장 모멘텀을 강조했다.",
+      "risk": "현재가(252,500원) 기준 일부 증권사 목표주가와의 괴리율 확인이 필요하며, 고유가·고환율 지속 시 원가 부담이 수익성을 압박할 수 있다.",
+      "channel_mentions": [
+        {
+          "source_type": "경제방송",
+          "source_name": "이데일리TV",
+          "content": "LG전자 2분기 잠정 영업이익 1조 5,788억 원으로 전년 동기 대비 146% 증가, 시장 컨센서스 47% 상회하며 목표가 줄상향 이슈를 집중 보도했다.",
+          "url": "https://www.youtube.com/watch?v=oHwF-RbDtqE"
+        },
+        {
+          "source_type": "경제방송",
+          "source_name": "이데일리TV",
+          "content": "DB증권이 LG전자 목표주가를 24만 5천 원으로 69% 상향, 가전·로보틱스·AI 데이터센터향 칠러 확대를 긍정 평가했다.",
+          "url": "https://www.youtube.com/watch?v=oHwF-RbDtqE"
+        },
+        {
+          "source_type": "경제방송",
+          "source_name": "이데일리TV",
+          "content": "조정 구간에서 주목할 섹터로 LG전자를 포함한 가전·소비재를 꼽으며 실적 장세 수혜주로 제시했다.",
+          "url": "https://www.youtube.com/watch?v=-DxKL169L0A"
+        },
+        {
+          "source_type": "경제방송",
+          "source_name": "TomatoTV",
+          "content": "젠슨 황이 예고한 폭발적 AI 고성장을 타야 할 종목으로 SK하이닉스·LG전자 등을 거론했다.",
+          "url": "https://www.youtube.com/watch?v=WvgMNrF1hZM"
+        }
+      ],
+      "channel_counts": {
+        "경제방송": 7
+      },
+      "total_count": 7,
+      "weighted_score": 16.49,
+      "overlap_count": 1,
+      "reasons": [],
+      "price": 252500,
+      "change_pct": -0.98,
+      "price_label": "현재가"
+    },
+    {
+      "rank": 2,
+      "name": "한화에어로스페이스",
+      "code": "012450",
+      "signal": "중립",
+      "summary": "미·이란 군사 충돌로 중동 지정학 리스크가 재점화되면서 방산주로서의 관심이 높아지고 있으나, 현재가(-8.36%)가 크게 하락하는 등 단기 차익 실현 매물이 우위를 보이고 있다. 하단 지지선인 95만 원 구간이 단기 트레이딩 진입 타점으로 거론된다.",
+      "catalyst": "미국의 이란 이틀 연속 공습으로 중동 긴장이 고조되며 방산·건설 메가 프로젝트 수혜 기대가 살아있다. 중동 지정학 리스크 장기화 시 방산 수주 모멘텀이 다시 부각될 수 있다.",
+      "risk": "유가 상승에도 단기 차익 실현 우위가 뚜렷하고, 95만 원 지지선 이탈 시 추가 하락 위험이 있어 손절 또는 추가 매수 여부에 대한 명확한 판단이 필요하다.",
+      "channel_mentions": [
+        {
+          "source_type": "경제방송",
+          "source_name": "TomatoTV",
+          "content": "한화에어로스페이스 하단 지지선 95만 원을 단기 트레이딩 진입 타점으로 제시하며, 저점 이탈 시 손절 또는 추가 매수 판단이 필요하다고 강조했다.",
+          "url": "https://www.youtube.com/watch?v=KLw8On5WpSM"
+        },
+        {
+          "source_type": "경제방송",
+          "source_name": "TomatoTV",
+          "content": "중동 휴전 균열에 따른 유가 급등으로 대한항공·한화에어로스페이스·HMM이 지정학 리스크 관련주로 언급됐다.",
+          "url": "https://www.youtube.com/watch?v=wbC1NH3gZR8"
+        },
+        {
+          "source_type": "경제방송",
+          "source_name": "이데일리TV",
+          "content": "조정 구간 주목 섹터로 중동 메가 프로젝트 수혜 방산·건설주를 거론하며 한화에어로스페이스를 포함시켰다.",
+          "url": "https://www.youtube.com/watch?v=-DxKL169L0A"
+        }
+      ],
+      "channel_counts": {
+        "경제방송": 3
+      },
+      "total_count": 3,
+      "weighted_score": 5.67,
+      "overlap_count": 1,
+      "reasons": [],
+      "price": 954000,
+      "change_pct": -8.36,
+      "price_label": "현재가"
+    },
+    {
+      "rank": 3,
+      "name": "현대차",
+      "code": "005380",
+      "signal": "중립",
+      "summary": "노사협상 결렬로 7월 13~15일 부분 파업이 예정되어 단기 생산 차질 우려가 부각되고 있다. 하반기 한·중 전기차 경쟁 격화라는 구조적 리스크와 함께 파업 이슈가 맞물려 현재가(-5.30%)가 큰 폭 하락했다.",
+      "catalyst": "하반기 자동차 산업 결산 관점에서 전기차 라인업 경쟁력과 글로벌 시장 점유율 방어 전략이 중장기 모멘텀으로 제시된다. 원화 약세 국면에서 수출 대기업으로서 환율 수혜 가능성도 일부 거론된다.",
+      "risk": "노사협상 결렬에 따른 13~15일 부분 파업 돌입이 단기 실적 불확실성을 높이고 있으며, 한·중 전기차 경쟁 심화가 하반기 마진 압박 요인이 될 수 있다.",
+      "channel_mentions": [
+        {
+          "source_type": "경제방송",
+          "source_name": "TomatoTV",
+          "content": "현대차 노사협상 결렬로 7월 13~15일 부분 파업 돌입 예정, 임금 인상·성과금 이견이 지속되고 있다고 보도했다.",
+          "url": "https://www.youtube.com/watch?v=yPEObYpRBNw"
+        },
+        {
+          "source_type": "경제방송",
+          "source_name": "TomatoTV",
+          "content": "하반기 자동차 산업 총정리 방송에서 한·중 전기차 경쟁 격화와 현대차·기아의 대응 전략을 심층 분석했다.",
+          "url": "https://www.youtube.com/watch?v=ojjD4GH7_yE"
+        },
+        {
+          "source_type": "경제방송",
+          "source_name": "이데일리TV",
+          "content": "코스피 조정 장세 속 방어 가능 섹터 분석에서 현대차·기아 등 완성차가 언급됐다.",
+          "url": "https://www.youtube.com/watch?v=NeJDe-QPVUc"
+        },
+        {
+          "source_type": "유튜브",
+          "source_name": "815머니톡",
+          "content": "전일(7월 8일) 오후 녹화에서 현대차 관련 실적 및 시장 흐름을 빅 호재 맥락에서 간략히 언급했다.",
+          "url": "https://www.youtube.com/watch?v=pzDs7fzjBw0"
+        }
+      ],
+      "channel_counts": {
+        "경제방송": 3,
+        "유튜브": 1
+      },
+      "total_count": 4,
+      "weighted_score": 8.26,
+      "overlap_count": 2,
+      "reasons": [],
+      "price": 438000,
+      "change_pct": -5.3,
+      "price_label": "현재가"
+    },
+    {
+      "rank": 4,
+      "name": "삼성전기",
+      "code": "009150",
+      "signal": "긍정",
+      "summary": "전일 외국인이 14거래일 만에 매수로 전환하며 삼성전기를 순매수 상위에 올렸고, 변동성 장세 속 탑픽 종목으로 제시됐다. 반도체 피크아웃 우려 속에서도 상대적 방어력이 부각됐다.",
+      "catalyst": "외국인의 순매수 전환과 변동성 장세에서의 탑픽 선정이 긍정적 수급 신호로 해석된다. 삼프로TV에서 전일 강보합 출발을 확인하며 단기 낙폭과대 관점의 매수 시각이 제시됐다.",
+      "risk": "반도체 업황 전반의 불확실성이 지속되는 가운데, 레버리지 ETF 수급 변동에 연동된 시장 전반의 변동성이 단기 주가에 영향을 줄 수 있다.",
+      "channel_mentions": [
+        {
+          "source_type": "경제방송",
+          "source_name": "TomatoTV",
+          "content": "변동성 장세에서 주목할 업종 탑픽으로 삼성전기(009150)를 선정하고 목표가와 손절가를 제시했다.",
+          "url": "https://www.youtube.com/watch?v=zeSm570_8ss"
+        },
+        {
+          "source_type": "경제방송",
+          "source_name": "TomatoTV",
+          "content": "외국인이 14거래일 만에 매수 전환하며 순매수 상위에 삼성전기·SK하이닉스가 이름을 올렸다고 보도했다.",
+          "url": "https://www.youtube.com/watch?v=2V2wGQkC1GM"
+        },
+        {
+          "source_type": "유튜브",
+          "source_name": "삼프로TV",
+          "content": "삼성전기가 전일 대비 0.23% 강보합으로 시작했다고 언급했다.",
+          "url": "https://www.youtube.com/watch?v=JSdciqKzWnw"
+        }
+      ],
+      "channel_counts": {
+        "경제방송": 2,
+        "유튜브": 1
+      },
+      "total_count": 3,
+      "weighted_score": 5.59,
+      "overlap_count": 2,
+      "reasons": [],
+      "price": 1449000,
+      "change_pct": -2.03,
+      "price_label": "현재가"
+    },
+    {
+      "rank": 5,
+      "name": "HD현대",
+      "code": "329180",
+      "signal": "중립",
+      "summary": "조선·방산 업종 관심이 지속되는 가운데 HD현대일렉트릭 등 계열사가 전력기기·AI 인프라 수혜주로 주목받고 있다. 현재가(-3.68%)는 하락세를 보이고 있어 가격 메리트 발생 여부를 확인해야 한다.",
+      "catalyst": "중동 지정학 리스크 재부각으로 조선·방산 관련주에 대한 관심이 높아지고 있으며, AI 전력 인프라 3대 메가 프로젝트 수혜 기대도 계열사를 통해 연결된다. 조선 기자재주 투자 매력도 거론되고 있다.",
+      "risk": "단기 낙폭이 확대되고 있어 지지선 확인 전 추격 매수는 위험하며, 중동 지정학 상황 변동에 따라 수주 기대가 빠르게 소멸될 수 있다.",
+      "channel_mentions": [
+        {
+          "source_type": "경제방송",
+          "source_name": "이데일리TV",
+          "content": "HD현대일렉트릭을 조정 구간 주목 섹터인 전력기기·원전 관련주로 언급했다.",
+          "url": "https://www.youtube.com/watch?v=NeJDe-QPVUc"
+        },
+        {
+          "source_type": "유튜브",
+          "source_name": "815머니톡",
+          "content": "HD현대중공업 등 조선 분기 실적 기대와 조선 기자재주 투자 매력을 분석했다.",
+          "url": "https://www.youtube.com/watch?v=sDbI9shGKnA"
+        }
+      ],
+      "channel_counts": {
+        "경제방송": 1,
+        "유튜브": 1
+      },
+      "total_count": 2,
+      "weighted_score": 3.45,
+      "overlap_count": 2,
+      "reasons": [],
+      "price": 498000,
+      "change_pct": -3.68,
+      "price_label": "현재가"
+    },
+    {
+      "rank": 6,
+      "name": "LG디스플레이",
+      "code": "034220",
+      "signal": "중립",
+      "summary": "전일 장중 1.01% 상승 흐름을 보이며 LG그룹주 동반 강세 흐름에 일부 동참했으나, 현재가(-7.03%)로 큰 폭 하락하며 변동성이 크다. LG전자 깜짝 실적 발표와의 연계 수혜 기대가 있으나 자체 실적 개선이 필요하다.",
+      "catalyst": "LG전자의 어닝 서프라이즈로 LG 그룹주 전반에 대한 관심이 높아지면서 디스플레이 계열사에도 낙수 기대가 형성되고 있다.",
+      "risk": "자체적인 실적 턴어라운드 확인이 선행되지 않으면 그룹주 동반 상승 기대만으로는 지속적 주가 상승이 어렵고, 시장 전반의 변동성 확대 국면에서 대형 하락 리스크가 있다.",
+      "channel_mentions": [
+        {
+          "source_type": "경제방송",
+          "source_name": "이데일리TV",
+          "content": "LG그룹주 섹터 분석에서 LG디스플레이를 포함해 목표가 논의 및 장중 1.01% 상승 흐름을 언급했다.",
+          "url": "https://www.youtube.com/watch?v=oHwF-RbDtqE"
+        },
+        {
+          "source_type": "경제방송",
+          "source_name": "이데일리TV",
+          "content": "LG전자 깜짝 실적 발표에 따른 LG 계열사 동반 주목 흐름에서 LG디스플레이가 언급됐다.",
+          "url": "https://www.youtube.com/watch?v=oHwF-RbDtqE"
+        }
+      ],
+      "channel_counts": {
+        "경제방송": 2
+      },
+      "total_count": 2,
+      "weighted_score": 4.96,
+      "overlap_count": 1,
+      "reasons": [],
+      "price": 10450,
+      "change_pct": -7.03,
+      "price_label": "현재가"
+    },
+    {
+      "rank": 7,
+      "name": "KB금융",
+      "code": "105560",
+      "signal": "중립",
+      "summary": "금융 소비 트렌드의 수혜주로 거론되고 있으며 현재가(+1.05%)로 소폭 상승 중이다. 한국은행 7월 16일 금리 인상 가능성이 높아지면서 금융주 전반의 수혜 기대가 형성되고 있다.",
+      "catalyst": "한국은행 금통위의 기준금리 인상 유력론이 부상하며 은행·금융주의 NIM(순이자마진) 개선 기대가 높아지고 있다. 주담대 한도 축소 등 대출 규제 강화도 은행 건전성 측면에서 긍정적으로 해석될 수 있다.",
+      "risk": "가계대출 급증에 따른 당국의 대출 관리 압박이 강화되고 있어 중장기적으로 대출 성장 둔화에 따른 이익 증가세 제한이 우려된다.",
+      "channel_mentions": [
+        {
+          "source_type": "경제방송",
+          "source_name": "이데일리TV",
+          "content": "금융 소비 트렌드 수혜주로 KB금융을 포함한 금융주를 조정 구간 주목 섹터로 언급했다.",
+          "url": "https://www.youtube.com/watch?v=NeJDe-QPVUc"
+        },
+        {
+          "source_type": "경제방송",
+          "source_name": "TomatoTV",
+          "content": "야인시대 리턴즈 종목 진단 코너에서 KB금융에 대한 종목 분석을 실시했다.",
+          "url": "https://www.youtube.com/watch?v=RO0igSo_K8M"
+        }
+      ],
+      "channel_counts": {
+        "경제방송": 2
+      },
+      "total_count": 2,
+      "weighted_score": 3.26,
+      "overlap_count": 1,
+      "reasons": [],
+      "price": 172800,
+      "change_pct": 1.05,
+      "price_label": "현재가"
+    },
+    {
+      "rank": 8,
+      "name": "LG에너지솔루션",
+      "code": "373220",
+      "signal": "중립",
+      "summary": "최근 실적 발표에서 기대에는 못 미쳤으나 흑자 전환에 성공하며 수익성 회복의 첫 발걸음을 내딛었다. 현재가(-0.16%)로 거의 보합권을 유지하고 있다.",
+      "catalyst": "흑자 전환 성공으로 최악의 실적 우려는 해소됐으며, 2차전지 업황 저점 통과 기대와 함께 전기차 시장 성장세 재개 시 수혜가 예상된다. 2차전지·반도체 소부장 저점 매수 전략 관점에서 관심 대상으로 거론됐다.",
+      "risk": "시장 기대치에 못 미친 실적이 확인된 만큼 추가 실적 개선 증거가 나오기 전까지 뚜렷한 상승 모멘텀을 기대하기 어렵다.",
+      "channel_mentions": [
+        {
+          "source_type": "유튜브",
+          "source_name": "머니인사이드",
+          "content": "LG에너지솔루션이 최근 실적 발표에서 기대에 못 미쳤지만 흑자 전환에 성공하며 다시 돈을 벌기 시작했다고 평가했다.",
+          "url": "https://www.youtube.com/watch?v=rbAvOn0SJcA"
+        }
+      ],
+      "channel_counts": {
+        "유튜브": 1
+      },
+      "total_count": 1,
+      "weighted_score": 2.72,
+      "overlap_count": 1,
+      "reasons": [],
+      "price": 315000,
+      "change_pct": -0.16,
+      "price_label": "현재가"
+    }
+  ],
+  "hidden_picks": [
+    {
+      "rank": 1,
+      "name": "신한지주",
+      "code": "055550",
+      "signal": "중립",
+      "summary": "금융 소비 트렌드 수혜주로 조정 구간에서 관심 종목으로 언급됐으며, 한국은행 금리 인상 유력론 부상과 함께 금융주 전반의 NIM 개선 기대가 형성되고 있다. 직접적인 실적 데이터나 목표주가 제시는 확인되지 않았다.",
+      "catalyst": "7월 16일 한국은행 금통위 금리 인상 가능성이 높게 점쳐지면서 은행주의 이자 수익 개선 기대가 높아지고 있다. 조정 구간에서 방어적 금융주로서의 가치가 부각되는 흐름이다.",
+      "risk": "가계대출 급증에 따른 금융당국의 대출 관리 강화와 KB국민은행 주담대 한도 축소 등 규제 리스크가 은행 대출 성장세를 제약할 수 있다.",
+      "channel_type": "경제방송",
+      "channel_name": "이데일리TV",
+      "reasons": [
+        {
+          "source_type": "경제방송",
+          "source_name": "이데일리TV",
+          "detail": "코스피 조정 장세 속 주목 섹터 분석에서 신한지주를 KB금융·하나금융지주와 함께 금융 소비 트렌드 수혜주로 언급했다.",
+          "source_url": "https://www.youtube.com/watch?v=NeJDe-QPVUc"
+        }
+      ],
+      "weighted_score": 1.65,
+      "price": 106000,
+      "change_pct": -1.21,
+      "price_label": "현재가"
+    }
+  ],
+  "ai_strategy": "■ 핵심 시나리오\n삼성전자의 역대급 어닝 서프라이즈와 SK하이닉스 ADR 상장, IMF의 한국 성장률 대폭 상향 등 펀더멘털 훼손 없이 단일 종목 레버리지 ETF 수급 이슈와 중동 지정학 리스크가 복합 작용하며 변동성이 극대화된 국면이다. 실적 장세가 본격화되는 흐름에서 변동성 확대를 조정으로 해석하고, 실적이 확인된 대형주 중심의 저점 분할 매수 전략이 유효하다.\n\n■ 섹터 로테이션\n반도체(삼성전자·SK하이닉스) 중심의 쏠림에서 실적 확인 가전(LG전자), 방어적 금융(KB금융·신한지주), 중동 리스크 수혜 방산·조선(한화에어로스페이스·HD현대), AI 전력 인프라(LS일렉트릭·HD현대일렉트릭) 등으로 분산하는 섹터 로테이션 흐름이 감지된다.\n\n■ 오늘의 주목 포인트\n• SK하이닉스 2분기 실적 발표 및 미국 ADR 상장 후 외국인 수급 변화 확인\n• 한국은행 금융통화위원회(7월 16일) 기준금리 결정 및 KB국민은행 주담대 한도 축소 이후 부동산·소비심리 영향\n• 미·이란 군사 충돌 추이와 국제 유가 방향성 및 원·달러 환율 1,500원 돌파 여부\n• 단일 종목 2배 레버리지 ETF 관련 수급 변동성 지속 여부 및 추가 규제 논의 동향\n\n■ 리스크 시나리오\n• [보통] 중동 군사 충돌 확전·유가 급등 지속 → 방산·조선주 비중 유지, 유가 상승 수혜 에너지·해운주 관심, 인플레이션 재확산 시 금리 인상 수혜 금융주로 방어\n• [높음] 한국은행 금리 인상 단행으로 유동성 축소 → 금리 인상 수혜 금융주(KB금융·신한지주) 비중 확대, 고밸류 성장주 비중 축소, 실적 기반 저PER 종목 중심 포트폴리오 재편\n• [보통] 반도체 피크아웃 현실화 및 레버리지 ETF 추가 변동성 → 반도체 비중 단기 축소 후 실적 발표 확인 시 재진입, 낙폭과대 실적주(LG전자·삼성전기) 분할 매수, 추격 매수 자제\n\n■ 애널리스트 종합 시각\n애널리스트들은 삼성전자·SK하이닉스의 AI 반도체 수요 구조적 성장이 훼손되지 않았다는 점에서 장기 매수 의견을 유지하고 있으며, LG전자에 대해서는 다수 증권사가 목표주가를 대폭 상향 조정했다. 다만 단기적으로 레버리지 ETF 수급 변동성과 중동 지정학 리스크, 금리 인상 가능성이 복합 작용하는 구간에서는 추격 매수보다 실적 확인 후 저점 분할 매수 전략을 권고하는 시각이 주류를 이루고 있다.",
+  "market_data": {
+    "kospi": {
+      "value": 7256.08984375,
+      "change_pct": 0.13,
+      "direction": "up",
+      "is_premarket": false
+    },
+    "kosdaq": {
+      "value": 794.02001953125,
+      "change_pct": 1.15,
+      "direction": "up",
+      "is_premarket": false
+    },
+    "nasdaq": {
+      "value": 25870.650390625,
+      "change_pct": 0.2,
+      "direction": "up",
+      "is_premarket": false
+    },
+    "sp500": {
+      "value": 7482.7099609375,
+      "change_pct": -0.28,
+      "direction": "down",
+      "is_premarket": false
+    },
+    "dow": {
+      "value": 52348.390625,
+      "change_pct": -1.09,
+      "direction": "down",
+      "is_premarket": false
+    },
+    "usd_krw": {
+      "value": 1503.239990234375,
+      "change_pct": -1.09,
+      "direction": "down",
+      "is_premarket": false
+    }
+  },
+  "brokerage_reports": {
+    "simultaneous": [],
+    "new_coverage": [],
+    "single_significant": []
+  }
+}
