@@ -1,0 +1,170 @@
+name: V3_1 morning_core 데이터 생성
+
+on:
+  schedule:
+    - cron: '0 22 * * 0-4'    # KST 월~금 07:00 (UTC 전날 22:00)
+  workflow_dispatch:
+    inputs:
+      skip_youtube:
+        description: '유튜브 수집 스킵'
+        required: false
+        default: 'false'
+        type: boolean
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: 📥 저장소 체크아웃
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: 🐍 Python 환경 설정
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: 'requirements.txt'
+
+      - name: 🖋️ 시스템 의존성 설치 (한글 폰트)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y \
+            fonts-nanum \
+            fonts-nanum-coding \
+            libfreetype6-dev \
+            libpng-dev \
+            pkg-config
+          fc-cache -fv || true
+
+      - name: 📦 Python 패키지 설치
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: 🔍 API 키 점검
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          YOUTUBE_API_KEY:   ${{ secrets.YOUTUBE_API_KEY }}
+          GH_TOKEN:          ${{ secrets.GH_TOKEN }}
+        run: |
+          python - <<'EOF'
+          import os, sys
+          keys = {
+              "ANTHROPIC_API_KEY": os.getenv("ANTHROPIC_API_KEY"),
+              "YOUTUBE_API_KEY":   os.getenv("YOUTUBE_API_KEY"),
+              "GH_TOKEN":          os.getenv("GH_TOKEN"),
+          }
+          missing = [k for k, v in keys.items() if not v]
+          for k in missing:
+              print(f"⚠️  {k} 누락")
+          if "ANTHROPIC_API_KEY" in missing:
+              print("❌ ANTHROPIC_API_KEY 없음 → 실행 중단")
+              sys.exit(1)
+          print("✅ 필수 키 확인 완료")
+          EOF
+
+      - name: 🎨 Matplotlib 백엔드 설정
+        run: |
+          mkdir -p ~/.config/matplotlib
+          echo "backend: Agg" > ~/.config/matplotlib/matplotlibrc
+
+      - name: 📊 morning_core 데이터 생성 실행
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          YOUTUBE_API_KEY:   ${{ secrets.YOUTUBE_API_KEY }}
+          GH_TOKEN:          ${{ secrets.GH_TOKEN }}
+          GEMINI_API_KEY:    ${{ secrets.GEMINI_API_KEY }}
+          SKIP_YOUTUBE:      ${{ github.event.inputs.skip_youtube || 'false' }}
+          MPLBACKEND:        Agg
+        run: python main.py
+
+      - name: ✅ 결과물 검증
+        run: |
+          if [ ! -f data/briefing_data.json ]; then
+            echo "❌ data/briefing_data.json 없음"
+            exit 1
+          fi
+          TODAY=$(TZ='Asia/Seoul' date +'%Y%m%d')
+          if [ ! -f "data/raw_${TODAY}.json" ]; then
+            echo "❌ data/raw_${TODAY}.json 없음 (V3_2가 이 파일을 재사용함)"
+            exit 1
+          fi
+          echo "✅ briefing_data.json / raw_${TODAY}.json 정상 생성"
+
+      - name: 🚀 변경사항 커밋 및 푸시
+        id: commit_push
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add data/
+          if git diff --quiet && git diff --staged --quiet; then
+            echo "ℹ️  변경사항 없음 → 커밋 스킵"
+            echo "committed=false" >> "$GITHUB_OUTPUT"
+          else
+            git commit -m "📊 V3_1 morning_core 데이터 갱신: $(TZ='Asia/Seoul' date +'%Y-%m-%d %H:%M KST')"
+            for i in 1 2 3; do
+              git push && break || {
+                echo "⚠️  push 실패 (${i}회) → rebase 후 재시도"
+                sleep 3
+                git pull --rebase origin main || true
+              }
+            done
+            echo "committed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: 📡 stock-briefing-step1 (morning_core) 트리거
+        if: steps.commit_push.outputs.committed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          CLEAN_TOKEN="$(printf '%s' "${GH_TOKEN}" | tr -d '\n\r ')"
+          response=$(curl -sS -o /tmp/dispatch_step1.txt -w "%{http_code}" -X POST \
+            -H "Authorization: token ${CLEAN_TOKEN}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            -H "Content-Type: application/json" \
+            https://api.github.com/repos/kunil-choi/stock-briefing-step1/actions/workflows/morning_core.yml/dispatches \
+            -d '{"ref":"main"}')
+          if [ "$response" != "204" ]; then
+            echo "❌ stock-briefing-step1 dispatch 실패 (HTTP ${response})"
+            cat /tmp/dispatch_step1.txt
+            exit 1
+          fi
+          echo "✅ stock-briefing-step1의 morning_core.yml 트리거 완료"
+
+      - name: 📡 stock-briefing-v3-2 트리거
+        if: steps.commit_push.outputs.committed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          CLEAN_TOKEN="$(printf '%s' "${GH_TOKEN}" | tr -d '\n\r ')"
+          response=$(curl -sS -o /tmp/dispatch_v32.txt -w "%{http_code}" -X POST \
+            -H "Authorization: token ${CLEAN_TOKEN}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            -H "Content-Type: application/json" \
+            https://api.github.com/repos/kunil-choi/stock-briefing-v3-2/actions/workflows/main.yml/dispatches \
+            -d '{"ref":"main"}')
+          if [ "$response" != "204" ]; then
+            echo "❌ stock-briefing-v3-2 dispatch 실패 (HTTP ${response})"
+            cat /tmp/dispatch_v32.txt
+            exit 1
+          fi
+          echo "✅ stock-briefing-v3-2의 main.yml 트리거 완료"
+
+      - name: 📋 실행 요약 (항상 출력)
+        if: always()
+        run: |
+          echo "=============================="
+          echo "KST 현재시각: $(TZ='Asia/Seoul' date)"
+          if [ -f data/briefing_data.json ]; then
+            echo "briefing_data.json 크기: $(wc -c < data/briefing_data.json) bytes"
+          else
+            echo "briefing_data.json: 없음"
+          fi
+          echo "=============================="

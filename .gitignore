@@ -1,0 +1,17 @@
+# .gitignore
+.env
+*.pyc
+__pycache__/
+*.pyo
+data/stock_names_cache.json
+.DS_Store
+*.log
+venv/
+.venv/
+dist/
+build/
+*.egg-info/
+
+# NOTE: v3의 .gitignore와 달리 data/raw_*.json은 여기서 제외하지 않는다.
+# stock-briefing-v3-2가 이 파일을 raw.githubusercontent.com으로 재사용하므로
+# 반드시 커밋되어야 한다.
