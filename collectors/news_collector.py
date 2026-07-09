@@ -151,6 +151,25 @@ def _normalize_title(title: str) -> str:
     return re.sub(r"[^\w가-힣]", "", title).lower()
 
 
+_FEED_REQUEST_HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                  "AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36",
+    "Accept": "application/rss+xml, application/xml, text/xml, */*",
+}
+
+
+def _fetch_feed(feed_url: str, timeout: int = 10):
+    """FIX-NEWS-TIMEOUT: feedparser.parse(url)에 URL을 직접 넘기면 내부
+    urllib 호출에 타임아웃이 없어 응답이 안 오는 서버에서 오래 멈추고,
+    기본 User-Agent가 없어 국내 언론사 서버가 요청을 차단/리셋하는 경우가
+    잦았다(Connection timed out / Connection reset by peer). requests로
+    명시적 timeout·브라우저 User-Agent를 지정해 가져온 뒤 feedparser로
+    파싱하도록 바꿔 두 문제를 모두 해결한다."""
+    resp = requests.get(feed_url, headers=_FEED_REQUEST_HEADERS, timeout=timeout)
+    resp.raise_for_status()
+    return feedparser.parse(resp.content)
+
+
 def collect_news(rss_feeds: dict, hours: int = 24) -> list:
     """
     RSS 피드에서 최근 N시간 이내 뉴스를 수집하고,
@@ -165,7 +184,7 @@ def collect_news(rss_feeds: dict, hours: int = 24) -> list:
 
     for source_name, feed_url in rss_feeds.items():
         try:
-            feed = feedparser.parse(feed_url)
+            feed = _fetch_feed(feed_url)
 
             if not _is_valid_feed(feed):
                 print(f"  [뉴스] {source_name} 피드 파싱 오류 → 스킵")
