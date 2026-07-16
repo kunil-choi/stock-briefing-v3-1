@@ -96,14 +96,23 @@ jobs:
             echo "❌ data/raw_${TODAY}.json 없음 (V3_2가 이 파일을 재사용함)"
             exit 1
           fi
-          echo "✅ briefing_data.json / raw_${TODAY}.json 정상 생성"
+          if [ ! -f docs/index.html ]; then
+            echo "❌ docs/index.html 없음"
+            exit 1
+          fi
+          SIZE=$(wc -c < docs/index.html)
+          if [ "$SIZE" -lt 1000 ]; then
+            echo "❌ docs/index.html 너무 작음 (${SIZE} bytes)"
+            exit 1
+          fi
+          echo "✅ briefing_data.json / raw_${TODAY}.json / docs/index.html (${SIZE} bytes) 정상 생성"
 
       - name: 🚀 변경사항 커밋 및 푸시
         id: commit_push
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add data/
+          git add data/ docs/
           if git diff --quiet && git diff --staged --quiet; then
             echo "ℹ️  변경사항 없음 → 커밋 스킵"
             echo "committed=false" >> "$GITHUB_OUTPUT"
