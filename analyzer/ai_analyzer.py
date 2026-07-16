@@ -374,12 +374,22 @@ def extract_mentions(all_data: list, stock_map: dict,
             if item.get("_from_gemini") and item.get("content"):
                 snippet = item["content"][:200]
 
+            # SPEAKER-ID-1: Gemini 영상 분석이 식별한 실제 발언자(호스트/게스트
+            # 애널리스트 등)를 채널 항목에 실어둔다. 지금까지는 이 정보가
+            # headlines_text(상위 60개 개요용)에만 "[화자 발언]" 접두어로
+            # 잠깐 쓰이고, 정작 종목별 channel_mentions을 만드는 근거가 되는
+            # 이 리스트에는 전혀 안 들어가서 Claude가 채널명 이상을 알 방법이
+            # 없었다.
+            speaker_name = (
+                item.get("gemini_speaker", "") if item.get("_from_gemini") else ""
+            )
             entry["channels"][ch_type].append({
-                "source_name": src_name,
-                "snippet":     snippet,
-                "link":        link,
-                "content_id":  content_id,
-                "weight":      round(weight, 2),
+                "source_name":  src_name,
+                "speaker_name": speaker_name,
+                "snippet":      snippet,
+                "link":         link,
+                "content_id":   content_id,
+                "weight":       round(weight, 2),
             })
             entry["total_count"]    += 1
             entry["weighted_score"] += weight
@@ -640,10 +650,12 @@ def build_analysis_prompt(
 
         for ch_type, items in data["channels"].items():
             for it in items[:5]:
-                w_str   = f"[가중치:{it.get('weight', 1.0):.1f}]"
-                url_str = f" [URL: {it['link']}]" if it.get("link") else ""
+                w_str      = f"[가중치:{it.get('weight', 1.0):.1f}]"
+                url_str    = f" [URL: {it['link']}]" if it.get("link") else ""
+                speaker    = it.get("speaker_name", "")
+                speaker_str = f" (발언자:{speaker})" if speaker else ""
                 stocks_info.append(
-                    f"   [{ch_type}]{w_str} {it['source_name']}: "
+                    f"   [{ch_type}]{w_str} {it['source_name']}{speaker_str}: "
                     f"{it['snippet'][:200]}{url_str}"
                 )
 
@@ -684,7 +696,8 @@ def build_analysis_prompt(
         '      "risk": "주요 리스크 1~2문장",\n'
         '      "channel_mentions": [\n'
         '        {"source_type": "뉴스|경제방송|경제방송TV|유튜브|증권사|애널리스트 중 택1",\n'
-        '         "source_name": "채널명", "content": "언급 내용 1~2문장",\n'
+        '         "source_name": "채널명", "speaker_name": "실제 발언자 이름+직함, 식별 안 되면 빈 문자열",\n'
+        '         "content": "언급 내용 1~2문장",\n'
         '         "url": "URL 없으면 빈 문자열"}\n'
         '      ],\n'
         '      "channel_counts": {}, "total_count": 0,\n'
@@ -702,7 +715,8 @@ def build_analysis_prompt(
         '      "risk": "주요 리스크 1~2문장",\n'
         '      "channel_mentions": [\n'
         '        {"source_type": "뉴스|경제방송|경제방송TV|유튜브|증권사|애널리스트 중 택1",\n'
-        '         "source_name": "채널명", "content": "언급 내용 1~2문장",\n'
+        '         "source_name": "채널명", "speaker_name": "실제 발언자 이름+직함, 식별 안 되면 빈 문자열",\n'
+        '         "content": "언급 내용 1~2문장",\n'
         '         "url": "URL 없으면 빈 문자열"}\n'
         '      ],\n'
         '      "channel_counts": {}, "total_count": 0,\n'
@@ -765,6 +779,10 @@ def build_analysis_prompt(
         "   - 매도/부정 의견 있으면 → 부정\n"
         "   - 그 외 → 중립\n"
         "4. channel_mentions: 실제 언급 채널/기사 내용 최대 4개. reasons는 빈 배열 [] 유지.\n"
+        "   speaker_name: 소스 데이터 항목에 \"(발언자:이름)\" 표기가 있으면 그 이름을\n"
+        "   그대로 옮기고, 가능하면 직함/소속도 함께 적으세요(예: \"김민수 im증권 연구원\").\n"
+        "   \"(발언자:...)\" 표기가 없는 항목은 speaker_name을 빈 문자열로 두세요 —\n"
+        "   채널명만으로 특정 인물을 추측해 지어내지 마세요.\n"
         "5. hidden_picks: [히든픽 후보] 목록에 종목이 있으면 반드시 포함. 후보 목록이 \"해당 없음\"일 때만 [].\n"
         "6. market_summary: 4단락(\\n\\n 구분), 각 단락 3~4문장, 400자 이상. 순서: 1)최근흐름개요(수집 데이터 기준 최근 24시간 내 흐름 서술, '오늘' 표현 지양) 2)주요이슈(최근 이슈 서술, '오늘' 표현 지양) 3)핵심포인트(긍정·부정 균형 서술, 리스크와 기회 모두 포함, '오늘' 표현 지양) 4)전망(오늘 개장 전망이 수집 데이터에 명시된 경우에만 '오늘' 사용, 없으면 '단기' 또는 '향후' 표현 사용).\n"
         "7. ai_strategy: 수집 데이터 기반으로만 작성. 임의 수치 생성 금지.\n"
