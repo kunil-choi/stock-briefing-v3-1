@@ -39,6 +39,20 @@
   `.gitignore`에서 제외하지 않고 커밋됩니다** — `stock-briefing-v3-2`가 뉴스/유튜브/
   Gemini 수집을 반복하지 않고 이 파일을 재사용해 애널리스트 리포트만 추가 수집하는
   구조이기 때문입니다.
+- `docs/index.html` — GitHub Pages 프리뷰 페이지. `analyzer/html_generator.py`는
+  v3/v3-2와 바이트 단위로 동일하게 유지한 채(수정 없음), `main.py`가 반환된 HTML
+  문자열에 프리뷰 배너만 얹어 저장합니다(`_label_preview_html()`). **이건 정식
+  `stock-briefing-v3` 공개 사이트를 대체하는 게 아닙니다** — v3는 지금 자동 실행이
+  중단된 상태로 그대로 유지되며, step1/step2 영상이 실제로 업로드되기 시작하면
+  v3가 다시 정식 공개 사이트 역할을 맡을 계획입니다. 그 전까지 이 페이지는 사람이
+  step1 영상 제작에 쓰인 데이터를 눈으로 확인하기 위한 용도입니다.
+
+## GitHub Pages 활성화 (최초 1회, 수동)
+
+레포 Settings → Pages → Build and deployment → Source: **Deploy from a branch**
+→ Branch: `main` / `/docs` 선택 후 Save. 이후 워크플로우가 `docs/index.html`을
+커밋할 때마다 자동 반영되며, 다음 주소에서 확인할 수 있습니다:
+`https://kunil-choi.github.io/stock-briefing-v3-1/`
 
 ## 트리거 체인
 
