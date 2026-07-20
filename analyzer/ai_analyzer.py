@@ -73,7 +73,6 @@ _SKIP_NAMES = {
     "중국", "미국", "유럽", "일본", "한국",
 }
 _MIN_NAME_LEN        = 2
-_HIGH_QUALITY_TYPES  = {"애널리스트", "경제방송TV", "경제방송", "증권사"}
 
 # ── TIER-FILTER-1: 소스 티어 정의 ────────────────────────────────────────
 _SOURCE_TIER = {
@@ -169,7 +168,7 @@ def _get_sentiment_weight(text: str, opinion: str = "") -> float:
 
 def _normalize_stock_item(item: dict, mention_lookup: dict = None) -> dict:
     """
-    Claude가 반환한 stocks/hidden_picks 항목의 name 필드를 정규화한다.
+    Claude가 반환한 stocks 항목의 name 필드를 정규화한다.
     탐색 순서: "name" → "stock_name" → "종목명" → "ticker"
     모두 없으면 mention_lookup 키 순서로 추정 (rank 기반).
     """
@@ -187,7 +186,7 @@ def _normalize_stock_item(item: dict, mention_lookup: dict = None) -> dict:
 
 def _normalize_result_stocks(result: dict, mention_lookup: dict) -> dict:
     """
-    result["stocks"]와 result["hidden_picks"]의 name 필드를 일괄 정규화.
+    result["stocks"]의 name 필드를 일괄 정규화.
     name이 비어있으면 rank 순서로 mention_lookup에서 복원 시도.
     """
     mention_names = list(mention_lookup.keys())
@@ -198,9 +197,6 @@ def _normalize_result_stocks(result: dict, mention_lookup: dict) -> dict:
         if not stock.get("name") and i < len(mention_names):
             stock["name"] = mention_names[i]
             print(f"[정규화] stocks[{i}] name 복원: {mention_names[i]}")
-
-    for hp in result.get("hidden_picks", []):
-        _normalize_stock_item(hp, mention_lookup)
 
     return result
 
@@ -508,59 +504,25 @@ def filter_mentions(mentions: dict, target: int = 10, min_target: int = 8) -> li
 
 
 
-# ── TIER-FILTER-1: 히든픽 후보 추출 ────────────────────────────────────
-
-def extract_hidden_picks(mentions: dict, filtered_names: set,
-                         max_picks: int = 3) -> list:
-    """
-    non_news_channel_types가 정확히 1종인 고품질 단독 언급 종목만 선택.
-    """
-    candidates = []
-    for name, data in mentions.items():
-        if name in filtered_names:
-            continue
-        non_news = set(data.get("non_news_channel_types", []))
-        if len(non_news) != 1:
-            continue
-        sole_type = list(non_news)[0]
-        if sole_type not in _HIGH_QUALITY_TYPES:
-            continue
-        candidates.append({
-            "name":           name,
-            "code":           data["code"],
-            "channel_type":   sole_type,
-            "channels":       data["channels"],
-            "weighted_score": round(data["weighted_score"], 2),
-            "total_count":    data["total_count"],
-        })
-
-    candidates.sort(key=lambda x: x["weighted_score"], reverse=True)
-    # 동일 채널 최대 1개 제한 (채널 다양성 보장)
-    result = []
-    used_channels = set()
-    for c in candidates:
-        ch = c["channel_type"]
-        if ch in used_channels:
-            continue
-        result.append(c)
-        used_channels.add(ch)
-        if len(result) >= max_picks:
-            break
-    print(f"[히든픽] 후보 {len(candidates)}개 중 {len(result)}개 선택 (채널 다양성 적용)")
-    return result
-
-
 # ── GEMINI-YT-6: 심층분석 대상 영상 수집 (종목 선정 후에만 실행) ────────
 # 예전에는 종목이 뭔지 모르는 상태에서 임의 기준(제목/스캔통과)으로 영상
 # 7개를 골라 심층분석했다. 그 결과 정작 최종 선정된 종목엔 검증된 발언이
 # 없고, 탈락한 종목에 분석 예산을 쓰는 미스매치가 있었다. 이제는 텍스트
-# 매칭만으로 종목 선정(market_leaders/filtered/hidden_candidates)을 먼저
-# 끝내고, 그 종목들에 실제로 연결된 영상만 추려 Gemini에 넘긴다.
+# 매칭만으로 종목 선정(market_leaders/filtered)을 먼저 끝내고, 그 종목들에
+# 실제로 연결된 영상만 추려 Gemini에 넘긴다.
+#
+# HIDDEN-PICK-REMOVE: "오늘의 픽"(단독 고품질 언급 종목) 개념은 V3-1에서
+# 제거했다. V3-1의 후보 풀(뉴스+유튜브+경제방송)은 관심종목 목표치(8~10개)를
+# 채우기에도 얇은 날이 많아서, "비뉴스 채널 정확히 1종 + 고품질 소스"라는
+# 오늘의 픽 조건이 관심종목의 5차 보완 로직과 같은 후보 풀을 놓고 경쟁하다가
+# 항상 관심종목 쪽에 흡수돼 오늘의 픽이 구조적으로 0개가 되는 문제가 있었다.
+# "오늘의 픽" 컨셉은 증권사 리포트가 있는 V3-2로 이전됐다
+# (analyzer/report_update_analyzer.py의 single_significant 카테고리 참고 —
+# 애널리스트 단독 유의미 언급이라는, 원래 취지에 더 잘 맞는 소스).
 
 _VIDEO_SOURCE_TYPES = {"경제방송", "경제방송TV", "유튜브", "증권사"}
 _LEADER_VIDEO_CAP   = 3   # 대형 주도주 1종목당 최대 심층분석 영상 수
 _STOCK_VIDEO_CAP    = 1   # 관심종목 1종목당 최대 심층분석 영상 수
-_HIDDEN_VIDEO_CAP   = 1   # 오늘의 픽 1종목당 최대 심층분석 영상 수
 
 
 def _top_video_entries(data: dict, cap: int) -> list:
@@ -586,8 +548,7 @@ def _top_video_entries(data: dict, cap: int) -> list:
     return result
 
 
-def gather_target_videos(market_leaders_raw: list, filtered: list,
-                         hidden_candidates: list) -> tuple:
+def gather_target_videos(market_leaders_raw: list, filtered: list) -> tuple:
     """이미 선정이 끝난 종목들에 대해서만 종목별 상위 영상을 추린다.
     반환: (video_to_stocks, video_source_names)
       - video_to_stocks:   {video_url: {종목명, ...}} (영상 하나가 여러 종목에 걸칠 수 있음)
@@ -606,8 +567,6 @@ def gather_target_videos(market_leaders_raw: list, filtered: list,
         _add(name, _top_video_entries(data, _LEADER_VIDEO_CAP))
     for name, data in filtered:
         _add(name, _top_video_entries(data, _STOCK_VIDEO_CAP))
-    for pick in hidden_candidates:
-        _add(pick["name"], _top_video_entries(pick, _HIDDEN_VIDEO_CAP))
 
     return video_to_stocks, video_source_names
 
@@ -681,7 +640,6 @@ def _build_analyst_summary_map(all_data: list) -> dict:
 
 def build_analysis_prompt(
     filtered_mentions: list,
-    hidden_candidates: list,
     all_data: list,
     today_date: str,
     now_kst: str,
@@ -767,25 +725,7 @@ def build_analysis_prompt(
                     f"{it['snippet'][:200]}{url_str}"
                 )
 
-    hidden_info = []
-    for i, pick in enumerate(hidden_candidates, 1):
-        ch_type = pick["channel_type"]
-        hidden_info.append(
-            f"{i}. {pick['name']} (코드:{pick['code']}, "
-            f"채널:{ch_type}, 가중점수:{pick['weighted_score']:.1f})"
-        )
-        for it in pick["channels"].get(ch_type, [])[:3]:
-            url_str = f" [URL: {it['link']}]" if it.get("link") else ""
-            hidden_info.append(
-                f"   [{ch_type}] {it['source_name']}: "
-                f"{it['snippet'][:200]}{url_str}"
-            )
-
     stocks_text = "\n".join(stocks_info)
-    if hidden_info:
-        hidden_text = "※ 아래 종목은 반드시 hidden_picks에 포함하세요\n" + "\n".join(hidden_info)
-    else:
-        hidden_text = "해당 없음 (hidden_picks는 빈 배열로)"
     stock_list_str = ", ".join(stock_name_list)
 
     prompt_json_structure = (
@@ -829,21 +769,6 @@ def build_analysis_prompt(
         '      ],\n'
         '      "channel_counts": {}, "total_count": 0,\n'
         '      "weighted_score": 0.0, "overlap_count": 0, "reasons": []\n'
-        '    }\n'
-        '  ],\n'
-        '  "hidden_picks": [\n'
-        '    {\n'
-        '      "rank": 1, "name": "종목명", "code": "종목코드",\n'
-        '      "signal": "긍정|중립|부정 중 택1",\n'
-        '      "summary": "종목 핵심 요약 2~3문장",\n'
-        '      "catalyst": "상승 촉매 2~3문장",\n'
-        '      "risk": "주요 리스크 1문장",\n'
-        '      "channel_type": "애널리스트|경제방송TV|경제방송|증권사 중 택1",\n'
-        '      "channel_name": "채널명",\n'
-        '      "reasons": [\n'
-        '        {"source_type": "채널유형", "source_name": "출처명",\n'
-        '         "detail": "언급 내용 요약", "source_url": "URL 없으면 빈 문자열"}\n'
-        '      ]\n'
         '    }\n'
         '  ],\n'
         '  "ai_strategy": {\n'
@@ -891,11 +816,10 @@ def build_analysis_prompt(
         "   그대로 옮기고, 가능하면 직함/소속도 함께 적으세요(예: \"김민수 im증권 연구원\").\n"
         "   \"(발언자:...)\" 표기가 없는 항목은 speaker_name을 빈 문자열로 두세요 —\n"
         "   채널명만으로 특정 인물을 추측해 지어내지 마세요.\n"
-        "5. hidden_picks: [히든픽 후보] 목록에 종목이 있으면 반드시 포함. 후보 목록이 \"해당 없음\"일 때만 [].\n"
-        "6. market_summary: 4단락(\\n\\n 구분), 각 단락 3~4문장, 400자 이상. 순서: 1)최근흐름개요(수집 데이터 기준 최근 24시간 내 흐름 서술, '오늘' 표현 지양) 2)주요이슈(최근 이슈 서술, '오늘' 표현 지양) 3)핵심포인트(긍정·부정 균형 서술, 리스크와 기회 모두 포함, '오늘' 표현 지양) 4)전망(오늘 개장 전망이 수집 데이터에 명시된 경우에만 '오늘' 사용, 없으면 '단기' 또는 '향후' 표현 사용).\n"
-        "7. ai_strategy: 수집 데이터 기반으로만 작성. 임의 수치 생성 금지.\n"
-        "8. URL은 출처 데이터에 있는 것만 사용. 없으면 빈 문자열.\n"
-        "9. 순수 JSON만 출력. 설명문·마크다운 코드블록 제거.\n"
+        "5. market_summary: 4단락(\\n\\n 구분), 각 단락 3~4문장, 400자 이상. 순서: 1)최근흐름개요(수집 데이터 기준 최근 24시간 내 흐름 서술, '오늘' 표현 지양) 2)주요이슈(최근 이슈 서술, '오늘' 표현 지양) 3)핵심포인트(긍정·부정 균형 서술, 리스크와 기회 모두 포함, '오늘' 표현 지양) 4)전망(오늘 개장 전망이 수집 데이터에 명시된 경우에만 '오늘' 사용, 없으면 '단기' 또는 '향후' 표현 사용).\n"
+        "6. ai_strategy: 수집 데이터 기반으로만 작성. 임의 수치 생성 금지.\n"
+        "7. URL은 출처 데이터에 있는 것만 사용. 없으면 빈 문자열.\n"
+        "8. 순수 JSON만 출력. 설명문·마크다운 코드블록 제거.\n"
     )
 
     return (
@@ -904,7 +828,6 @@ def build_analysis_prompt(
         f"※ market_summary는 '최근 시장 흐름' 관점으로 작성. 수집 데이터의 대부분이 24시간 이내 과거 데이터이므로 '오늘' 표현은 4)전망 단락에서 오늘 전망이 수집 데이터에 명시된 경우에만 사용. 날짜 표현('전일', '전전일' 등)은 오늘 날짜 기준으로 정확히 사용할 것.\n\n"
         f"[최근 주요 헤드라인]\n{headlines_text}\n\n"
         f"[관심종목 후보 (가중점수 순)]\n{stocks_text}\n\n"
-        f"[히든픽 후보]\n{hidden_text}\n\n"
         "위 데이터를 바탕으로 아래 JSON 형식으로 오늘의 AI 주식 브리핑을 작성하세요.\n\n"
         f"{rules}\n\n"
         f"[출력 JSON 구조]\n{CB}json\n{prompt_json_structure}\n{CB}"
@@ -1167,9 +1090,6 @@ def analyze_and_generate_html(
         stock_prices[name] = price_info
     print(f"[주가조회] 관심종목 {len(stock_prices)}/{len(filtered)}개 수집 완료")
 
-    # ── FIX-HIDDEN-PRICE: 히든픽 주가 조회 ───────────────────────────────
-    hidden_candidates = extract_hidden_picks(mentions, filtered_names)
-
     # ── GEMINI-YT-6: 종목 선정이 끝난 뒤에만 타겟 영상 심층분석 ───────────
     panelist_quotes_by_stock = {}
     try:
@@ -1177,14 +1097,13 @@ def analyze_and_generate_html(
         valid_names = (
             {n for n, _ in market_leaders_raw}
             | {n for n, _ in filtered}
-            | {p["name"] for p in hidden_candidates}
         )
         target_videos, video_source_names = gather_target_videos(
-            market_leaders_raw, filtered, hidden_candidates
+            market_leaders_raw, filtered
         )
         print(f"[패널발언] 타겟 영상 {len(target_videos)}개 "
-              f"(대형주도주≤{_LEADER_VIDEO_CAP}·관심종목≤{_STOCK_VIDEO_CAP}·"
-              f"오늘의픽≤{_HIDDEN_VIDEO_CAP} 종목당, 중복 제거 후)")
+              f"(대형주도주≤{_LEADER_VIDEO_CAP}·관심종목≤{_STOCK_VIDEO_CAP} "
+              f"종목당, 중복 제거 후)")
         gemini_results = analyze_target_videos(list(target_videos.keys()), GEMINI_API_KEY)
         panelist_quotes_by_stock = build_panelist_quotes(
             gemini_results, valid_names, video_source_names
@@ -1193,23 +1112,8 @@ def analyze_and_generate_html(
     except Exception as e:
         print(f"[패널발언] 타겟 심층분석 파이프라인 오류 (브리핑은 계속 진행): {e}")
 
-    print(f"[주가조회] 히든픽 {len(hidden_candidates)}개 주가 조회 시작")
-    for pick in hidden_candidates:
-        name = pick["name"]
-        code = pick["code"]
-        if name in stock_prices:
-            continue
-        if not code:
-            continue
-        price_info = fetch_naver_stock_price(name, code_override=code)
-        if not price_info or price_info.get("price", 0) <= 0:
-            continue
-        price_info["price_label"] = price_label_default
-        stock_prices[name] = price_info
-    print(f"[주가조회] 히든픽 주가 수집 완료 (전체 stock_prices: {len(stock_prices)}개)")
-
     prompt = build_analysis_prompt(
-        filtered, hidden_candidates, all_data, today_date, now_kst_str,
+        filtered, all_data, today_date, now_kst_str,
         stock_prices=stock_prices,
         yesterday_date=yesterday_date,
         day_before_date=day_before_date,
@@ -1318,30 +1222,9 @@ def analyze_and_generate_html(
             stock["reasons"]        = []
         stock["panelist_quotes"] = panelist_quotes_by_stock.get(name, [])
 
-    # ── 히든픽 주가 병합 ───────────────────────────────────────────────────
-    hidden_lookup = {p["name"]: p for p in hidden_candidates}
-    for hp in result.get("hidden_picks", []):
-        name = hp.get("name", "")
-        if name in hidden_lookup:
-            hp["weighted_score"] = hidden_lookup[name]["weighted_score"]
-            hp["channel_type"]   = hidden_lookup[name]["channel_type"]
-
-        price_info = stock_prices.get(name)
-        if price_info and isinstance(price_info, dict) and price_info.get("price", 0) > 0:
-            hp["price"]       = price_info["price"]
-            hp["change_pct"]  = price_info.get("change_pct", 0.0)
-            hp["price_label"] = price_info.get("price_label", price_label_default)
-        else:
-            hp["price"]       = 0
-            hp["change_pct"]  = 0.0
-            hp["price_label"] = price_label_default
-        hp["panelist_quotes"] = panelist_quotes_by_stock.get(name, [])
-
     # ── URL 복원 ───────────────────────────────────────────────────────────
     for stock in result.get("stocks", []):
         _restore_source_url(stock, all_data)
-    for hp in result.get("hidden_picks", []):
-        _restore_source_url(hp, all_data)
 
     # ── 결과 저장 ──────────────────────────────────────────────────────────
     if market_overview:

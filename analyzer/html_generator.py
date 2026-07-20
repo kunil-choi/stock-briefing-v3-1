@@ -26,14 +26,6 @@ PARA_TITLES = ["📌 최근 흐름", "📊 주요 이슈", "🔍 핵심 포인�
 # 기존 5단락 구조에서 긍정/부정 내용이 제목과 뒤집혀 표출되던 문제 해결.
 # 프롬프트도 4단락으로 맞춰 수정 (ai_analyzer.py FIX-PARA-1 연동).
 
-_HP_SOURCE_META = {
-    "애널리스트": {"color": "#51cf66", "icon": "📊", "label": "애널리스트"},
-    "경제방송TV": {"color": "#ffa94d", "icon": "📺", "label": "경제방송TV"},
-    "경제방송":   {"color": "#74c0fc", "icon": "📡", "label": "경제방송"},
-    "증권사":     {"color": "#cc5de8", "icon": "🏦", "label": "증권사 채널"},
-}
-_HP_SOURCE_DEFAULT = {"color": "#adb5bd", "icon": "📌", "label": "단독 언급"}
-
 _INDICATOR_DEFS = [
     ("코스피",   ["kospi",  "KOSPI"]),
     ("코스닥",   ["kosdaq", "KOSDAQ"]),
@@ -289,76 +281,6 @@ def _build_analyst_html(all_data: list) -> str:
     html += _render_day_section(today_items, "", "#ff922b")
     html += _render_day_section(yest_items,  "📅 전일 주목 리포트", "#adb5bd")
     return html or '<p style="color:#666;">분류된 리포트 없음</p>'
-
-
-def _hidden_pick_source_badge(channel_type: str) -> str:
-    meta = _HP_SOURCE_META.get(channel_type, _HP_SOURCE_DEFAULT)
-    return (
-        f'<span class="hp-source-badge" '
-        f'style="background:{meta["color"]}22;color:{meta["color"]};'
-        f'border:1px solid {meta["color"]}55;">'
-        f'{meta["icon"]} {meta["label"]}</span>'
-    )
-
-
-def _render_star_rating(weighted_score, max_score: float = 20.0) -> str:
-    """FIX-STAR-1: max_score 20.0 기준 별점 렌더링."""
-    try:
-        score = float(weighted_score)
-    except (TypeError, ValueError):
-        score = 0.0
-    score  = max(0.0, score)
-    filled = max(1, round((score / max_score) * 5)) if score > 0 else 0
-    filled = min(filled, 5)
-    empty  = 5 - filled
-    stars  = (
-        f'<span class="star filled">{"★" * filled}</span>'
-        f'<span class="star empty">{"☆" * empty}</span>'
-    )
-    return f'<span class="star-rating">{stars}</span>'
-
-
-def _render_reasons(reasons: list) -> str:
-    """히든픽 전용 reasons 렌더링."""
-    if not reasons:
-        return ""
-    items = ""
-    for r in reasons:
-        if isinstance(r, str):
-            rd, rl, rn, rt = r.strip(), "", "", ""
-        elif isinstance(r, dict):
-            rd = (r.get("detail") or r.get("reason") or
-                  r.get("text")   or r.get("summary", "")).strip()
-            rl = r.get("source_url") or r.get("link") or r.get("url", "")
-            rn = (r.get("source_name") or "").strip()
-            rt = (r.get("source_type") or "").strip()
-        else:
-            continue
-        if not rd:
-            continue
-        meta        = _TAG_META.get(rt, {"bg": "#2d2d44", "color": "#adb5bd"})
-        source_html = (
-            f'<span class="reason-source" '
-            f'style="background:{meta["bg"]};color:{meta["color"]};">'
-            f'{_he.escape(rn)}</span> '
-        ) if rn else ""
-        text_html = (
-            f'<a href="{rl}" target="_blank" rel="noopener" '
-            f'style="color:#adb5bd;text-decoration:none;">'
-            f'{_he.escape(rd)}</a>'
-            if rl and rl.startswith(("http://", "https://"))
-            else f'<span style="color:#adb5bd;">{_he.escape(rd)}</span>'
-        )
-        items += f'<li>{source_html}{text_html}</li>'
-    return f'<ul class="reasons-list">{items}</ul>' if items else ""
-
-
-def _is_negative_signal(sig) -> bool:
-    """부정 신호 여부만 판별 (FIX-HIDDEN-SIG 용)."""
-    if not sig:
-        return False
-    sig_l = str(sig).strip().lower()
-    return any(k in sig_l for k in ("부정", "매도", "sell", "negative"))
 
 
 def _is_positive_signal(sig) -> bool:
@@ -641,7 +563,6 @@ def generate_html(
     all_data        = all_data or []
 
     stocks         = data.get("stocks",         [])
-    hidden_picks   = data.get("hidden_picks",   [])
     market_sum     = data.get("market_summary", "")
     hot_sectors    = data.get("hot_sectors",    [])
     ai_strategy    = data.get("ai_strategy",    "")
@@ -654,12 +575,6 @@ def generate_html(
     briefing_time = now_kst.strftime("%H:%M")
 
     filtered_stocks = _filter_stocks_tiered(stocks)
-
-    # FIX-HIDDEN-SIG: 부정 신호가 명시된 경우만 제외, 중립 포함 모두 표시
-    filtered_hidden = [
-        h for h in hidden_picks
-        if not _is_negative_signal(h.get("signal"))
-    ]
 
     market_indicators_html = _build_market_indicators(market_overview)
     market_summary_html    = _render_market_summary(market_sum)
@@ -798,71 +713,6 @@ def generate_html(
         stocks_html = (
             '<p style="color:#666;text-align:center;padding:2rem;">'
             '오늘은 복수 채널 교차 언급 종목이 없습니다.</p>'
-        )
-
-    hidden_html = ""
-    for idx, hp in enumerate(filtered_hidden, 1):
-        name         = hp.get("name", "")
-        channel_type = hp.get("channel_type", "")
-        weighted_sc  = hp.get("weighted_score", 0)
-        naver_code   = hp.get("naver_code") or hp.get("code", "")
-        naver_url    = hp.get("naver_url", "")
-        chart_b64    = hp.get("chart_base64", "")
-        reasons      = hp.get("reasons", [])
-
-        if not naver_url:
-            if naver_code:
-                naver_url = (f"https://finance.naver.com/item/main.naver"
-                             f"?code={naver_code}")
-            elif name:
-                naver_url = (f"https://finance.naver.com/search/searchResult.naver"
-                             f"?query={name.replace(' ', '+')}")
-
-        source_badge_html = _hidden_pick_source_badge(channel_type)
-        star_html         = _render_star_rating(weighted_sc)
-        pick_badge_html   = f'<span class="hp-score-badge">Pick #{idx}</span>'
-
-        price_html = _render_price_html(hp)
-
-        if chart_b64:
-            chart_key      = _safe_chart_key("hpchart", name)
-            safe_name_js   = _safe_js_str(name)
-            chart_data_dict[chart_key] = f"data:image/png;base64,{chart_b64}"
-            chart_btn_html = (
-                f"<button class=\"chart-btn\" "
-                f"onclick=\"showChart('{chart_key}','{safe_name_js}')\">"
-                f"📈 차트 보기</button>"
-            )
-        elif naver_url:
-            chart_btn_html = (
-                f'<a href="{naver_url}" target="_blank" rel="noopener" '
-                f'class="chart-btn">🔗 Naver 차트</a>'
-            )
-        else:
-            chart_btn_html = ""
-
-        detail_html   = _render_stock_detail(hp)
-        reasons_block = _render_reasons(reasons)
-
-        hidden_html += f"""
-<div class="hidden-pick-card">
-  <div class="hp-card-header">
-    <div class="hp-badges">{source_badge_html}{pick_badge_html}</div>
-    <a href="{naver_url}" target="_blank" rel="noopener"
-       class="hp-stock-name">{_he.escape(name)}</a>
-    {star_html}
-  </div>
-  <div class="hp-card-body">
-    <div class="price-row">{price_html}{chart_btn_html}</div>
-    {detail_html}
-    {reasons_block}
-  </div>
-</div>"""
-
-    if not hidden_html:
-        hidden_html = (
-            '<p style="color:#666;text-align:center;padding:1.5rem;">'
-            '오늘의 픽 없음</p>'
         )
 
     if chart_data_dict:
@@ -1105,11 +955,6 @@ a:hover { text-decoration: underline; }
     {leaders_html}
     <div class="section-title">👀 오늘의 관심종목</div>
     {stocks_html}
-  </div>
-
-  <div class="section">
-    <div class="section-title">💎 오늘의 픽</div>
-    {hidden_html}
   </div>
 
   <div class="section">
