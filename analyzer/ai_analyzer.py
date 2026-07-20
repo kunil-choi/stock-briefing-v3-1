@@ -550,6 +550,114 @@ def extract_hidden_picks(mentions: dict, filtered_names: set,
     return result
 
 
+# ── GEMINI-YT-6: 심층분석 대상 영상 수집 (종목 선정 후에만 실행) ────────
+# 예전에는 종목이 뭔지 모르는 상태에서 임의 기준(제목/스캔통과)으로 영상
+# 7개를 골라 심층분석했다. 그 결과 정작 최종 선정된 종목엔 검증된 발언이
+# 없고, 탈락한 종목에 분석 예산을 쓰는 미스매치가 있었다. 이제는 텍스트
+# 매칭만으로 종목 선정(market_leaders/filtered/hidden_candidates)을 먼저
+# 끝내고, 그 종목들에 실제로 연결된 영상만 추려 Gemini에 넘긴다.
+
+_VIDEO_SOURCE_TYPES = {"경제방송", "경제방송TV", "유튜브", "증권사"}
+_LEADER_VIDEO_CAP   = 3   # 대형 주도주 1종목당 최대 심층분석 영상 수
+_STOCK_VIDEO_CAP    = 1   # 관심종목 1종목당 최대 심층분석 영상 수
+_HIDDEN_VIDEO_CAP   = 1   # 오늘의 픽 1종목당 최대 심층분석 영상 수
+
+
+def _top_video_entries(data: dict, cap: int) -> list:
+    """종목 하나의 channels 딕셔너리에서 영상 채널(뉴스 제외) 항목만 모아
+    weight 내림차순 상위 cap개를 반환 (link/source_name 등 원본 dict 그대로,
+    링크 기준 중복 제거)."""
+    entries = []
+    for ch_type, items in (data.get("channels") or {}).items():
+        if ch_type not in _VIDEO_SOURCE_TYPES:
+            continue
+        entries.extend(items)
+    entries.sort(key=lambda e: e.get("weight", 0.0), reverse=True)
+
+    result, seen = [], set()
+    for e in entries:
+        link = e.get("link", "")
+        if not link or link in seen:
+            continue
+        seen.add(link)
+        result.append(e)
+        if len(result) >= cap:
+            break
+    return result
+
+
+def gather_target_videos(market_leaders_raw: list, filtered: list,
+                         hidden_candidates: list) -> tuple:
+    """이미 선정이 끝난 종목들에 대해서만 종목별 상위 영상을 추린다.
+    반환: (video_to_stocks, video_source_names)
+      - video_to_stocks:   {video_url: {종목명, ...}} (영상 하나가 여러 종목에 걸칠 수 있음)
+      - video_source_names: {video_url: 채널명}"""
+    video_to_stocks: dict    = {}
+    video_source_names: dict = {}
+
+    def _add(name: str, entries: list):
+        for e in entries:
+            link = e.get("link", "")
+            video_to_stocks.setdefault(link, set()).add(name)
+            if link not in video_source_names:
+                video_source_names[link] = e.get("source_name", "")
+
+    for name, data in market_leaders_raw:
+        _add(name, _top_video_entries(data, _LEADER_VIDEO_CAP))
+    for name, data in filtered:
+        _add(name, _top_video_entries(data, _STOCK_VIDEO_CAP))
+    for pick in hidden_candidates:
+        _add(pick["name"], _top_video_entries(pick, _HIDDEN_VIDEO_CAP))
+
+    return video_to_stocks, video_source_names
+
+
+def _match_stock_name(raw_name: str, valid_names: set) -> Optional[str]:
+    """Gemini가 자유 텍스트로 반환한 종목명을 이미 선정된 종목명 집합과
+    매칭한다. 정확히 일치하지 않으면 부분 포함으로 완화 매칭."""
+    raw = (raw_name or "").strip()
+    if not raw:
+        return None
+    if raw in valid_names:
+        return raw
+    for vn in valid_names:
+        if vn and (vn in raw or raw in vn):
+            return vn
+    return None
+
+
+def build_panelist_quotes(gemini_results: dict, valid_names: set,
+                          video_source_names: dict = None) -> dict:
+    """analyze_target_videos() 결과를 종목별 발언 리스트로 정리한다.
+    화자 미특정(speaker 빈 문자열) 또는 내용 없는 언급은 버린다 —
+    "구체적으로 누가 뭐라 했는지"가 핵심이므로 애매한 항목은 섞지 않는다."""
+    video_source_names = video_source_names or {}
+    quotes_by_stock: dict = {}
+    for video_url, payload in gemini_results.items():
+        source_name = video_source_names.get(video_url, "")
+        for m in payload.get("mentions", []):
+            stock_name = _match_stock_name(m.get("stock_name", ""), valid_names)
+            if not stock_name:
+                continue
+            speaker = (m.get("speaker") or "").strip()
+            fact    = (m.get("fact") or "").strip()
+            quote   = (m.get("quote") or "").strip()
+            if not speaker or not (fact or quote):
+                continue
+            timestamp  = m.get("timestamp", "")
+            source_url = f"{video_url}&t={timestamp}" if timestamp else video_url
+            quotes_by_stock.setdefault(stock_name, []).append({
+                "speaker_name": speaker,
+                "source_name":  source_name,
+                "fact":         fact,
+                "quote":        quote,
+                "sentiment":    m.get("sentiment", "중립"),
+                "confidence":   m.get("confidence", "보통"),
+                "source_url":   source_url,
+            })
+    return quotes_by_stock
+
+
 # ── FIX-ACC-1: 애널리스트 리포트 요약 맵 구성 ───────────────────────────
 
 def _build_analyst_summary_map(all_data: list) -> dict:
@@ -1062,6 +1170,29 @@ def analyze_and_generate_html(
     # ── FIX-HIDDEN-PRICE: 히든픽 주가 조회 ───────────────────────────────
     hidden_candidates = extract_hidden_picks(mentions, filtered_names)
 
+    # ── GEMINI-YT-6: 종목 선정이 끝난 뒤에만 타겟 영상 심층분석 ───────────
+    panelist_quotes_by_stock = {}
+    try:
+        from collectors.gemini_youtube_analyzer import analyze_target_videos
+        valid_names = (
+            {n for n, _ in market_leaders_raw}
+            | {n for n, _ in filtered}
+            | {p["name"] for p in hidden_candidates}
+        )
+        target_videos, video_source_names = gather_target_videos(
+            market_leaders_raw, filtered, hidden_candidates
+        )
+        print(f"[패널발언] 타겟 영상 {len(target_videos)}개 "
+              f"(대형주도주≤{_LEADER_VIDEO_CAP}·관심종목≤{_STOCK_VIDEO_CAP}·"
+              f"오늘의픽≤{_HIDDEN_VIDEO_CAP} 종목당, 중복 제거 후)")
+        gemini_results = analyze_target_videos(list(target_videos.keys()), GEMINI_API_KEY)
+        panelist_quotes_by_stock = build_panelist_quotes(
+            gemini_results, valid_names, video_source_names
+        )
+        print(f"[패널발언] {len(panelist_quotes_by_stock)}개 종목에서 검증된 발언 확보")
+    except Exception as e:
+        print(f"[패널발언] 타겟 심층분석 파이프라인 오류 (브리핑은 계속 진행): {e}")
+
     print(f"[주가조회] 히든픽 {len(hidden_candidates)}개 주가 조회 시작")
     for pick in hidden_candidates:
         name = pick["name"]
@@ -1158,6 +1289,7 @@ def analyze_and_generate_html(
             leader["total_count"]    = data["total_count"]
             leader["weighted_score"] = round(data["weighted_score"], 2)
             leader["overlap_count"]  = len(data["non_news_channel_types"])
+        leader["panelist_quotes"] = panelist_quotes_by_stock.get(name, [])
         _restore_source_url(leader, all_data)
 
     # ── FIX-PRICE-4/5: result["stocks"]에 주가 병합 ──────────────────────
@@ -1184,6 +1316,7 @@ def analyze_and_generate_html(
             stock["weighted_score"] = round(data["weighted_score"], 2)
             stock["overlap_count"]  = len(data["non_news_channel_types"])
             stock["reasons"]        = []
+        stock["panelist_quotes"] = panelist_quotes_by_stock.get(name, [])
 
     # ── 히든픽 주가 병합 ───────────────────────────────────────────────────
     hidden_lookup = {p["name"]: p for p in hidden_candidates}
@@ -1202,6 +1335,7 @@ def analyze_and_generate_html(
             hp["price"]       = 0
             hp["change_pct"]  = 0.0
             hp["price_label"] = price_label_default
+        hp["panelist_quotes"] = panelist_quotes_by_stock.get(name, [])
 
     # ── URL 복원 ───────────────────────────────────────────────────────────
     for stock in result.get("stocks", []):

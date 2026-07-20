@@ -3,10 +3,9 @@
 Gemini를 활용한 유튜브 영상 직접 분석 모듈
 
 역할:
-  - youtube_collector.py가 수집한 YouTube URL을 받아
-    Gemini로 영상을 직접 시청·분석
+  - 이미 종목 선정이 끝난 뒤, 그 종목들과 실제로 연결된(텍스트 매칭으로
+    확인된) 영상만 받아 Gemini로 영상을 직접 시청·분석
   - 발언자 / 타임스탬프 / 실제 발언 원문 / 종목명 / 감성 추출
-  - transcript(자막) 기반 분석을 병행하여 API 비용 절감
 
 수정 이력:
 - GEMINI-YT-1  : 최초 작성 — 영상 직접 분석 + transcript 폴백
@@ -26,6 +25,14 @@ Gemini를 활용한 유튜브 영상 직접 분석 모듈
                     Gemini가 영상으로 인식하지 못하는 잘못된 구조였음 →
                     공식 문서대로 types.Part(file_data=types.FileData(...))
                     구조로 복원.
+- GEMINI-YT-6  : 전면 재구조화 — "수집 → 스캔 → 심층분석(최대 7개, 종목 미확정
+                 상태에서 제목/스캔 기준으로 선별) → 종목 선정"이던 순서를
+                 "텍스트 매칭만으로 종목 선정 → 그 종목에 실제로 연결된 영상만
+                 심층분석"으로 뒤집었다. 이제 영상이 넘어오는 시점에는 이미
+                 관련성이 검증돼 있으므로 1단계 스캔(worth_deep_analysis 판단)이
+                 불필요해져 제거했고, 심층분석 대상 선정(패널리스트 제목/스캔
+                 통과 우선순위)도 호출부(ai_analyzer.py)의 종목별 캡으로
+                 대체되어 이 모듈에서는 더 이상 다루지 않는다.
 """
 
 import json
@@ -49,47 +56,10 @@ except ImportError:
 # 의 deprecation 페이지에서 현재 상태 확인 권장.
 GEMINI_MODEL = "gemini-2.5-flash"
 
+# 영상 1개 분석 후 다음 호출까지 대기 (레이트리밋 여유)
+_DEEP_SLEEP_SEC = 2.0
 
-# ── 분석 단계별 설정 ──────────────────────────────────────────────────────────
-# 1단계: 경량 스캔 — transcript 있는 영상 대상 + 패널리스트 제목 포함 영상 우선
-_MIN_TRANSCRIPT_CHARS = 50    # transcript 최소 길이 (짧아도 활용)
-_SCAN_SLEEP_SEC       = 0.5   # 1단계 스캔 간격 (빠르게)
-
-# 2단계: 심층 분석 — 선별된 영상만, 영상 직접분석으로 fact/quote 추출
-_MAX_DEEP_ANALYSIS    = 7     # 심층 분석 최대 건수 (타임라인 기준: 영상당 45초 × 7개 ≈ 5분)
-_DEEP_TIER1_MAX       = 4     # 1순위 (패널리스트 제목) 최대 건수
-_DEEP_TIER2_MAX       = 3     # 2순위 (스캔 통과) 최대 건수
-_DEEP_SLEEP_SEC       = 2.0   # 2단계 분석 간격 (여유있게)
-_DEEP_TIMEOUT_SEC     = 45    # 영상 1개당 최대 대기 시간
-
-# 패널리스트 실명 목록 (우선순위 판단용)
-from config import POPULAR_PANELISTS as _PANELISTS
-
-# ── 프롬프트 템플릿 ───────────────────────────────────────────────────────────
-# ── 1단계: 경량 스캔 프롬프트 (transcript 텍스트만 사용) ─────────────────────
-_PROMPT_SCAN = """
-아래는 유튜브 영상의 자막입니다.
-다음 두 가지만 판단하세요.
-
-1. 실명이 확인된 금융 전문가/애널리스트가 등장하는가?
-2. 특정 종목에 대해 구체적인 투자 의견, 목표주가, 실적 전망 등을 언급하는가?
-
-JSON으로만 응답:
-{{
-  "has_expert": true/false,
-  "has_specific_mention": true/false,
-  "detected_names": ["발견된 전문가 이름 (있을 경우)"],
-  "detected_stocks": ["언급된 종목명 (있을 경우)"],
-  "worth_deep_analysis": true/false
-}}
-
-worth_deep_analysis = true 조건: has_expert AND has_specific_mention 둘 다 true일 때
-
-[자막]
-{transcript}
-"""
-
-# ── 2단계: 심층 분석 프롬프트 (영상 직접분석) ────────────────────────────────
+# ── 심층 분석 프롬프트 (영상 직접분석) ────────────────────────────────────────
 _PROMPT_VIDEO = """
 이 유튜브 영상을 분석하여 주식 종목 언급을 추출하세요.
 방송 제작용 데이터로 사용되므로, 정확성이 최우선입니다.
@@ -167,304 +137,55 @@ def _analyze_via_video_url(client, video_url: str) -> Optional[dict]:
         return None
 
 
-# ── 메인 분석 함수 ───────────────────────────────────────────────────────────
 
-def _scan_transcript(client, transcript: str, video_url: str) -> dict:
+
+# ── 타겟 심층 분석 ───────────────────────────────────────────────────────────
+# GEMINI-YT-6: 종목 선정이 끝난 뒤 호출부(ai_analyzer.py)가 종목별 상위 영상만
+# 추려서 넘겨준다. 여기서는 그 목록을 그대로 영상 직접분석에 돌리기만 하면
+# 되므로, 관련성 재판단(스캔)이나 우선순위 로직이 필요 없다.
+
+def analyze_target_videos(video_urls: list, api_key: str) -> dict:
     """
-    1단계: transcript 텍스트만으로 경량 스캔.
-    전문가 실명 + 종목 구체 언급 여부만 판단 (YES/NO).
-    """
-    if not transcript or len(transcript) < _MIN_TRANSCRIPT_CHARS:
-        return {"worth_deep_analysis": False}
-    prompt = _PROMPT_SCAN.format(transcript=transcript[:3000])
-    try:
-        response = client.models.generate_content(
-            model=GEMINI_MODEL,
-            contents=prompt,
-        )
-        result = _parse_gemini_response(response.text)
-        return result or {"worth_deep_analysis": False}
-    except Exception as e:
-        print(f"    [GeminiYT 스캔] 실패 ({video_url[:50]}): {e}")
-        return {"worth_deep_analysis": False}
+    이미 관련성이 확인된 영상 URL 목록을 받아 Gemini 영상 직접분석을 수행한다.
 
-
-def analyze_youtube_items(
-    youtube_items: list,
-    api_key: str,
-) -> list:
-    """
-    2단계 파이프라인으로 Gemini 분석 수행.
-
-    1단계 — 경량 스캔: transcript 있는 전체 영상 대상, 전문가+종목 언급 여부만 판단
-    2단계 — 심층 분석: 1단계 통과 영상만, 영상 직접분석으로 fact/quote 추출 (최대 5개)
-
-    우선순위:
-      1순위: 제목에 패널리스트 실명 포함 영상 (최대 3개)
-      2순위: 1단계 스캔 통과한 유튜브/경제방송 영상 (최대 2개)
-      증권사 채널: 심층 분석 제외
+    반환: {video_url: {"speakers": [...], "mentions": [...]}, ...}
+          (SDK/키 없음 또는 개별 영상 분석 실패 시 해당 URL은 결과에서 누락)
     """
     if not _GEMINI_AVAILABLE:
-        print("[GeminiYT] google-genai SDK 없음 → 전체 스킵")
-        return youtube_items
-
+        print("[GeminiYT] google-genai SDK 없음 → 타겟 분석 스킵")
+        return {}
     if not api_key:
-        print("[GeminiYT] GEMINI_API_KEY 없음 → 전체 스킵")
-        return youtube_items
+        print("[GeminiYT] GEMINI_API_KEY 없음 → 타겟 분석 스킵")
+        return {}
+    if not video_urls:
+        return {}
 
-    client = genai.Client(api_key=api_key)
+    client  = genai.Client(api_key=api_key)
+    results = {}
+    done    = 0
+    fail    = 0
 
-    # 스캔 대상 선별
-    # - 증권사 채널 제외
-    # - transcript 있는 영상 OR 패널리스트 이름이 제목에 포함된 영상
-    def _has_panelist_in_title(item):
-        title = item.get("title", "")
-        return any(name in title for name in _PANELISTS)
-
-    # 스캔 대상: 증권사 포함 전체 — description 또는 transcript가 있거나 패널리스트 제목
-    scannable = [
-        item for item in youtube_items
-        if len(item.get("summary", "") or "") >= _MIN_TRANSCRIPT_CHARS
-        or len(item.get("description", "") or "") >= _MIN_TRANSCRIPT_CHARS
-        or _has_panelist_in_title(item)
-    ]
-    non_scannable = [
-        item for item in youtube_items
-        if item not in scannable
-    ]
-
-    has_desc  = sum(1 for i in scannable if len(i.get("description","") or "") >= _MIN_TRANSCRIPT_CHARS)
-    has_trans = sum(1 for i in scannable if i.get("has_transcript"))
-    print(f"[GeminiYT] 1단계 스캔 대상: {len(scannable)}개 "
-          f"(transcript:{has_trans}개 / description:{has_desc}개 / 무관 {len(non_scannable)}개 제외)")
-
-    # ── 1단계: 경량 스캔 ─────────────────────────────────────────────────────
-    for item in scannable:
-        transcript = item.get("summary", "") or ""
-        title      = item.get("title", "")
-        video_url  = item.get("link", "")
-
-        has_panelist_in_title = _has_panelist_in_title(item)
-        item["_panelist_in_title"] = has_panelist_in_title
-
-        # 패널리스트가 제목에 있으면 스캔 없이 바로 통과
-        if has_panelist_in_title:
-            panelist_names = [n for n in _PANELISTS if n in title]
-            item["_scan_result"]    = {"worth_deep_analysis": True, "detected_names": panelist_names, "detected_stocks": []}
-            item["_detected_names"] = panelist_names
-            item["_worth_deep"]     = True
-            print(f"  ✅ 제목패널 [{title[:35]}] [{','.join(panelist_names)}]")
-            continue
-
-        # transcript 또는 description으로 스캔
-        description = item.get("description", "") or ""
-        scan_text = transcript if len(transcript) >= _MIN_TRANSCRIPT_CHARS else description
-        if len(scan_text) >= _MIN_TRANSCRIPT_CHARS:
-            scan = _scan_transcript(client, scan_text, video_url)
-            item["_scan_result"]    = scan
-            item["_detected_names"] = scan.get("detected_names", [])
-            item["_worth_deep"]     = scan.get("worth_deep_analysis", False)
-            status = "✅ 통과" if item["_worth_deep"] else "⏭ 스킵"
-            panelist_tag = f" [{','.join(item['_detected_names'])}]" if item["_detected_names"] else ""
-            print(f"  {status} [{title[:35]}]{panelist_tag}")
-            time.sleep(_SCAN_SLEEP_SEC)
-        else:
-            item["_scan_result"]    = {"worth_deep_analysis": False}
-            item["_detected_names"] = []
-            item["_worth_deep"]     = False
-
-    # ── 2단계 대상 선별 (최대 5개, 우선순위 적용) ────────────────────────────
-    passed   = [i for i in scannable if i.get("_worth_deep")]
-    priority = []
-
-    # 1순위: 제목에 패널리스트 실명 포함 (최대 4개)
-    tier1 = [i for i in passed if i.get("_panelist_in_title")][:_DEEP_TIER1_MAX]
-    priority.extend(tier1)
-    used_urls = {i.get("link") for i in tier1}
-
-    # 2순위: 나머지 스캔 통과 영상 전체 (유튜브/경제방송/증권사 모두, 최대 3개)
-    tier2 = [
-        i for i in passed
-        if i.get("link") not in used_urls
-    ][:_DEEP_TIER2_MAX]
-    priority.extend(tier2)
-
-    print(f"\n[GeminiYT] 2단계 심층 분석 대상: {len(priority)}개 "
-          f"(1순위 패널리스트:{len(tier1)}개, 2순위 스캔통과:{len(tier2)}개)")
-
-    # ── 2단계: 심층 분석 (영상 직접분석) ─────────────────────────────────────
-    deep_done  = 0
-    deep_fail  = 0
-    deep_urls  = {i.get("link") for i in priority}
-
-    for item in priority:
-        video_url = item.get("link", "")
-        title     = item.get("title", "")
-
+    print(f"[GeminiYT] 타겟 심층분석 대상: {len(video_urls)}개")
+    for video_url in video_urls:
         result = None
         try:
             result = _analyze_via_video_url(client, video_url)
         except Exception as e:
-            print(f"  ❌ [{title[:30]}] 심층분석 예외: {e}")
+            print(f"  ❌ [{video_url}] 심층분석 예외: {e}")
 
         if result:
-            item["gemini_summary"]  = result.get("video_summary", "")
-            item["gemini_speaker"]  = result.get("main_speaker", "")
-            item["gemini_speakers"] = result.get("speakers", [])
-            item["gemini_mentions"] = result.get("mentions", [])
-            item["gemini_analyzed"] = True
-            deep_done += 1
-            print(f"  ✅ [{title[:30]}] → 종목 언급 {len(item['gemini_mentions'])}개")
+            mentions = result.get("mentions", [])
+            results[video_url] = {
+                "speakers": result.get("speakers", []),
+                "mentions": mentions,
+            }
+            done += 1
+            print(f"  ✅ [{video_url}] → 종목 언급 {len(mentions)}개")
         else:
-            item["gemini_analyzed"] = False
-            deep_fail += 1
-            print(f"  ❌ [{title[:30]}] → 심층분석 실패")
+            fail += 1
+            print(f"  ❌ [{video_url}] → 심층분석 실패")
 
         time.sleep(_DEEP_SLEEP_SEC)
 
-    # 2단계 미대상 항목은 스캔 결과(detected_stocks)로 간이 처리
-    for item in scannable:
-        if item.get("link") not in deep_urls:
-            scan = item.get("_scan_result", {})
-            item["gemini_summary"]  = ""
-            item["gemini_speaker"]  = ", ".join(item.get("_detected_names", []))
-            item["gemini_speakers"] = item.get("_detected_names", [])
-            item["gemini_mentions"] = [
-                {
-                    "stock_name": s, "timestamp": "", "speaker": "",
-                    "fact": "", "quote": "", "sentiment": "중립", "confidence": "낮음"
-                }
-                for s in scan.get("detected_stocks", [])
-            ]
-            item["gemini_analyzed"] = False
-
-    # 스캔 불가 항목 기본값
-    for item in non_scannable:
-        item["gemini_summary"]  = ""
-        item["gemini_speaker"]  = ""
-        item["gemini_speakers"] = []
-        item["gemini_mentions"] = []
-        item["gemini_analyzed"] = False
-
-    enriched = scannable + non_scannable
-    print(f"\n[GeminiYT] 완료 — 심층분석 성공:{deep_done} / 실패:{deep_fail} / "
-          f"스캔통과(간이):{len(passed)-len(priority)}개 / 스캔스킵:{len(non_scannable)}개")
-    return enriched
-
-
-# ── gemini_mentions → all_data 확장 헬퍼 ─────────────────────────────────────
-
-def expand_gemini_mentions(enriched_items: list) -> list:
-    """
-    gemini_mentions에서 추출된 발언을 별도 항목으로 확장.
-
-    변경사항:
-    - fact/quote 필드 추가 (방송 제작용)
-    - data/youtube_mentions.json 별도 저장 (외부 앱 연동용)
-    - speakers 필드(출연자 목록) 저장
-    """
-    import os
-    import json
-    from datetime import datetime, timezone, timedelta
-    KST = timezone(timedelta(hours=9))
-
-    expanded       = list(enriched_items)
-    youtube_export = []  # 외부 앱 연동용 별도 저장 데이터
-
-    for item in enriched_items:
-        mentions = item.get("gemini_mentions", [])
-        if not mentions:
-            continue
-
-        base_url    = item.get("link", "")
-        source_name = item.get("source_name", "")
-        source_type = item.get("source_type", "유튜브")
-        published   = item.get("published", "")
-        main_speaker = item.get("gemini_speaker", "")
-        speakers    = item.get("gemini_speakers", [])
-        video_summary = item.get("gemini_summary", "")
-
-        for mention in mentions:
-            stock_name = mention.get("stock_name", "")
-            fact       = mention.get("fact", "")
-            quote      = mention.get("quote", "")
-            # 구버전 호환: statement가 있으면 fact/quote 폴백
-            statement  = mention.get("statement", "")
-            if not fact and statement:
-                fact = statement
-            timestamp  = mention.get("timestamp", "")
-            m_speaker  = mention.get("speaker") or main_speaker
-            sentiment  = mention.get("sentiment", "중립")
-            confidence = mention.get("confidence", "보통")
-
-            if not stock_name or (not fact and not quote):
-                continue
-
-            timestamp_url = f"{base_url}&t={timestamp}" if timestamp else base_url
-
-            # 브리핑용 summary (기존 흐름 유지)
-            summary_parts = []
-            if m_speaker:
-                summary_parts.append(f"[{m_speaker}]")
-            if fact:
-                summary_parts.append(fact)
-            if quote:
-                summary_parts.append(f'"{quote}"')
-            summary = " ".join(summary_parts)
-            if sentiment != "중립":
-                summary += f" (감성:{sentiment})"
-
-            expanded.append({
-                "source_type":       source_type,
-                "source_name":       source_name,
-                "title":             f"{m_speaker or source_name}: {stock_name} 언급",
-                "summary":           summary,
-                "content":           fact or quote,
-                "link":              timestamp_url,
-                "url":               timestamp_url,
-                "published":         published,
-                "stock_name":        stock_name,
-                "gemini_speaker":    m_speaker,
-                "gemini_fact":       fact,
-                "gemini_quote":      quote,
-                "gemini_sentiment":  sentiment,
-                "gemini_confidence": confidence,
-                "_from_gemini":      True,
-            })
-
-            # 외부 앱 연동용 데이터 축적
-            youtube_export.append({
-                "date":          datetime.now(KST).strftime("%Y-%m-%d"),
-                "channel":       source_name,
-                "video_url":     base_url,
-                "video_title":   item.get("title", ""),
-                "video_summary": video_summary,
-                "published":     published,
-                "speakers":      speakers,
-                "main_speaker":  main_speaker,
-                "stock_name":    stock_name,
-                "timestamp":     timestamp,
-                "timestamp_url": timestamp_url,
-                "speaker":       m_speaker,
-                "fact":          fact,
-                "quote":         quote,
-                "sentiment":     sentiment,
-                "confidence":    confidence,
-            })
-
-    # 외부 앱 연동용 JSON 저장
-    if youtube_export:
-        os.makedirs("data", exist_ok=True)
-        export_path = "data/youtube_mentions.json"
-        try:
-            with open(export_path, "w", encoding="utf-8") as f:
-                json.dump(youtube_export, f, ensure_ascii=False, indent=2)
-            print(f"[GeminiYT] 방송제작용 데이터 저장: {export_path} ({len(youtube_export)}건)")
-        except Exception as e:
-            print(f"[GeminiYT] 방송제작용 데이터 저장 실패: {e}")
-
-    original_count = len(enriched_items)
-    expanded_count = len(expanded) - original_count
-    print(f"[GeminiYT] 발언 확장: {expanded_count}개 항목 추가 "
-          f"(원본 {original_count}개 유지)")
-    return expanded
+    print(f"[GeminiYT] 타겟 심층분석 완료 — 성공:{done} / 실패:{fail}")
+    return results

@@ -153,34 +153,14 @@ def main():
         else:
             print("  → YouTube 클라이언트 없음, 스킵")
 
-    # ── GEMINI: 유튜브 영상 직접 분석 (v3의 GEMINI-MAIN 로직 동일) ────────
+    # ── 유튜브 원본 데이터 추가 ────────────────────────────────────────────
+    # GEMINI-YT-6: Gemini 영상 직접분석은 더 이상 여기서(종목 선정 전에)
+    # 하지 않는다. all_data는 텍스트 매칭만으로 종목 점수를 매기는 데 쓰이고,
+    # 종목 선정이 끝난 뒤 analyze_and_generate_html() 내부에서 선정된 종목에
+    # 실제로 연결된 영상만 골라 Gemini로 심층분석한다 (analyzer/ai_analyzer.py
+    # 의 gather_target_videos()/build_panelist_quotes() 참고).
     youtube_raw = yt_data + panelist_data
-    if SKIP_YOUTUBE:
-        all_data.extend(youtube_raw)
-    elif GEMINI_API_KEY and youtube_raw:
-        try:
-            from collectors.gemini_youtube_analyzer import (
-                analyze_youtube_items,
-                expand_gemini_mentions,
-            )
-            print(f"\n[GEMINI] 유튜브 영상 분석 시작 ({len(youtube_raw)}개)...")
-            enriched = analyze_youtube_items(youtube_raw, GEMINI_API_KEY)
-            expanded = expand_gemini_mentions(enriched)
-
-            analyzed_urls = {item.get("link", "") for item in youtube_raw}
-            for item in youtube_raw:
-                if item.get("link", "") not in {e.get("link", "") for e in expanded}:
-                    expanded.append(item)
-
-            all_data.extend(expanded)
-            print(f"  → Gemini 분석 완료: {len(expanded)}건 (원본+발언 확장 포함)")
-        except Exception as e:
-            print(f"  [GEMINI] 유튜브 분석 실패 (기존 데이터로 계속 진행): {e}")
-            all_data.extend(youtube_raw)
-    else:
-        all_data.extend(youtube_raw)
-        if not GEMINI_API_KEY:
-            print("\n[GEMINI] API 키 없음 → 유튜브 영상 분석 스킵")
+    all_data.extend(youtube_raw)
 
     # ── 애널리스트 리포트 수집 없음 (V3_1의 핵심 차이점) ──────────────────
     # morning_core 영상은 증권사 리포트를 다루지 않으므로, 08:00 대기~08:30 강제

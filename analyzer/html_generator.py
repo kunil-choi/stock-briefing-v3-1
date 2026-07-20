@@ -399,6 +399,39 @@ def _render_stock_detail(stock: dict) -> str:
             f'</div>'
         )
 
+    pq_list = stock.get("panelist_quotes", [])
+    if pq_list:
+        pq_items = ""
+        for pq in pq_list:
+            speaker = (pq.get("speaker_name") or "").strip()
+            source  = (pq.get("source_name") or "").strip()
+            quote   = (pq.get("quote") or "").strip()
+            fact    = (pq.get("fact") or "").strip()
+            url     = pq.get("source_url", "")
+            body    = f'"{quote}"' if quote else fact
+            speaker_label = f"{speaker} · {source}" if source else speaker
+            body_html = (
+                f'<a href="{url}" target="_blank" rel="noopener" '
+                f'style="color:#adb5bd;text-decoration:none;">{_he.escape(body)}</a>'
+                if url and url.startswith(("http://", "https://"))
+                else f'<span style="color:#8b949e;">{_he.escape(body)}</span>'
+            )
+            fact_html = (
+                f'<div style="font-size:.78rem;color:#868e96;margin-top:.15rem;">'
+                f'{_he.escape(fact)}</div>'
+                if fact and quote else ""
+            )
+            pq_items += (
+                f'<li><span style="color:#ffd43b;font-weight:700;">'
+                f'{_he.escape(speaker_label)}</span> {body_html}{fact_html}</li>'
+            )
+        html += (
+            f'<div class="stock-section">'
+            f'<span class="stock-section-label">🎙️ 패널 발언</span>'
+            f'<ul class="reasons-list">{pq_items}</ul>'
+            f'</div>'
+        )
+
     cm_list = stock.get("channel_mentions", [])
     if cm_list:
         cm_items = ""
