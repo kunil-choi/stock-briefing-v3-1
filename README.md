@@ -60,9 +60,13 @@
 cron 07:00 KST (월~금)
   → main.py 실행 (목표 완료 ~07:30~07:45)
   → data/ 커밋·푸시
-  → workflow_dispatch: stock-briefing-step1 (morning_core.yml)
   → workflow_dispatch: stock-briefing-v3-2 (main.yml)
 ```
+
+`stock-briefing-step1`(morning_core.yml, 실제 영상 생성 — OpenAI/TTS 과금 발생)은
+더 이상 자동 트리거하지 않습니다(과금 방지를 위한 의도적 변경). `docs/index.html`로
+데이터를 사람이 먼저 확인한 뒤, step1 저장소 Actions 탭에서 수동으로
+`workflow_dispatch`를 실행하세요.
 
 ## 필요 Secrets (레포 Settings → Secrets and variables → Actions)
 
@@ -71,7 +75,7 @@ cron 07:00 KST (월~금)
 | `ANTHROPIC_API_KEY` | Claude 분석 |
 | `YOUTUBE_API_KEY` | YouTube 수집 |
 | `GEMINI_API_KEY` | 유튜브 영상 분석(선택 — 없으면 스킵) |
-| `GH_TOKEN` | `contents:write` + step1/v3-2 워크플로우 dispatch 권한 필요 |
+| `GH_TOKEN` | `contents:write` + v3-2 워크플로우 dispatch 권한 필요 |
 
 기존 v3 레포에 등록된 값과 동일한 값을 재사용할 수 있습니다.
 
