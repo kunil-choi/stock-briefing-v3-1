@@ -128,25 +128,10 @@ jobs:
             echo "committed=true" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: 📡 stock-briefing-step1 (morning_core) 트리거
-        if: steps.commit_push.outputs.committed == 'true'
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: |
-          CLEAN_TOKEN="$(printf '%s' "${GH_TOKEN}" | tr -d '\n\r ')"
-          response=$(curl -sS -o /tmp/dispatch_step1.txt -w "%{http_code}" -X POST \
-            -H "Authorization: token ${CLEAN_TOKEN}" \
-            -H "Accept: application/vnd.github.v3+json" \
-            -H "Content-Type: application/json" \
-            https://api.github.com/repos/kunil-choi/stock-briefing-step1/actions/workflows/morning_core.yml/dispatches \
-            -d '{"ref":"main"}')
-          if [ "$response" != "204" ]; then
-            echo "❌ stock-briefing-step1 dispatch 실패 (HTTP ${response})"
-            cat /tmp/dispatch_step1.txt
-            exit 1
-          fi
-          echo "✅ stock-briefing-step1의 morning_core.yml 트리거 완료"
-
+      # stock-briefing-step1(morning_core.yml, 실제 영상 생성 — OpenAI/TTS 과금 발생)은
+      # 더 이상 여기서 자동 트리거하지 않는다. 데이터(docs/index.html)를 사람이 먼저
+      # 확인한 뒤 step1 저장소 Actions 탭에서 수동으로 workflow_dispatch 실행한다
+      # (과금 방지를 위한 의도적 변경).
       - name: 📡 stock-briefing-v3-2 트리거
         if: steps.commit_push.outputs.committed == 'true'
         env:
