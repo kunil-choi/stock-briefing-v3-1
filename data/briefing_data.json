@@ -1,272 +1,258 @@
 {
-  "briefing_date": "2026년 07월 21일",
-  "market_summary": "전일 뉴욕증시는 미국·이란 군사 충돌 재격화와 국제유가 상승 우려로 일제히 하락했다. 다만 반도체·AI 관련주에 저가매수세가 유입되며 하락 폭이 제한됐고, 지난주 대폭 하락 후 반도체 지수는 부분 반등에 나섰다. 국내 증시에서는 VKOSPI(코스피200 변동성지수)가 2008년 금융위기 때보다 높은 사상 최고치를 기록하며 극도의 투자 심리 위축이 확인됐다.\n\n미국·이란 전면전 위기가 고조되는 가운데 홍해에 이어 호르무즈 해협까지 봉쇄 리스크가 부각되고 있다. 정부는 국내 선사에 홍해 통항 자제 2차 권고를 내렸으며(유조선·필수화물선은 제외), 고유가 우려가 글로벌 물가·운송 비용 전반에 파급될 가능성이 높아졌다. 국내에서는 한국은행이 기준금리를 인상한 가운데 미국 연준 워시 이사도 추가 인상 가능성을 시사하며 금리인상 기조가 재부각되고 있다.\n\n긍정적 측면으로는 이번 주 알파벳·테슬라·인텔 등 빅테크 실적 발표가 줄줄이 예정돼 있어 AI 투자 지속 여부 확인 시 반도체·AI 수혜주의 반등 계기가 마련될 수 있다. 조선 섹터는 하반기 수주 모멘텀 기대감이 유지되고 있으며, ESS·배터리·방산 관련주도 중장기 성장 테마로 주목받고 있다. 반면 단일종목 레버리지 ETF에 대한 여당·금융당국의 집중 모니터링 촉구로 규제 리스크가 부상했고, 삼성전자 소액주주들의 성과급 반대 서한 등 거버넌스 이슈도 시장 불안 요인으로 작용 중이다.\n\n향후 시장의 방향성은 이번 주 빅테크 실적에서 AI 투자 지속성이 확인되느냐에 달려 있다는 분석이 지배적이다. 중동 지정학 리스크가 완화될 경우 반도체·조선·방산 등 주도 섹터의 저가매수 기회가 열릴 수 있으나, 전쟁 확전 시 유가 추가 급등과 글로벌 공급망 교란으로 시장 변동성이 한층 확대될 수 있어 단기 방어적 포지션 관리가 중요하다.",
+  "briefing_date": "2026년 07월 22일",
+  "market_summary": "전일(7월 21일) 뉴욕증시는 기업 실적 호조와 반도체주 반등에 힘입어 일제히 상승했다. 다우존스30 산업평균지수는 385.38포인트(0.74%) 오른 52,224.6을 기록했으며, 나스닥은 1.3% 상승했다. 국내 7월 1~20일 수출액은 549억 달러로 전년 대비 52% 증가하며 7월 기준 역대 최대 실적을 기록했고, 반도체 수출이 전년 대비 180% 이상 급증하며 전체 수출을 견인했다.\n\n최근 시장의 주요 이슈는 미국-이란 군사 충돌 재격화에 따른 국제유가 급등과 이에 연동된 금리 상승 압력이다. 한국 국고채 30년물 금리가 연 4.564%로 사상 최고치를 경신했고, 물가 상승 우려 재부각으로 한국은행의 추가 기준금리 인상 가능성도 시장에서 거론되고 있다. 한편 삼성바이오로직스가 2.7조원 규모의 비만치료제 기업 인수를 추진한다는 소식이 바이오 섹터의 주요 화두로 떠올랐으며, 삼성전자가 런던에서 14년 만의 언팩 행사를 열고 폴더블폰 신제품을 공개했다.\n\n긍정적 측면으로는 반도체 호황에 따른 기업 현금 급증, 은행권 MMT 100조원 돌파, 수출 역대 최고 실적 등 국내 실물 경기의 탄탄한 흐름이 주목된다. 반면 반도체 수출이 전월 대비로는 13% 감소하며 모멘텀 둔화 조짐이 나타났고, 유가 급등에 따른 물가 불안과 금리 인상 사이클 지속 가능성, AI 확산에 따른 고용 없는 성장 우려가 리스크 요인으로 부각되고 있다. 마이너스통장 잔액 44조원 누적 등 가계 레버리지 문제도 잠재 변수다.\n\n향후 시장은 알파벳·아마존 등 빅테크 실적 발표와 AI 설비투자 확대 여부에 민감하게 반응할 전망이다. 중동 정세 추가 격화 여부가 유가와 금리 방향을 결정하는 핵심 변수로 작용할 것으로 보이며, 한국은행의 추가 금리 인상 시기(8월 vs 10월) 가늠도 단기 채권 및 주식시장 변동성을 높이는 요인이 될 수 있다. 삼성바이오로직스의 대규모 M&A 성사 여부와 비만치료제 경쟁 구도 변화도 바이오 섹터 전반에 영향을 미칠 중요 이벤트로 지목된다.",
   "hot_sectors": [
     {
-      "name": "반도체·AI",
-      "reason": "저가매수 유입"
+      "name": "반도체",
+      "reason": "수출 역대 최고"
     },
     {
-      "name": "조선·방산",
-      "reason": "중동리스크 수혜"
+      "name": "바이오/비만치료제",
+      "reason": "삼성바이오 대형 M&A"
     },
     {
-      "name": "ESS·배터리",
-      "reason": "전력인프라 확대"
+      "name": "에너지/원자재",
+      "reason": "중동 유가 급등"
     },
     {
-      "name": "에너지·유가",
-      "reason": "호르무즈 봉쇄 우려"
+      "name": "원전",
+      "reason": "K원전 인력·수주 확대"
+    },
+    {
+      "name": "금융",
+      "reason": "금리 인상·기업예금 급증"
     }
   ],
   "market_leaders": [
     {
       "rank": 1,
-      "name": "SK하이닉스",
-      "code": "000660",
+      "name": "삼성전자",
+      "code": "005930",
       "signal": "긍정",
-      "summary": "반도체 지수가 전전일 대비 20% 급락 후 저가매수세가 유입되며 반등 시도가 나타나고 있다. 이번 주 빅테크 실적 발표에서 AI 투자 지속 여부가 확인될 경우 HBM 최대 수혜주로서 추가 반등이 기대된다.",
-      "catalyst": "글로벌 빅테크의 AI 인프라 투자 지속 기대감이 HBM 수요 전망을 뒷받침하고 있다. 전전일 급락 이후 저가매수 유입으로 반도체 섹터 내 선도 종목으로서 반등 탄력이 부각되고 있다.",
-      "risk": "미국·이란 군사 충돌 확전 시 글로벌 공급망 교란과 투자 심리 위축이 재차 주가 하방 압력으로 작용할 수 있다. VKOSPI 사상 최고치 수준의 시장 변동성이 지속되는 점도 단기 리스크 요인이다.",
+      "summary": "전일 종가 259,000원으로 6.15% 상승하며 강한 반등세를 보였다. 런던 올드 빌링스게이트에서 14년 만의 언팩 행사를 열고 폴더블폰 3종·워치 2종 등 신제품을 공개했다. 반도체 호황에 따른 기업 현금 증가 수혜 속에 시장 내 최고 언급 점수를 기록 중이다.",
+      "catalyst": "7월 1~20일 반도체 수출이 전년 대비 180% 이상 급증하며 전체 수출을 견인했다. 런던 언팩에서 신규 폴더블폰 라인업 공개로 프리미엄 스마트폰 모멘텀이 부각되고 있다. 반도체 호황으로 쌓인 대규모 기업 현금이 은행 파킹 상품으로 유입되며 재무 건전성도 부각된다.",
+      "risk": "7월 반도체 수출이 전월 대비 13% 감소해 단기 모멘텀 둔화 우려가 있다. 최태원 SK 회장의 '메모리 역풍론' 등 반도체 초과이윤 분배 논쟁이 정책 불확실성으로 작용할 수 있다.",
       "channel_mentions": [
         {
           "source_type": "뉴스",
           "source_name": "아시아경제",
           "speaker_name": "",
-          "content": "반도체 지수가 20% 급락 후 이번 주 빅테크 실적 발표에서 AI 투자 지속 여부가 반도체 반등 여부의 관건으로 지목됐다.",
-          "url": "https://view.asiae.co.kr/article/2026072017082142247"
+          "content": "삼성전자가 런던 올드 빌링스게이트에서 14년 만의 언팩 행사를 열고 폴더블폰 3종·워치 2종 등 신제품을 공개했다.",
+          "url": "https://view.asiae.co.kr/article/2026072205595482061"
         },
         {
           "source_type": "뉴스",
-          "source_name": "아시아경제",
+          "source_name": "매일경제",
           "speaker_name": "",
-          "content": "뉴욕증시는 중동 불안으로 하락했으나 반도체·AI 관련주를 중심으로 저가매수세가 유입되며 하락 폭이 제한됐다.",
-          "url": "https://view.asiae.co.kr/article/2026072107212356834"
-        },
-        {
-          "source_type": "뉴스",
-          "source_name": "아시아경제",
-          "speaker_name": "",
-          "content": "VKOSPI가 2008년 금융위기 수준을 넘어 사상 최고치를 기록한 배경으로 삼성전자·SK하이닉스로의 코스피 상승 78% 쏠림 현상이 지목됐다.",
-          "url": "https://view.asiae.co.kr/article/2026072016352329832"
+          "content": "반도체 호황으로 삼성전자·SK하이닉스 등 기업 현금이 은행 MMT·기업자유예금으로 대거 유입되며 은행권 파킹 자금이 사상 최대를 기록했다.",
+          "url": "https://www.mk.co.kr/news/economy/12103858"
         },
         {
           "source_type": "경제방송",
           "source_name": "이데일리TV",
           "speaker_name": "",
-          "content": "SK하이닉스를 포함한 반도체·AI 대형주 전반에 대한 2분기 실적 시즌 대응 전략이 논의됐다.",
-          "url": "https://www.youtube.com/watch?v=fs0BjKyVRn4"
+          "content": "삼성전자를 포함한 반도체 대형주 ETF 및 개별 종목 투자 전략이 집중 논의됐다.",
+          "url": "https://www.youtube.com/watch?v=oAYiiwuJMbw"
+        },
+        {
+          "source_type": "뉴스",
+          "source_name": "매일경제",
+          "speaker_name": "",
+          "content": "7월 1~20일 수출에서 반도체가 전년 대비 180% 이상 증가하며 전체 수출액 549억 달러 역대 최고치를 이끌었다.",
+          "url": "https://www.mk.co.kr/news/economy/12103105"
         }
       ],
       "channel_counts": {
-        "뉴스": 5,
-        "경제방송": 20,
-        "유튜브": 15
+        "뉴스": 7,
+        "경제방송": 9,
+        "유튜브": 21
       },
-      "total_count": 40,
-      "weighted_score": 70.6,
+      "total_count": 37,
+      "weighted_score": 69.97,
       "overlap_count": 2,
       "reasons": [],
-      "price": 1764000,
-      "change_pct": -4.23,
+      "price": 259000,
+      "change_pct": 6.15,
       "price_label": "전일종가",
       "panelist_quotes": [
         {
-          "speaker_name": "이권희 대표 위즈웨이브",
-          "source_name": "815머니톡",
-          "fact": "최근 주식 시장에서 하이닉스는 반등 시도 후 다시 급락하는 모습을 보였다.",
-          "quote": "오늘 어쨌건 하이닉스나 삼성전자 좀 플러스 반전하다가 다시 급락을 해 버리면서 급락장으로 가버렸어요. 잘 버티다가.",
-          "sentiment": "부정",
-          "confidence": "높음",
-          "source_url": "https://www.youtube.com/watch?v=Ruihq-vmZH4&t=00:20"
-        },
-        {
-          "speaker_name": "이권희 대표 위즈웨이브",
-          "source_name": "815머니톡",
-          "fact": "64기가바이트 서버 디램의 스팟 가격이 고정가 대비 3배 상승했다는 소식이 있다.",
-          "quote": "64기가바이트 서버 디램 가격이 스팟 가격이 고정가 대비 세 배가 올랐다. (중략) 근데 서버 디램 쪽으로 해서 나오고 있는 겁니다.",
-          "sentiment": "긍정",
-          "confidence": "높음",
-          "source_url": "https://www.youtube.com/watch?v=Ruihq-vmZH4&t=02:40"
-        },
-        {
-          "speaker_name": "이권희 대표 위즈웨이브",
-          "source_name": "815머니톡",
-          "fact": "미국 시장 시간 외 거래에서 SK하이닉스의 ADR은 3%대 상승을 기록 중이다.",
-          "quote": "지금 3%대 지금 시간 외에서 오르고 있어요. 예. 그리고 마이크론도 한 1.5%대 이상 반등 나오는 걸로 보입니다.",
-          "sentiment": "긍정",
-          "confidence": "높음",
-          "source_url": "https://www.youtube.com/watch?v=Ruihq-vmZH4&t=04:27"
-        },
-        {
-          "speaker_name": "이권희 대표 위즈웨이브",
-          "source_name": "815머니톡",
-          "fact": "현재 '좋다고 하는 종목들' 중 하나로, 주가가 40~50% 빠진 상태이다.",
-          "quote": "종목은 지금 뭐 다 작살나가지고 예, 여기 뭐 좋다고 하는 종목들이 다 지금 대부분 한 4-50%씩 빠졌어요.",
+          "speaker_name": "권소현 이데일리 마켓in센터장",
+          "source_name": "이데일리TV",
+          "fact": "삼성전자와 SK하이닉스 같은 개별 종목의 하루 등락률을 두 배로 추종하도록 설계된 단일 종목 레버리지 ETF가 출시되었습니다.",
+          "quote": "삼성전자하고 SK하이닉스 같은 개별 종목 하나에 하루 등락률을 뭐 두 배로 추종하도록 설계된 상장지수펀드인데요.",
           "sentiment": "중립",
           "confidence": "높음",
-          "source_url": "https://www.youtube.com/watch?v=Ruihq-vmZH4&t=21:13"
+          "source_url": "https://www.youtube.com/watch?v=oAYiiwuJMbw&t=00:36"
         },
         {
-          "speaker_name": "소현철 박사",
-          "source_name": "김작가TV",
-          "fact": "일부 증권사에서 SK하이닉스의 추정 실적을 낮추기 시작한 것은 '전조의 사인'일 수 있으므로 D램 평균 고정 가격의 하락 또는 미드 싱글(5% 미만) 상승 시에는 조심해야 한다.",
-          "quote": "어닝에 대해서 좀 추정치를 낮추기 시작했잖아요. 근데 그런 거는 사실은 약간 전조의 사인이다라고 보시는 거는 좀 참고하실 필요는 있다.",
-          "sentiment": "주의",
-          "confidence": "높음",
-          "source_url": "https://www.youtube.com/watch?v=7wGDjAWu40g&t=09:00"
-        },
-        {
-          "speaker_name": "소현철 박사 (상지대학교 국가안보학과 외래교수)",
-          "source_name": "김작가TV",
-          "fact": "뉴욕 주지사의 데이터센터 건설 1년 유예 발표 이후 주식 가격이 9% 가까이 하락했으며, 필라델피아 반도체 지수와 함께 약세를 보였습니다.",
-          "quote": "그러면서 어저께 SK하이닉스 ADR 주식도 뭐 9% 가까이 빠졌고...",
-          "sentiment": "부정",
-          "confidence": "높음",
-          "source_url": "https://www.youtube.com/watch?v=o3U04bZA_zg&t=02:10"
-        },
-        {
-          "speaker_name": "김주혜 뉴스 앵커",
+          "speaker_name": "권소현 이데일리 마켓in센터장",
           "source_name": "이데일리TV",
-          "fact": "SK하이닉스는 장중 하락 전환하여 3%대 약세를 기록하고 있습니다.",
-          "quote": "삼성전자와 SK하이닉스는 결국 장중에 또 하락 전환했습니다. SK하이닉스도 3%대 약세 그리고 있습니다.",
-          "sentiment": "부정",
-          "confidence": "높음",
-          "source_url": "https://www.youtube.com/watch?v=2RFgrybYSog&t=01:58"
-        },
-        {
-          "speaker_name": "김주혜 뉴스 앵커",
-          "source_name": "이데일리TV",
-          "fact": "SK는 약보합권 흐름을 나타내고 있습니다.",
-          "quote": "SK의 경우에도 약보합권 흐름 나타나고 있습니다.",
-          "sentiment": "중립",
-          "confidence": "보통",
-          "source_url": "https://www.youtube.com/watch?v=2RFgrybYSog&t=06:20"
-        },
-        {
-          "speaker_name": "윤여삼 메리츠증권 연구위원",
-          "source_name": "이데일리TV",
-          "fact": "반도체 업황의 펀더멘털은 바뀌지 않았고 올해 600조 원, 내년 900조 원의 이익을 거둘 것으로 예상되지만, 국내 증시 시가총액의 60%를 차지하는 쏠림 현상으로 인한 변동성 때문에 최근 조정 국면에서 주가가 하락했습니다.",
-          "quote": "저희는 올해 3전 닉스의 가장 결정적인 하는 총재도 사실은 심지어는 그 얘기를 했습니다. 여러분들 주가를 보지 마시고요 반도체 가격을 보셔야 됩니다. 근데 반도체 현물가 같은 경우에는 최근에 뭐 장기 계약의 협상이 조금 어 부정적으로 이어진 것 같습니다 뭐 이런 거에 대한 자범이 있지만 현물 가격은 현재도 상승 중이고요.",
+          "fact": "단일 종목 레버리지 ETF 출시 직후 삼성전자와 SK하이닉스 주가가 오르던 시기였고, 이에 개인 투자자 자금이 빠르게 유입되었습니다.",
+          "quote": "안 그래도 삼성전자 하이닉스 굉장히 이제 오르던 시기였고...",
           "sentiment": "중립",
           "confidence": "높음",
-          "source_url": "https://www.youtube.com/watch?v=fs0BjKyVRn4&t=06:58"
+          "source_url": "https://www.youtube.com/watch?v=oAYiiwuJMbw&t=01:56"
+        },
+        {
+          "speaker_name": "권소현 이데일리 마켓in센터장",
+          "source_name": "이데일리TV",
+          "fact": "6월 22일부터 7월 20일까지 삼성전자 본주는 30.98% 하락했지만, KODEX 삼성전자 단일종목레버리지 ETF는 57.17% 하락하여 본주보다 더 큰 손실을 기록했습니다.",
+          "quote": "삼성전자 본주는 35만3500원에서 24만4000원으로 -30.98% 하락했습니다. KODEX 삼성전자 단일종목레버리지는 2만8265원에서 1만2105원으로 -57.17% 하락했습니다.",
+          "sentiment": "부정",
+          "confidence": "높음",
+          "source_url": "https://www.youtube.com/watch?v=oAYiiwuJMbw&t=05:57"
+        },
+        {
+          "speaker_name": "이인철 소장 (참좋은경제연구소)",
+          "source_name": "KBS 1라디오",
+          "fact": "Samsung Electronics had a slight gain, around 245,000 KRW.",
+          "quote": "삼성전자가 강보합 24만 5천원 정도에",
+          "sentiment": "Neutral",
+          "confidence": "High",
+          "source_url": "https://www.youtube.com/watch?v=G52VOCQkoy8&t=06:07"
+        },
+        {
+          "speaker_name": "이인철 소장 (참좋은경제연구소)",
+          "source_name": "KBS 1라디오",
+          "fact": "The main reason for the market decline is the sharp fall in semiconductor stocks, including Samsung Electronics and SK hynix, amid concerns about AI investment, peak semiconductor prices, Middle East geopolitical risks, and rising oil prices.",
+          "quote": "가장 큰 이유는 이제 삼성전자 SK 하이닉스 반도체주의 급락인데요.",
+          "sentiment": "Negative",
+          "confidence": "High",
+          "source_url": "https://www.youtube.com/watch?v=G52VOCQkoy8&t=07:33"
         }
       ]
     },
     {
       "rank": 2,
-      "name": "삼성전자",
-      "code": "005930",
-      "signal": "부정",
-      "summary": "소액주주들이 반도체 부문 특별경영성과급 지급에 반대하는 주주서한을 전일 국민연금에 발송하며 거버넌스 이슈가 부상했다. 주가 급락 국면에서 대규모 성과급 지급 추진이 논란이 되고 있으며, 단기적으로 투자 심리에 부정적 영향을 줄 수 있다.",
-      "catalyst": "반도체 저가매수세 유입과 이번 주 글로벌 빅테크 실적 발표에서 AI 투자 지속성이 확인될 경우 낙폭 과대 인식이 반등 계기로 작용할 수 있다. VKOSPI 급등에 따른 변동성 완화 국면에서 지수 내 비중 1위 종목으로 수급 개선 여지가 있다.",
-      "risk": "소액주주의 성과급 반대 서한과 국민연금 협의 과정에서 주가 불확실성이 높아질 수 있다. 레버리지 ETF 규제 강화 논의가 삼성전자 관련 단일종목 상품에 직접적 영향을 줄 수 있는 점도 주목해야 한다.",
+      "name": "SK하이닉스",
+      "code": "000660",
+      "signal": "긍정",
+      "summary": "반도체 수출 급증 수혜의 핵심 수혜주로 시장 내 두 번째로 높은 언급 점수를 기록했다. 전일 뉴욕증시 반도체주 반등이 국내 반도체 대장주에도 긍정적 흐름을 형성하고 있다. 반도체 호황에 따른 대규모 기업 현금 축적이 재무 여력 확대로 이어지고 있다.",
+      "catalyst": "뉴욕증시 반도체주 반등에 힘입어 나스닥이 1.3% 상승했고, 관련 모멘텀이 국내 시장으로 이어질 가능성이 높다. 7월 수출 통계에서 반도체가 전년 대비 180% 이상 급증하며 고대역폭 메모리(HBM) 수요 강세를 재확인했다. 반도체 기업 현금 증가분이 은행 단기 상품으로 유입되며 투자 여력도 부각되고 있다.",
+      "risk": "반도체 수출이 전월 대비 13% 감소해 계절적 조정 우려가 존재한다. 미-이란 충돌 지속에 따른 글로벌 공급망 불안과 금리 인상 사이클이 밸류에이션 부담으로 작용할 수 있다.",
       "channel_mentions": [
         {
           "source_type": "뉴스",
           "source_name": "매일경제",
           "speaker_name": "",
-          "content": "삼성전자 소액주주들이 주가 급락 국면에서 반도체 부문 특별경영성과급에 제동을 걸기 위해 전일 국민연금에 주주서한을 발송했다.",
-          "url": "https://www.mk.co.kr/news/economy/12102757"
-        },
-        {
-          "source_type": "뉴스",
-          "source_name": "매일경제",
-          "speaker_name": "",
-          "content": "단일종목 레버리지 ETF 집중 모니터링 촉구가 이루어졌으며 삼성전자 관련 상품이 주요 대상으로 거론됐다.",
-          "url": "https://www.mk.co.kr/news/economy/12102777"
-        },
-        {
-          "source_type": "뉴스",
-          "source_name": "아시아경제",
-          "speaker_name": "",
-          "content": "코스피 상승분의 78%를 삼성전자·SK하이닉스가 독식한 쏠림 구조가 VKOSPI 사상 최고치의 원인으로 분석됐다.",
-          "url": "https://view.asiae.co.kr/article/2026072016352329832"
+          "content": "반도체 호황으로 SK하이닉스 등 기업 현금이 급증하며 은행권 기업예금이 1년 새 40조 원 늘었다.",
+          "url": "https://www.mk.co.kr/news/economy/12103858"
         },
         {
           "source_type": "경제방송",
           "source_name": "이데일리TV",
           "speaker_name": "",
-          "content": "삼성전자를 포함한 주요 대형주 전반의 2분기 실적 시즌 대응 전략이 방송에서 다뤄졌다.",
-          "url": "https://www.youtube.com/watch?v=fs0BjKyVRn4"
+          "content": "SK하이닉스를 포함한 반도체 대형주 중심의 ETF 및 종목 투자 전략이 집중 논의됐다.",
+          "url": "https://www.youtube.com/watch?v=oAYiiwuJMbw"
+        },
+        {
+          "source_type": "뉴스",
+          "source_name": "아시아경제",
+          "speaker_name": "",
+          "content": "전일 뉴욕증시에서 반도체주 강세에 힘입어 나스닥이 1.3% 상승했다.",
+          "url": "https://view.asiae.co.kr/article/2026072207100567481"
+        },
+        {
+          "source_type": "뉴스",
+          "source_name": "매일경제",
+          "speaker_name": "",
+          "content": "7월 1~20일 반도체 수출이 전년 대비 180% 이상 증가하며 월간 최대 수출 실적을 견인했다.",
+          "url": "https://www.mk.co.kr/news/economy/12103596"
         }
       ],
       "channel_counts": {
-        "뉴스": 5,
-        "경제방송": 15,
-        "유튜브": 19
+        "뉴스": 3,
+        "경제방송": 7,
+        "유튜브": 15
       },
-      "total_count": 39,
-      "weighted_score": 70.27,
+      "total_count": 25,
+      "weighted_score": 44.78,
       "overlap_count": 2,
       "reasons": [],
-      "price": 244000,
-      "change_pct": -4.31,
+      "price": 1836000,
+      "change_pct": 4.08,
       "price_label": "전일종가",
       "panelist_quotes": [
         {
-          "speaker_name": "이권희 대표 위즈웨이브",
-          "source_name": "815머니톡",
-          "fact": "최근 주식 시장에서 삼성전자는 반등 시도 후 다시 급락하는 모습을 보였다.",
-          "quote": "오늘 어쨌건 하이닉스나 삼성전자 좀 플러스 반전하다가 다시 급락을 해 버리면서 급락장으로 가버렸어요. 잘 버티다가.",
+          "speaker_name": "박진희 유안타증권 골드센터 강남지점 부장",
+          "source_name": "김작가TV",
+          "fact": "BNK에서 SK하이닉스 목표주가를 185만원으로 하향 조정했다.",
+          "quote": "BNK에서도 하이닉스 목표가 한번 내렸죠. 185만원.",
           "sentiment": "부정",
           "confidence": "높음",
-          "source_url": "https://www.youtube.com/watch?v=Ruihq-vmZH4&t=00:20"
+          "source_url": "https://www.youtube.com/watch?v=ds73elcIe1w&t=21:28"
         },
         {
-          "speaker_name": "이권희 대표 위즈웨이브",
-          "source_name": "815머니톡",
-          "fact": "삼성전자는 많이 빠졌지만, 반도체 업황 우려보다는 수급 문제로 인한 것으로 보인다.",
-          "quote": "SK하이닉스, 삼성전자: 반도체 우려 보다는 수급 문제.",
-          "sentiment": "중립",
-          "confidence": "높음",
-          "source_url": "https://www.youtube.com/watch?v=Ruihq-vmZH4&t=07:48"
-        },
-        {
-          "speaker_name": "이권희 대표 위즈웨이브",
-          "source_name": "815머니톡",
-          "fact": "현재 '좋다고 하는 종목들' 중 하나로, 주가가 40~50% 빠진 상태이다.",
-          "quote": "종목은 지금 뭐 다 작살나가지고 예, 여기 뭐 좋다고 하는 종목들이 다 지금 대부분 한 4-50%씩 빠졌어요.",
-          "sentiment": "중립",
-          "confidence": "높음",
-          "source_url": "https://www.youtube.com/watch?v=Ruihq-vmZH4&t=21:13"
-        },
-        {
-          "speaker_name": "소현철 박사",
-          "source_name": "김작가TV",
-          "fact": "삼성전자는 현재 선행 PER 4.8배로 2000년 이후 최저치이며, 파운드리 사업의 적자 폭이 축소되고 테슬라, 애플 등과의 협력 기회가 있어 가장 편안하고 장기적으로 한미 제조 동맹의 큰 수혜주가 될 것이다.",
-          "quote": "만약에 가장 좀 편안한 주식은 지금은 반도체 중에 삼성전자가 제일 편안해요. 그나마도. ... 결국 한미 제조 동맹의 가장 큰 수혜 중에 하나가 저는 장기적으로는 삼성전자고",
-          "sentiment": "긍정",
-          "confidence": "높음",
-          "source_url": "https://www.youtube.com/watch?v=7wGDjAWu40g&t=19:48"
-        },
-        {
-          "speaker_name": "소현철 박사 (상지대학교 국가안보학과 외래교수)",
-          "source_name": "김작가TV",
-          "fact": "미국 투자자들이 한국 반도체 주식의 높은 PER 때문에 차익 실현을 하고 있으며, 3분기 D램 평균 가격은 2분기 대비 13%에서 18% 상승할 것으로 전망됩니다.",
-          "quote": "삼성전자 SK하이닉스 싼 거 다 알고, 그 다음에 올해 연말까지 반도체 업황 나쁘지 않은 것도 인정. 근데 한국 주식이 비중이 너무 많다.",
-          "sentiment": "중립",
-          "confidence": "높음",
-          "source_url": "https://www.youtube.com/watch?v=o3U04bZA_zg&t=07:11"
-        },
-        {
-          "speaker_name": "김주혜 뉴스 앵커",
+          "speaker_name": "권소현 이데일리 마켓in센터장",
           "source_name": "이데일리TV",
-          "fact": "삼성전자는 장중 하락 전환하여 4%대 약세를 기록하고 있습니다.",
-          "quote": "삼성전자가 4%대... 약세 그리고 있습니다.",
+          "fact": "삼성전자와 SK하이닉스 같은 개별 종목의 하루 등락률을 두 배로 추종하도록 설계된 단일 종목 레버리지 ETF가 출시되었습니다.",
+          "quote": "삼성전자하고 SK하이닉스 같은 개별 종목 하나에 하루 등락률을 뭐 두 배로 추종하도록 설계된 상장지수펀드인데요.",
+          "sentiment": "중립",
+          "confidence": "높음",
+          "source_url": "https://www.youtube.com/watch?v=oAYiiwuJMbw&t=00:36"
+        },
+        {
+          "speaker_name": "권소현 이데일리 마켓in센터장",
+          "source_name": "이데일리TV",
+          "fact": "단일 종목 레버리지 ETF 출시 직후 삼성전자와 SK하이닉스 주가가 오르던 시기였고, 이에 개인 투자자 자금이 빠르게 유입되었습니다.",
+          "quote": "안 그래도 삼성전자 하이닉스 굉장히 이제 오르던 시기였고...",
+          "sentiment": "중립",
+          "confidence": "높음",
+          "source_url": "https://www.youtube.com/watch?v=oAYiiwuJMbw&t=01:56"
+        },
+        {
+          "speaker_name": "권소현 이데일리 마켓in센터장",
+          "source_name": "이데일리TV",
+          "fact": "7월 8일 SK하이닉스 본주는 정규장에서 8% 가까이 하락했으나, 해당 종목을 두 배 추종하는 ACE SK하이닉스 레버리지 ETF는 오히려 30% 급등 마감하여 시장 왜곡 현상이 발생했습니다.",
+          "quote": "SK하이닉스 본주는 정규장에서 8% 가까이 하락을 했거든요. 근데 이 종목을 두 배로 추종해야 되는 에이스 SK하이닉스 레버리지 ETF는 오히려 30% 급등한 가격에 장을 마감한 거예요.",
           "sentiment": "부정",
           "confidence": "높음",
-          "source_url": "https://www.youtube.com/watch?v=2RFgrybYSog&t=02:03"
+          "source_url": "https://www.youtube.com/watch?v=oAYiiwuJMbw&t=04:00"
         },
         {
-          "speaker_name": "윤여삼 메리츠증권 연구위원",
+          "speaker_name": "권소현 이데일리 마켓in센터장",
           "source_name": "이데일리TV",
-          "fact": "반도체 업황의 펀더멘털은 바뀌지 않았고 올해 600조 원, 내년 900조 원의 이익을 거둘 것으로 예상되지만, 국내 증시 시가총액의 60%를 차지하는 쏠림 현상으로 인한 변동성 때문에 최근 조정 국면에서 주가가 하락했습니다.",
-          "quote": "저희는 올해 3전 닉스의 가장 결정적인 하는 총재도 사실은 심지어는 그 얘기를 했습니다. 여러분들 주가를 보지 마시고요 반도체 가격을 보셔야 됩니다. 근데 반도체 현물가 같은 경우에는 최근에 뭐 장기 계약의 협상이 조금 어 부정적으로 이어진 것 같습니다 뭐 이런 거에 대한 자범이 있지만 현물 가격은 현재도 상승 중이고요.",
+          "fact": "6월 22일부터 7월 20일까지 SK하이닉스 본주는 39.57% 하락했지만, KODEX SK하이닉스 단일종목레버리지 ETF는 69.89% 하락하여 본주보다 훨씬 더 큰 손실을 기록했습니다.",
+          "quote": "SK하이닉스 본주는 291만9000원에서 176만4000원으로 -39.57% 하락했습니다. KODEX SK하이닉스 단일종목레버리지는 4만4000원에서 1만3250원으로 -69.89% 하락했습니다.",
+          "sentiment": "부정",
+          "confidence": "높음",
+          "source_url": "https://www.youtube.com/watch?v=oAYiiwuJMbw&t=05:57"
+        },
+        {
+          "speaker_name": "이권희 대표 (위즈웨이브)",
+          "source_name": "815머니톡",
+          "fact": "SK하이닉스는 어제 -1.81% 하락 마감했으나, 외국인과 기관이 매수하는 모습을 보였습니다.",
+          "quote": "- SKHY -1.81%",
           "sentiment": "중립",
           "confidence": "높음",
-          "source_url": "https://www.youtube.com/watch?v=fs0BjKyVRn4&t=06:58"
+          "source_url": "https://www.youtube.com/watch?v=jgStWqWKZgA&t=04:56"
+        },
+        {
+          "speaker_name": "이인철 소장 (참좋은경제연구소)",
+          "source_name": "KBS 1라디오",
+          "fact": "SK hynix DR rose over 4% during the day but eventually fell 1.86%.",
+          "quote": "SK 하이닉스 DR은 이 장중에 4% 넘게 오르다가 결국 약세로 돌아서습니다. 1.86% 하락했고요.",
+          "sentiment": "Negative",
+          "confidence": "High",
+          "source_url": "https://www.youtube.com/watch?v=G52VOCQkoy8&t=05:39"
+        },
+        {
+          "speaker_name": "이인철 소장 (참좋은경제연구소)",
+          "source_name": "KBS 1라디오",
+          "fact": "SK hynix fell about 1% to 1,740,000 KRW.",
+          "quote": "SK 하이닉스는 아 174만원대 1% 가량 하락하고 있고요.",
+          "sentiment": "Negative",
+          "confidence": "High",
+          "source_url": "https://www.youtube.com/watch?v=G52VOCQkoy8&t=06:10"
+        },
+        {
+          "speaker_name": "이인철 소장 (참좋은경제연구소)",
+          "source_name": "KBS 1라디오",
+          "fact": "The main reason for the market decline is the sharp fall in semiconductor stocks, including Samsung Electronics and SK hynix, amid concerns about AI investment, peak semiconductor prices, Middle East geopolitical risks, and rising oil prices.",
+          "quote": "가장 큰 이유는 이제 삼성전자 SK 하이닉스 반도체주의 급락인데요.",
+          "sentiment": "Negative",
+          "confidence": "High",
+          "source_url": "https://www.youtube.com/watch?v=G52VOCQkoy8&t=07:33"
         }
       ]
     }
@@ -277,145 +263,187 @@
       "name": "카카오",
       "code": "035720",
       "signal": "중립",
-      "summary": "전일 종가 35,050원으로 2.37% 하락 마감했다. 시장 전반의 변동성 확대 국면에서 특별한 독자적 모멘텀 없이 시장 약세에 동조하는 흐름이 지속되고 있다.",
-      "catalyst": "배민 커머스 사업부문의 B마트 성장 전략과 연계해 카카오 커머스 출신 인사의 시장 영향력이 간접 언급됐다. 부동산 신고 채널 등 공공 인프라에서의 카카오 플랫폼 활용이 지속되며 생활 밀착형 서비스 영역에서의 존재감이 유지되고 있다.",
-      "risk": "시장 전반의 변동성 급등(VKOSPI 사상 최고치) 국면에서 플랫폼 대형주에 대한 매도세가 지속될 가능성이 있다. 특별한 실적 개선 촉매나 신규 사업 모멘텀이 부재한 상황에서 주가 하락 흐름이 이어질 수 있다.",
+      "summary": "전일 종가 35,300원(+0.71%)으로 소폭 상승했으나 카카오뱅크 노조의 7월 31일 전일 파업 결정이 부정적 이슈로 부각됐다. 반면 UAE NAFIS 리더십 프로그램 참가자들의 카카오뱅크 방문 등 해외 디지털금융 혁신 사례로 주목받는 측면도 공존한다. 관심 종목 후보 1위로 가장 높은 가중점수를 기록했다.",
+      "catalyst": "UAE 총리실 관할 NAFIS 리더십 프로그램 참가자들이 한국 디지털금융 혁신 사례 탐방 목적으로 카카오뱅크를 방문하며 글로벌 브랜드 인지도가 부각됐다. AI 서비스 확장 및 플랫폼 사업 다각화 기대감이 유튜브·경제방송 채널에서 지속적으로 언급되고 있다.",
+      "risk": "카카오뱅크 노동조합이 임금 교섭 결렬로 7월 31일 전면 파업을 결의해 단기 운영 리스크가 발생했다. 파업에 따른 서비스 차질 우려가 투자심리에 부정적으로 작용할 수 있다.",
       "channel_mentions": [
         {
           "source_type": "뉴스",
-          "source_name": "아시아경제",
+          "source_name": "매일경제",
           "speaker_name": "",
-          "content": "카카오커머스 대표 출신 이효진 배민 커머스사업부문장이 B마트를 매일 장보는 플랫폼으로 키우겠다는 전략을 밝혔다.",
-          "url": "https://view.asiae.co.kr/article/2026071317492155304"
+          "content": "카카오뱅크 노동조합이 임금 교섭 결렬에 따라 오는 31일 하루 동안 전면 파업에 나선다.",
+          "url": "https://www.mk.co.kr/news/economy/12103562"
         },
         {
           "source_type": "뉴스",
-          "source_name": "아시아경제",
+          "source_name": "매일경제",
           "speaker_name": "",
-          "content": "경기도 부동산 교란 행위 신고에 카카오톡 전용 채널이 활용되고 있다고 보도됐다.",
-          "url": "https://view.asiae.co.kr/article/2026072107193052356"
+          "content": "UAE NAFIS 리더십 프로그램 참가자들이 한국 디지털금융 혁신 사례를 살펴보기 위해 카카오뱅크를 방문했다.",
+          "url": "https://www.mk.co.kr/news/economy/12103235"
         },
         {
           "source_type": "경제방송",
           "source_name": "이데일리TV",
           "speaker_name": "",
-          "content": "카카오가 2분기 실적 시즌 대응 전략 논의 맥락에서 주요 대형주 리스트에 포함돼 언급됐다.",
-          "url": "https://www.youtube.com/watch?v=fs0BjKyVRn4"
+          "content": "카카오가 주요 관심 종목으로 ETF 및 개별 종목 투자 전략 논의에서 언급됐다.",
+          "url": "https://www.youtube.com/watch?v=oAYiiwuJMbw"
         },
         {
           "source_type": "유튜브",
-          "source_name": "하와이 대저택",
+          "source_name": "경제 원탑",
           "speaker_name": "",
-          "content": "카카오톡 선물하기 링크와 함께 전쟁·코스피 관련 재테크 콘텐츠에서 카카오가 간접 언급됐다.",
-          "url": "https://www.youtube.com/watch?v=E4ghYnfJ7AI"
+          "content": "카카오 채널 및 관련 투자 정보가 언급되며 관심 종목으로 다뤄졌다.",
+          "url": "https://www.youtube.com/watch?v=z8sg2opBTbw"
         }
       ],
       "channel_counts": {
-        "뉴스": 2,
+        "뉴스": 3,
         "경제방송": 1,
-        "유튜브": 3
+        "유튜브": 2
       },
       "total_count": 6,
-      "weighted_score": 9.43,
+      "weighted_score": 8.8,
       "overlap_count": 2,
       "reasons": [],
-      "price": 35050,
-      "change_pct": -2.37,
+      "price": 35300,
+      "change_pct": 0.71,
       "price_label": "전일종가",
       "panelist_quotes": []
     },
     {
       "rank": 2,
-      "name": "삼성SDI",
-      "code": "006400",
-      "signal": "긍정",
-      "summary": "전일 종가 401,000원으로 7.71% 급락했으나, 52주 신고가 기업 분석 대상으로 선정되며 ESS 채택 확대라는 구조적 성장 축이 재조명됐다. ESS·BESS 시장 확대와 태양광-BESS 시대 개막 수혜주로서 배터리 대장주 지위가 부각되고 있다.",
-      "catalyst": "태양광-BESS 시대가 본격화되면서 삼성SDI의 ESS 사업 채택 확대가 핵심 성장 동력으로 평가받고 있다. 체슬리TV에서 52주 신고가 기업 분석 대상으로 선정되며 비은행 이익 확대와 ESS 채택을 두 축으로 한 성장 스토리가 제시됐다.",
-      "risk": "전일 7.71%의 큰 폭 하락은 시장 전반의 변동성 급등과 맞물려 단기 추가 하락 가능성을 배제하기 어렵다. 중동 전쟁 리스크에 따른 원자재 가격 상승이 배터리 소재 원가에 부담을 줄 수 있다.",
+      "name": "현대차",
+      "code": "005380",
+      "signal": "중립",
+      "summary": "전일 종가 399,000원(0.00%)으로 보합 마감했다. 이데일리TV와 유튜브 채널에서 40만원 재돌파 가능성과 로봇(보스턴다이내믹스) 사업화 기대감을 중심으로 집중 논의됐다. 목표주가 하향 리포트가 나온 점은 단기 부담 요인이다.",
+      "catalyst": "피지컬 AI 및 보스턴다이내믹스 로봇 상용화 속도가 시장에서 중장기 성장 동력으로 부각되고 있다. 유진투자증권 이재일 전략산업분석팀장이 현대차·기아 하반기 투자전략에서 로봇 사업을 실적보다 중요한 모멘텀으로 제시했다.",
+      "risk": "815머니톡에서 현대차 목표주가 하향 리포트가 언급돼 단기 눈높이 조정 우려가 있다. 글로벌 전기차 수요 둔화 및 중동 정세 불안에 따른 원자재 비용 상승도 수익성 리스크로 작용할 수 있다.",
       "channel_mentions": [
         {
+          "source_type": "경제방송",
+          "source_name": "이데일리TV",
+          "speaker_name": "이재일 유진투자증권 전략산업분석팀장",
+          "content": "현대차 40만원 재돌파 가능성과 실적보다 중요한 로봇 사업 모멘텀을 중심으로 현대차·기아 하반기 투자전략을 논의했다.",
+          "url": "https://www.youtube.com/watch?v=Fh2K3cQnnQE"
+        },
+        {
+          "source_type": "경제방송",
+          "source_name": "TomatoTV",
+          "speaker_name": "",
+          "content": "피지컬 AI와 현대차 그룹 로봇 상용화 속도가 투자 핵심 포인트로 제시됐다.",
+          "url": "https://www.youtube.com/watch?v=eF9OKsExj6s"
+        },
+        {
           "source_type": "유튜브",
-          "source_name": "체슬리TV",
+          "source_name": "815머니톡",
           "speaker_name": "",
-          "content": "52주 신고가 기업 분석 대상으로 삼성SDI를 선정해 ESS 채택 확대를 핵심 성장 축으로 분석했다.",
-          "url": "https://www.youtube.com/watch?v=vW3PdTJIjQo"
+          "content": "현대차 목표주가 하향 배경과 리포트에서 주목해야 할 핵심 포인트가 논의됐다.",
+          "url": "https://www.youtube.com/watch?v=jgStWqWKZgA"
         },
         {
-          "source_type": "경제방송",
-          "source_name": "이데일리TV",
-          "speaker_name": "",
-          "content": "2분기 실적 시즌 대응 전략 맥락에서 삼성SDI가 배터리 대형주로 언급됐다.",
-          "url": "https://www.youtube.com/watch?v=fs0BjKyVRn4"
-        },
-        {
-          "source_type": "경제방송",
-          "source_name": "이데일리TV",
-          "speaker_name": "",
-          "content": "태양광-BESS 시대 배터리·전력인프라 대장주 논의에서 삼성SDI가 핵심 종목으로 거론됐다.",
-          "url": "https://www.youtube.com/watch?v=P9apidjcb_Y"
+          "source_type": "유튜브",
+          "source_name": "신사임당",
+          "speaker_name": "김대준 대표",
+          "content": "현대차가 난리난 진짜 이유와 앞으로의 방향성에 대해 집중 분석했다.",
+          "url": "https://www.youtube.com/watch?v=68tmBH-Q_Ag"
         }
       ],
       "channel_counts": {
-        "경제방송": 2,
-        "유튜브": 1
+        "경제방송": 3,
+        "유튜브": 2
       },
-      "total_count": 3,
-      "weighted_score": 5.72,
+      "total_count": 5,
+      "weighted_score": 7.93,
       "overlap_count": 2,
       "reasons": [],
-      "price": 401000,
-      "change_pct": -7.71,
+      "price": 399000,
+      "change_pct": 0.0,
       "price_label": "전일종가",
       "panelist_quotes": [
         {
-          "speaker_name": "이권희 대표 위즈웨이브",
+          "speaker_name": "이권희 대표 (위즈웨이브)",
           "source_name": "815머니톡",
-          "fact": "현재 '좋다고 하는 종목들' 중 하나로, 주가가 40~50% 빠진 상태이다.",
-          "quote": "종목은 지금 뭐 다 작살나가지고 예, 여기 뭐 좋다고 하는 종목들이 다 지금 대부분 한 4-50%씩 빠졌어요.",
+          "fact": "어제 기관 투자자들이 현대차를 매수했고, KB증권은 현대차의 목표주가를 90만원으로 하향 조정했지만 내용은 변한 것이 없으며, 터키 공장의 전기차 라인 공사로 인한 생산 차질은 일시적이라고 평가했습니다.",
+          "quote": "현대차 목표주가를 원래 130만 원으로까지 제시를 했던 가장 공격적인 증권사였죠. 타협을 했습니다. 세상과. 목표주가 90만 원으로 하향했습니다. 예. 내용은 바뀐 건 없고요. 2분기의 영업이익이 조금 부진할 거다. 왜냐하면 터키 공장이 지금 생산 중단이 일부 됐었대요. 터키 공장에 전기차 라인 공사에 따른 생산 중단. 연간 영업이익 전망치도 2.1% 하향했는데 화재 및 공사 등 생산 차질은 일시적이다 이렇게 보고 있습니다.",
           "sentiment": "중립",
           "confidence": "높음",
-          "source_url": "https://www.youtube.com/watch?v=Ruihq-vmZH4&t=21:13"
-        },
-        {
-          "speaker_name": "소현철 박사",
-          "source_name": "김작가TV",
-          "fact": "삼성SDI는 전고체 배터리 상용화를 내년 하반기로 보고 있으며, 화재 위험이 적고 주행 거리가 1000km까지 늘어날 수 있다는 장점이 있다. 재무 구조가 탄탄하고 삼성디스플레이 지분 매각을 통해 신사업 투자 자금을 확보할 수 있어 2차전지 기업 중 가장 긍정적으로 보고 있다.",
-          "quote": "전고체 배터리는 상용화가 내년이고요. 내년 하반기 정도 보고 있고. 이 전고체가 되게 되면 기본적으로 전의 액에서 전해질로 되면서 화재가 거의 안 납니다. 그리고 출력이 높아져서 한 번 충전하면은 지금 한 400에서 500km인데 이게 1000km까지 갈 수가 있고요. ... 삼성SDI를 가장 좀 좋게 보고 있습니다.",
-          "sentiment": "긍정",
-          "confidence": "높음",
-          "source_url": "https://www.youtube.com/watch?v=7wGDjAWu40g&t=25:45"
+          "source_url": "https://www.youtube.com/watch?v=jgStWqWKZgA&t=11:07"
         }
       ]
     },
     {
       "rank": 3,
-      "name": "KB금융",
-      "code": "105560",
+      "name": "삼성바이오로직스",
+      "code": "207940",
       "signal": "긍정",
-      "summary": "전일 종가 168,800원으로 6.79% 하락했으나, 체슬리TV에서 52주 신고가 기업 분석 대상으로 선정되며 비은행 이익 확대가 핵심 성장 동력으로 재조명됐다. 금융지주 CEO 3연임 제한 규제 논의가 지배구조 변화 변수로 부상하고 있다.",
-      "catalyst": "비은행 부문 이익 확대를 두 축으로 한 성장 스토리가 52주 신고가 분석 리포트에서 긍정적으로 평가됐다. 은행대리업 시범 사업 개시와 핀테크·헬스케어 협업 확대 등 비이자 수익 다각화 노력이 장기 성장 기반을 강화하고 있다.",
-      "risk": "금융당국이 이번 주 내 금융지주 CEO 3연임 법적 금지를 포함한 지배구조 개편안 발표를 예고하고 있어 단기 불확실성이 존재한다. 한국은행 기준금리 인상 사이클이 지속될 경우 가계대출 부실화 우려가 중기 리스크로 작용할 수 있다.",
+      "summary": "전일 종가 1,395,000원(+3.72%)으로 강한 상승세를 보였다. 국내 최대 규모인 2.7조원을 투자해 비만치료제 기업 인수를 추진한다는 소식이 시장의 핵심 이슈로 부각됐다. KBS 1라디오·이데일리TV·815머니톡 등 다수 채널에서 집중 조명받고 있다.",
+      "catalyst": "2.7조원 규모의 비만치료제 기업 인수 추진 소식이 바이오 CMO를 넘어 신약 사업으로의 사업 다각화 기대감을 높이고 있다. 비만치료제 건강보험 적용 논쟁과 한국판 비만약 가능성이 맞물려 섹터 전반의 관심도 상승으로 이어지고 있다.",
+      "risk": "대규모 인수에 따른 재무 부담과 비만치료제 시장에서의 노보노디스크·일라이릴리 등 글로벌 경쟁사 대비 후발 주자 리스크가 있다. M&A 성사 여부 및 통합 시너지 실현까지 상당한 시일이 소요될 수 있다.",
       "channel_mentions": [
         {
-          "source_type": "유튜브",
-          "source_name": "체슬리TV",
+          "source_type": "경제방송",
+          "source_name": "KBS 1라디오",
           "speaker_name": "",
-          "content": "52주 신고가 기업 분석에서 KB금융을 비은행 이익 확대를 핵심 성장 축으로 한 주목 종목으로 선정했다.",
-          "url": "https://www.youtube.com/watch?v=vW3PdTJIjQo"
+          "content": "삼성바이오로직스의 역대급 2.7조원 비만약 기업 인수 파괴력과 비만치료제 건강보험 적용 논쟁, 한국판 비만약 가능성을 집중 분석했다.",
+          "url": "https://www.youtube.com/watch?v=G52VOCQkoy8"
         },
         {
           "source_type": "경제방송",
           "source_name": "이데일리TV",
+          "speaker_name": "한승연 연구원",
+          "content": "삼성바이오로직스의 국내 최대 규모 2.7조원 비만 기업 인수 소식과 그 실익을 집중 분석했다.",
+          "url": "https://www.youtube.com/watch?v=ybDUxNSUS0k"
+        },
+        {
+          "source_type": "유튜브",
+          "source_name": "815머니톡",
           "speaker_name": "",
-          "content": "2분기 실적 시즌 대응 전략 맥락에서 KB금융이 금융 대형주로 언급됐다.",
-          "url": "https://www.youtube.com/watch?v=fs0BjKyVRn4"
+          "content": "삼성바이오로직스의 M&A가 시장에 미치는 영향과 뉴스가 주가에 반영되지 않는 이유를 논의했다.",
+          "url": "https://www.youtube.com/watch?v=KMERIDNXoR4"
+        }
+      ],
+      "channel_counts": {
+        "경제방송": 3,
+        "유튜브": 1
+      },
+      "total_count": 4,
+      "weighted_score": 7.41,
+      "overlap_count": 2,
+      "reasons": [],
+      "price": 1395000,
+      "change_pct": 3.72,
+      "price_label": "전일종가",
+      "panelist_quotes": []
+    },
+    {
+      "rank": 4,
+      "name": "두산에너빌리티",
+      "code": "034020",
+      "signal": "긍정",
+      "summary": "전일 종가 66,800원(+3.09%)으로 강한 상승세를 기록했다. 체코 원전 수주와 반도체 전력 수요 증가에 따른 K원전 인력 4년 만의 증원 소식이 긍정적 모멘텀으로 작용하고 있다. 유튜브 원전 전문가 채널에서 집중 조명됐다.",
+      "catalyst": "정부가 하반기 원전 인력 추가 증원을 추진 중이며, 체코 수주와 반도체 전력 수요 증가로 설계·시공·정비 인력 요청이 예년 대비 2~3배 늘었다. 중동 유가 급등에 따른 원전 경쟁력 재부각과 글로벌 에너지 안보 수요 확대도 긍정적 배경이다.",
+      "risk": "원전 관련 규제 불확실성과 인력 확충 속도가 수주 이행 일정에 영향을 줄 수 있다. 글로벌 금리 상승에 따른 대형 프로젝트 자금 조달 비용 증가도 리스크 요인이다.",
+      "channel_mentions": [
+        {
+          "source_type": "유튜브",
+          "source_name": "웅달 책방",
+          "speaker_name": "",
+          "content": "두산에너빌리티 원전주 투자 관련 내용이 이영훈 이사·이희근 대표 출연 콘텐츠에서 집중 논의됐다.",
+          "url": "https://www.youtube.com/watch?v=SQif6i0sOmw"
         },
         {
           "source_type": "뉴스",
           "source_name": "매일경제",
           "speaker_name": "",
-          "content": "금융당국이 이번 주 내 금융지주 CEO 3연임 금지를 포함한 지배구조 개편안을 발표할 예정이라는 보도가 나왔다.",
-          "url": "https://www.mk.co.kr/news/economy/12102610"
+          "content": "체코 수주·반도체 전력 수요 증가로 K원전 인력이 4년 만에 늘었으며 정부가 하반기 추가 증원을 추진하고 있다.",
+          "url": "https://www.mk.co.kr/news/economy/12103700"
+        },
+        {
+          "source_type": "경제방송",
+          "source_name": "이데일리TV",
+          "speaker_name": "",
+          "content": "두산에너빌리티가 주요 관심 종목으로 ETF 및 섹터 투자 전략 논의에서 언급됐다.",
+          "url": "https://www.youtube.com/watch?v=oAYiiwuJMbw"
         }
       ],
       "channel_counts": {
@@ -423,283 +451,208 @@
         "유튜브": 1
       },
       "total_count": 2,
-      "weighted_score": 4.06,
+      "weighted_score": 3.64,
       "overlap_count": 2,
       "reasons": [],
-      "price": 168800,
-      "change_pct": -6.79,
-      "price_label": "전일종가",
-      "panelist_quotes": []
-    },
-    {
-      "rank": 4,
-      "name": "HD현대",
-      "code": "329180",
-      "signal": "긍정",
-      "summary": "전일 종가 448,500원으로 7.33% 하락했으나, 조선 섹터 하반기 수주 모멘텀 기대감이 지속되며 저가 매수 관점의 주목도가 높아지고 있다. 중동 지정학 리스크에 따른 해상 운송 수요 재편이 조선업 중장기 수혜 논거를 강화하고 있다.",
-      "catalyst": "상반기보다 하반기 실적이 더 좋을 것이라는 조선 섹터 전망과 함께 HD현대중공업·한화오션 등 조선 탑픽으로 반복 언급되고 있다. 산업은행과 신용보증기금이 한화그룹 방산·조선 계열사와 동반성장 금융 프로그램 업무협약을 체결하는 등 금융지원 인프라도 확충되고 있다.",
-      "risk": "전일 7.33%의 큰 폭 하락이 시장 변동성 확대와 맞물려 단기 추가 조정 가능성을 남기고 있다. 중동 전쟁 전면전 확전 시 원자재·강재 가격 급등이 조선업 수익성에 부담 요인으로 작용할 수 있다.",
-      "channel_mentions": [
-        {
-          "source_type": "경제방송",
-          "source_name": "TomatoTV",
-          "speaker_name": "변영인 기업공시연구소 대표",
-          "content": "상반기보다 하반기가 더 좋을 것이라는 조선 섹터 전망과 함께 HD현대중공업·삼성중공업·한화오션을 주목 종목으로 제시했다.",
-          "url": "https://www.youtube.com/watch?v=vNTK9hXbdSA"
-        },
-        {
-          "source_type": "경제방송",
-          "source_name": "이데일리TV",
-          "speaker_name": "",
-          "content": "조선·화장품 탑픽 논의에서 HD현대중공업·한화오션·현대힘스가 주목 종목으로 선정됐다.",
-          "url": "https://www.youtube.com/watch?v=tTlnYrOdOfM"
-        },
-        {
-          "source_type": "경제방송",
-          "source_name": "이데일리TV",
-          "speaker_name": "",
-          "content": "HD현대 지주사 및 HD한국조선해양·HD현대일렉트릭을 포함한 HD현대 그룹 전반이 시황 분석 종목으로 거론됐다.",
-          "url": "https://www.youtube.com/watch?v=fs0BjKyVRn4"
-        },
-        {
-          "source_type": "경제방송",
-          "source_name": "이데일리TV",
-          "speaker_name": "",
-          "content": "원자력발전 관련주·지주사 맥락에서 HD현대가 파이널샷 종목으로 언급됐다.",
-          "url": "https://www.youtube.com/watch?v=2RFgrybYSog"
-        }
-      ],
-      "channel_counts": {
-        "경제방송": 5
-      },
-      "total_count": 5,
-      "weighted_score": 8.22,
-      "overlap_count": 1,
-      "reasons": [],
-      "price": 448500,
-      "change_pct": -7.33,
+      "price": 66800,
+      "change_pct": 3.09,
       "price_label": "전일종가",
       "panelist_quotes": [
         {
-          "speaker_name": "이권희 대표 위즈웨이브",
-          "source_name": "815머니톡",
-          "fact": "현재 '좋다고 하는 종목들' 중 하나로, 주가가 40~50% 빠진 상태이다.",
-          "quote": "종목은 지금 뭐 다 작살나가지고 예, 여기 뭐 좋다고 하는 종목들이 다 지금 대부분 한 4-50%씩 빠졌어요.",
-          "sentiment": "중립",
-          "confidence": "높음",
-          "source_url": "https://www.youtube.com/watch?v=Ruihq-vmZH4&t=21:14"
-        },
-        {
-          "speaker_name": "소현철 박사",
-          "source_name": "김작가TV",
-          "fact": "HD현대중공업은 이지스 구축함을 많이 건조했으며, 한화오션과 함께 군함 수주에 강점을 가지고 있어 미국과의 조선업 협력에서 기회를 얻을 수 있다.",
-          "quote": "두 번째가 HD현대중공업이고요. ... HD 현대중공업은 뭐 이지스 구축함을 많이 만들었고",
-          "sentiment": "긍정",
-          "confidence": "높음",
-          "source_url": "https://www.youtube.com/watch?v=7wGDjAWu40g&t=14:39"
-        },
-        {
-          "speaker_name": "김주혜 뉴스 앵커",
-          "source_name": "이데일리TV",
-          "fact": "HD현대는 2%대에서 4%대까지 낙폭을 확인하고 있습니다.",
-          "quote": "이 밖에 롯데지주 HD현대 2에서 4%까지 낙폭 확인되고 있는 모습입니다.",
+          "speaker_name": "이영훈 영업이사",
+          "source_name": "웅달 책방",
+          "fact": "두산에너빌리티를 포함한 SMR 관련주들은 SMR 수주 및 미래 가치에 대한 기대감으로 주가가 선반영되어 상승했으나, 실제 발주 지연으로 인해 조정을 받고 있습니다.",
+          "quote": "아, 이거는 해석하기 나름인데요. 일단은 반영이 먼저 됐었죠. 원전 수주하게 되면 SMR 수주하게 되면 이 주식들은 뭐 실적도 엄청 좋아질 거고 미래가치도 엄청 좋아질 거고 원전 산업은 2050년까지 뭐 2040년까지 미국에서 원전을 400개를 짓는 데부터 시작해서 그거를 얘네가 수주했을 때 거기에 물건을 납품하기 시작하면 얼마가 될 것인지를 계산기를 막 두드렸으니까 기대감 때문에 많이 올랐는데 전혀 발주가 안 나오니까 이게 뭐지?",
           "sentiment": "부정",
           "confidence": "높음",
-          "source_url": "https://www.youtube.com/watch?v=2RFgrybYSog&t=06:33"
+          "source_url": "https://www.youtube.com/watch?v=SQif6i0sOmw&t=03:06"
+        },
+        {
+          "speaker_name": "이희근 대표",
+          "source_name": "웅달 책방",
+          "fact": "두산에너빌리티는 SMR 전용 공장을 2028년 완공 목표로 건설 중이며, 연간 생산 능력을 20기로 확보하여 SMR 시장 수요 증가에 따른 핵심적인 수혜를 받을 것으로 예상됩니다.",
+          "quote": "두산에너빌리티가 미리 잘 투자를 했거든요. 요거 보게 되면 두산에너빌리티 같은 경우는 SMR 전용 공장을 지금 짓고 있거든요. 미리 투자를 해서 짓고 있고 요게 한 2028년 완공되면 한 연간 20기. 현재 12기인데 뭐 한 절반 가까이 더 늘어나는 거지요. 그래서 이런 걸 보면 캐파를 미리 확보를 해 놨을 때 어떻게 보면 지금 SMR이 단순히 한국보다는 미국도 그렇고 동남아도 그렇고 또 우리나라도 SMR 하나 짓는다 이렇게 얘기를 했기 때문에 수요는 계속 있을 걸로 보입니다.",
+          "sentiment": "긍정",
+          "confidence": "높음",
+          "source_url": "https://www.youtube.com/watch?v=SQif6i0sOmw&t=17:46"
         }
       ]
     },
     {
       "rank": 5,
-      "name": "두산에너빌리티",
-      "code": "034020",
+      "name": "삼성SDI",
+      "code": "006400",
       "signal": "긍정",
-      "summary": "전일 종가 64,800원으로 7.03% 하락했으나, 원자력발전 관련주 및 에너지 인프라 핵심 종목으로 여러 방송에서 지속 언급되고 있다. 전력망 투자 확대와 원자력 발전 재조명 흐름에서 중장기 수혜 기대가 유지된다.",
-      "catalyst": "원전·에너지 인프라 수요 확대 흐름에서 두산에너빌리티가 반복적으로 탑픽 종목으로 거론되고 있다. ESS·재생에너지·전력망 투자 테마 전반에서 중요 연결고리 종목으로 평가받고 있다.",
-      "risk": "전일 7% 이상 급락한 상황에서 시장 변동성이 지속될 경우 단기 추가 하락 압력이 존재한다. 원전 관련 정책 변수와 글로벌 에너지 시장 불확실성이 중기 리스크로 작용할 수 있다.",
+      "summary": "전일 종가 416,500원(+3.87%)으로 관심 종목 중 가장 높은 등락률을 기록했다. 전고체 배터리 선도 기업으로서의 기술적 우위가 TomatoTV 등 경제방송에서 집중 부각됐다. 전기차 수요 회복 기대감과 함께 신재생에너지 핵심 소재주로도 주목받고 있다.",
+      "catalyst": "TomatoTV에서 전고체 배터리 분야 가장 앞선 기업으로 삼성SDI를 지목하며 신재생 핵심주로서의 투자 가치를 강조했다. 현대차 그룹의 로봇·전기차 사업 확대와 맞물린 배터리 공급망 수혜 기대감도 상승 모멘텀으로 작용하고 있다.",
+      "risk": "전기차 시장의 글로벌 수요 불확실성과 CATL·BYD 등 중국 경쟁사의 공격적 확장이 지속적인 리스크다. 원자재 가격 변동성과 전고체 배터리 상용화 시점 지연 가능성도 주의 요인이다.",
       "channel_mentions": [
-        {
-          "source_type": "경제방송",
-          "source_name": "이데일리TV",
-          "speaker_name": "",
-          "content": "원자력발전 관련주 맥락에서 두산에너빌리티가 파이널샷 종목으로 선정됐다.",
-          "url": "https://www.youtube.com/watch?v=2RFgrybYSog"
-        },
-        {
-          "source_type": "경제방송",
-          "source_name": "이데일리TV",
-          "speaker_name": "",
-          "content": "ESS·BESS·전력망 인프라 대장주 논의에서 두산에너빌리티가 핵심 종목으로 거론됐다.",
-          "url": "https://www.youtube.com/watch?v=P9apidjcb_Y"
-        },
-        {
-          "source_type": "경제방송",
-          "source_name": "이데일리TV",
-          "speaker_name": "",
-          "content": "반도체·방산·조선 등 주요 섹터 시황 분석에서 두산에너빌리티가 에너지 인프라 대형주로 언급됐다.",
-          "url": "https://www.youtube.com/watch?v=fs0BjKyVRn4"
-        },
         {
           "source_type": "경제방송",
           "source_name": "TomatoTV",
-          "speaker_name": "김민준",
-          "content": "매수 vs 매도 사이드카 국면에서 두산에너빌리티가 반등 시기 관찰 종목으로 선정됐다.",
-          "url": "https://www.youtube.com/watch?v=5E9MXyiYYhs"
-        }
-      ],
-      "channel_counts": {
-        "경제방송": 4
-      },
-      "total_count": 4,
-      "weighted_score": 6.57,
-      "overlap_count": 1,
-      "reasons": [],
-      "price": 64800,
-      "change_pct": -7.03,
-      "price_label": "전일종가",
-      "panelist_quotes": [
-        {
-          "speaker_name": "이권희 대표 위즈웨이브",
-          "source_name": "815머니톡",
-          "fact": "현재 '좋다고 하는 종목들' 중 하나로, 주가가 40~50% 빠진 상태이다.",
-          "quote": "종목은 지금 뭐 다 작살나가지고 예, 여기 뭐 좋다고 하는 종목들이 다 지금 대부분 한 4-50%씩 빠졌어요.",
-          "sentiment": "중립",
-          "confidence": "높음",
-          "source_url": "https://www.youtube.com/watch?v=Ruihq-vmZH4&t=21:20"
-        },
-        {
-          "speaker_name": "김주혜 뉴스 앵커",
-          "source_name": "이데일리TV",
-          "fact": "두산에너빌리티는 7%대 약세를 그리며 64,200원대까지 내려와 있습니다.",
-          "quote": "두산에너빌리티도 7%대 약세 그리면서 6만4,000원대까지 내려와 있습니다.",
-          "sentiment": "부정",
-          "confidence": "높음",
-          "source_url": "https://www.youtube.com/watch?v=2RFgrybYSog&t=04:27"
-        }
-      ]
-    },
-    {
-      "rank": 6,
-      "name": "한화에어로스페이스",
-      "code": "012450",
-      "signal": "긍정",
-      "summary": "전일 종가 875,000원으로 7.21% 급락했으나, 산업은행·신용보증기금과의 방산·조선 동반성장 금융 프로그램 업무협약 체결로 정책금융 지원 기반이 강화됐다. 중동 지정학 리스크 고조와 글로벌 방산 수요 증가 흐름이 중장기 성장 모멘텀을 뒷받침하고 있다.",
-      "catalyst": "산업은행·신용보증기금과의 방산·조선 동반성장 금융 프로그램 협약으로 자금조달 비용 절감 및 수주 경쟁력 강화가 기대된다. 미국·이란 전면전 위기 고조로 글로벌 방산 예산 확대 논의가 가속화되며 수혜 가능성이 높아지고 있다.",
-      "risk": "전일 7.21%의 큰 폭 하락 이후 단기 변동성 리스크가 잔존한다. 방산 수출 계약의 지연 또는 취소 가능성과 환율 변동에 따른 수익성 변동이 중기 리스크 요인이다.",
-      "channel_mentions": [
-        {
-          "source_type": "뉴스",
-          "source_name": "매일경제",
-          "speaker_name": "",
-          "content": "산업은행·신용보증기금과 한화에어로스페이스 등 방산·조선 4개 계열사가 동반성장 금융 프로그램 업무협약을 체결했다.",
-          "url": "https://www.mk.co.kr/news/economy/12102611"
+          "speaker_name": "이재필",
+          "content": "삼성SDI를 전고체 배터리 선도주이자 신재생에너지 핵심주로 압축 투자 대상으로 제시했다.",
+          "url": "https://www.youtube.com/watch?v=eF9OKsExj6s"
         },
         {
           "source_type": "경제방송",
           "source_name": "이데일리TV",
           "speaker_name": "",
-          "content": "방산·반도체·조선 섹터 시황 분석에서 한화에어로스페이스가 방산 대형주로 언급됐다.",
-          "url": "https://www.youtube.com/watch?v=fs0BjKyVRn4"
+          "content": "삼성SDI가 전기차·배터리 섹터 관심 종목으로 투자 전략 논의에서 반복 언급됐다.",
+          "url": "https://www.youtube.com/watch?v=oAYiiwuJMbw"
+        },
+        {
+          "source_type": "경제방송",
+          "source_name": "이데일리TV",
+          "speaker_name": "이재일 유진투자증권 전략산업분석팀장",
+          "content": "현대차·기아 하반기 전략 논의에서 LG에너지솔루션·삼성SDI 등 배터리 공급망이 함께 언급됐다.",
+          "url": "https://www.youtube.com/watch?v=Fh2K3cQnnQE"
         }
       ],
       "channel_counts": {
-        "뉴스": 1,
-        "경제방송": 1
+        "경제방송": 3
       },
-      "total_count": 2,
-      "weighted_score": 3.9,
+      "total_count": 3,
+      "weighted_score": 4.91,
       "overlap_count": 1,
       "reasons": [],
-      "price": 875000,
-      "change_pct": -7.21,
+      "price": 416500,
+      "change_pct": 3.87,
+      "price_label": "전일종가",
+      "panelist_quotes": []
+    },
+    {
+      "rank": 6,
+      "name": "NAVER",
+      "code": "035420",
+      "signal": "긍정",
+      "summary": "전일 종가 193,000원(+3.82%)으로 강한 상승세를 기록했다. AI 서비스 상용화와 다각화된 포트폴리오를 보유한 플랫폼 기업으로서의 투자 매력이 TomatoTV에서 부각됐다. 광고 수익 회복과 AI 커머스 확대가 실적 개선 기대감을 높이고 있다.",
+      "catalyst": "TomatoTV 나현진 보넥스트투자자문 대표가 AI 서비스 상용화와 다각화된 포트폴리오를 NAVER의 핵심 투자 포인트로 제시했다. 알파벳 등 글로벌 빅테크의 AI 수익화 성과가 국내 AI 플랫폼 기업 밸류에이션에도 긍정적 영향을 미칠 것으로 기대된다.",
+      "risk": "국내 AI 검색 경쟁 심화와 카카오 등 경쟁 플랫폼의 추격이 시장점유율 유지에 부담이다. 글로벌 빅테크의 AI 서비스 확장이 국내 시장에서도 경쟁 압력을 높일 수 있다.",
+      "channel_mentions": [
+        {
+          "source_type": "경제방송",
+          "source_name": "TomatoTV",
+          "speaker_name": "나현진 보넥스트투자자문 대표",
+          "content": "NAVER의 AI 서비스 상용화와 다각화된 포트폴리오를 핵심 투자 포인트로 제시하며 관심 종목으로 추천했다.",
+          "url": "https://www.youtube.com/watch?v=LiXRKfAdmz4"
+        },
+        {
+          "source_type": "경제방송",
+          "source_name": "이데일리TV",
+          "speaker_name": "",
+          "content": "NAVER가 ETF 및 개별 종목 투자 전략 논의에서 주요 관심 종목으로 언급됐다.",
+          "url": "https://www.youtube.com/watch?v=oAYiiwuJMbw"
+        }
+      ],
+      "channel_counts": {
+        "경제방송": 2
+      },
+      "total_count": 2,
+      "weighted_score": 4.06,
+      "overlap_count": 1,
+      "reasons": [],
+      "price": 193000,
+      "change_pct": 3.82,
       "price_label": "전일종가",
       "panelist_quotes": [
         {
-          "speaker_name": "이권희 대표 위즈웨이브",
-          "source_name": "815머니톡",
-          "fact": "현재 '좋다고 하는 종목들' 중 하나로, 주가가 40~50% 빠진 상태이다.",
-          "quote": "종목은 지금 뭐 다 작살나가지고 예, 여기 뭐 좋다고 하는 종목들이 다 지금 대부분 한 4-50%씩 빠졌어요.",
-          "sentiment": "중립",
+          "speaker_name": "나현진 보넥스트투자자문 대표",
+          "source_name": "TomatoTV",
+          "fact": "NAVER는 주가 하락폭이 일단락되고 있으며, AI 에이전트 및 국가 소버린 AI 정책의 최대 수혜주로 하반기 실적 개선과 커머스 성장세가 두드러질 것으로 기대됩니다.",
+          "quote": "주가의 하락폭은 어느 정도 잠잠해졌습니다. 시장이 하락을 크게 할 때도 네이버는 이제 먼저 내려왔기 때문에 하락폭이 크지 않은 상황이고 이제 좀 안정세를 찾고 있다고 볼 수 있습니다. ... 앞으로 있을 AI 에이전트 그리고 국가 소버린 AI 정책에 가장 수혜를 받을 수 있는 종목으로 꼽아 볼 수 있겠습니다. 하반기에 실적 개선세가 여전히 기대되고 있는 상황이고 어 특히 커머스 관련한 성장세가 눈에 띄게 나타나고 있는 상황입니다.",
+          "sentiment": "긍정",
           "confidence": "높음",
-          "source_url": "https://www.youtube.com/watch?v=Ruihq-vmZH4&t=21:15"
+          "source_url": "https://www.youtube.com/watch?v=LiXRKfAdmz4&t=02:56"
+        },
+        {
+          "speaker_name": "나현진 보넥스트투자자문 대표",
+          "source_name": "TomatoTV",
+          "fact": "NAVER의 매수가는 19만원 이하, 목표가는 전고점 매물대가 모여 있는 중간선인 22만원, 손절가는 17만원으로 제시됩니다. 현재 하방 변동성이 제한되고 가격 상승 여력이 남아있다고 판단됩니다.",
+          "quote": "현재 가격이 19만원 이하 정도 선에서 형성되고 있습니다. 어 19만원 매수가로 잡고 목표가는 어 전고점 매물대가 모여 있는 중간선 22만원 정도로 잡아보겠습니다. 그리고 손절선은 17만원으로 17만원을 깨면 손절을 아무래도 해야 되기 때문에 이 부분까지 하방은 좀 짧게 잡고 상단 22만원 제시해 드리겠습니다.",
+          "sentiment": "긍정",
+          "confidence": "높음",
+          "source_url": "https://www.youtube.com/watch?v=LiXRKfAdmz4&t=08:44"
         }
       ]
     },
     {
       "rank": 7,
-      "name": "LG에너지솔루션",
-      "code": "373220",
-      "signal": "중립",
-      "summary": "전일 종가 317,500원으로 4.94% 하락 마감했다. 태양광-BESS 시대 개막과 ESS 수요 확대 흐름의 수혜 종목으로 거론되고 있으나, 단기적으로는 시장 변동성 확대의 영향권에 있다.",
-      "catalyst": "태양광-BESS 시대의 배터리 대장주로서 ESS·BESS 전력 인프라 확대 흐름에서 수혜가 기대된다. 전력망 투자 확대와 글로벌 에너지 전환 정책 지속이 중장기 성장 동력으로 작용할 수 있다.",
-      "risk": "전기차 업황 불확실성과 배터리 소재 원가 부담이 단기 수익성 개선을 제한할 수 있다. 시장 전반의 변동성 급등 국면에서 대형 성장주로서 매도 압력이 지속될 수 있다.",
+      "name": "SK이노베이션",
+      "code": "096770",
+      "signal": "긍정",
+      "summary": "전일 종가 116,300원(-0.51%)으로 소폭 하락 마감했다. 중동 군사 충돌에 따른 유가 급등 수혜주로 TomatoTV에서 집중 조명됐다. 유가 상승 환경에서 에너지 기업으로서의 수혜 기대감이 투자 관심을 높이고 있다.",
+      "catalyst": "미국-이란 군사 충돌 재격화로 국제유가가 급등하면서 에너지 기업 SK이노베이션의 수혜 기대감이 부각됐다. TomatoTV 김민준 투자클럽에서 유가 상승 수혜주로 SK이노베이션과 GS를 나란히 제시하며 단기 매매 관심 종목으로 언급됐다.",
+      "risk": "미-이란 종전 합의 시 유가가 빠르게 안정될 경우 수혜 모멘텀이 단기에 소멸될 수 있다. 실제로 생산자물가 상승세가 10개월 만에 꺾인 점이 유가 하락 전환 가능성을 시사한다.",
       "channel_mentions": [
         {
           "source_type": "경제방송",
-          "source_name": "이데일리TV",
-          "speaker_name": "",
-          "content": "2분기 실적 시즌 대응 전략 맥락에서 LG에너지솔루션이 배터리 대형주로 언급됐다.",
-          "url": "https://www.youtube.com/watch?v=fs0BjKyVRn4"
+          "source_name": "TomatoTV",
+          "speaker_name": "강종태",
+          "content": "SK이노베이션이 모건스탠리 이슈 및 기술적 반등 가능성과 함께 관심 종목으로 언급됐다.",
+          "url": "https://www.youtube.com/watch?v=phzN31Ncgfw"
         },
         {
           "source_type": "경제방송",
-          "source_name": "이데일리TV",
-          "speaker_name": "",
-          "content": "태양광-BESS 시대 배터리·전력인프라 대장주 논의에서 LG에너지솔루션이 핵심 수혜 종목으로 거론됐다.",
-          "url": "https://www.youtube.com/watch?v=P9apidjcb_Y"
+          "source_name": "TomatoTV",
+          "speaker_name": "김민준",
+          "content": "반도체 반등 분기점과 함께 유가 상승 수혜주로 SK이노베이션과 GS를 주목할 것을 제안했다.",
+          "url": "https://www.youtube.com/watch?v=woelvC0ybqc"
         }
       ],
       "channel_counts": {
         "경제방송": 2
       },
       "total_count": 2,
-      "weighted_score": 3.31,
+      "weighted_score": 4.02,
       "overlap_count": 1,
       "reasons": [],
-      "price": 317500,
-      "change_pct": -4.94,
+      "price": 116300,
+      "change_pct": -0.51,
       "price_label": "전일종가",
       "panelist_quotes": [
         {
-          "speaker_name": "이권희 대표 위즈웨이브",
-          "source_name": "815머니톡",
-          "fact": "현재 '좋다고 하는 종목들' 중 하나로, 주가가 40~50% 빠진 상태이다.",
-          "quote": "종목은 지금 뭐 다 작살나가지고 예, 여기 뭐 좋다고 하는 종목들이 다 지금 대부분 한 4-50%씩 빠졌어요.",
+          "speaker_name": "박진희 유안타증권 골드센터 강남지점 부장",
+          "source_name": "김작가TV",
+          "fact": "SK이노베이션은 윤활유 실적이 매우 좋아 시장이 빠지는 상황에서도 혼자 급등했었다.",
+          "quote": "정유도 최근에 유날류가 너무 좋아가지고 SK이노베이션 시장 빠지는데도 혼자 급등했었잖아요. 실적이 엄청 좋아요 유날류쪽이",
+          "sentiment": "긍정",
+          "confidence": "높음",
+          "source_url": "https://www.youtube.com/watch?v=ds73elcIe1w&t=25:54"
+        },
+        {
+          "speaker_name": "정태근 (미래경제연구소 이사)",
+          "source_name": "TomatoTV",
+          "fact": "SK이노베이션은 2차전지 부문은 아직 적자이지만, 정제마진과 윤활기유 마진 개선이 기대되며, 기관 수급이 지속적으로 유입되는지 확인하며 홀딩하는 전략이 유효함. 매수가 143,000원 이상에서는 돌파 여부를 보고 손실을 줄이는 것을 고려해야 함.",
+          "quote": "SK이노베이션 같은 경우는 2차전지 부분은 아직까지 적자이기 때문에 기대할 부분이 없고요. 지금 이제 정제 마진하고 윤활기유 마진이 이 부분이 좋게 나올 거라고 예상되게 되면서 이제 외국계 증권사에서 국내 이제 증권사였던 2분기 실적에서 긍정이 평가를 하고 있거든요. 그래서 일단 14만원까지 일단 어 대응 가격을 설정해 놓되 기관 수급이 계속 지속적으로 들어온지 고도 같이 확인하시라. 그렇게 말씀드리도록 하겠습니다.",
           "sentiment": "중립",
           "confidence": "높음",
-          "source_url": "https://www.youtube.com/watch?v=Ruihq-vmZH4&t=21:13"
+          "source_url": "https://www.youtube.com/watch?v=phzN31Ncgfw&t=16:16"
         }
       ]
     },
     {
       "rank": 8,
-      "name": "LG화학",
-      "code": "066570",
+      "name": "LG에너지솔루션",
+      "code": "373220",
       "signal": "중립",
-      "summary": "전일 종가 167,200원으로 6.59% 하락했다. ESS·배터리 소재 공급망의 핵심 종목으로 전력 인프라 확대 흐름과 연계돼 관찰되고 있으나, 석유화학 업황 부진과 나프타 가격 상승이 부담 요인으로 작용하고 있다.",
-      "catalyst": "ESS·BESS 확대와 배터리 소재 수요 증가 흐름에서 전구체·양극재 등 소재 공급망 핵심 기업으로서 수혜 가능성이 언급되고 있다. 태양광-BESS 시대 개막에 따른 에너지 소재 수요 구조적 성장이 중장기 성장 동력이 될 수 있다.",
-      "risk": "나프타 가격 상승으로 인한 석유화학 부문 원가 부담이 하반기 실적에 부정적 영향을 줄 수 있다. 고환율과 원자재 가격 동반 상승으로 수익성 압박이 심화될 가능성이 있다.",
+      "summary": "전일 종가 317,000원(-0.16%)으로 보합 수준 마감했다. 이데일리TV에서 전기차·배터리 섹터 관련 논의 시 반복 언급됐으나 독립적인 촉매 이슈는 제한적이다. 현대차 그룹 전동화 전략 및 글로벌 전기차 수요 회복 여부가 중장기 방향성을 결정할 전망이다.",
+      "catalyst": "이데일리TV의 현대차·기아 하반기 투자전략 논의에서 LG에너지솔루션이 핵심 배터리 공급망 종목으로 언급됐다. 전고체 배터리 상용화 및 전기차 신모델 출시 사이클이 중장기 수주 모멘텀으로 작용할 수 있다.",
+      "risk": "전기차 시장의 수요 불확실성이 지속되는 가운데 중국 CATL·BYD의 가격 경쟁이 수익성을 압박하고 있다. 글로벌 금리 상승 환경에서 대규모 설비 투자 부담도 단기 주가 발목을 잡을 수 있다.",
       "channel_mentions": [
         {
           "source_type": "경제방송",
           "source_name": "이데일리TV",
           "speaker_name": "",
-          "content": "2분기 실적 시즌 대응 전략 맥락에서 LG화학이 배터리·소재 대형주로 언급됐다.",
-          "url": "https://www.youtube.com/watch?v=fs0BjKyVRn4"
+          "content": "LG에너지솔루션이 전기차·배터리 섹터 ETF 및 개별 종목 투자 전략에서 주요 종목으로 언급됐다.",
+          "url": "https://www.youtube.com/watch?v=oAYiiwuJMbw"
         },
         {
           "source_type": "경제방송",
           "source_name": "이데일리TV",
-          "speaker_name": "",
-          "content": "태양광-BESS 시대 배터리·전력인프라 논의에서 LG화학이 배터리 소재 핵심 종목으로 거론됐다.",
-          "url": "https://www.youtube.com/watch?v=P9apidjcb_Y"
-        },
-        {
-          "source_type": "뉴스",
-          "source_name": "아시아경제",
-          "speaker_name": "",
-          "content": "나프타 가격 상승이 식품·화학 업계의 하반기 원가 부담 요인으로 지목됐다.",
-          "url": "https://view.asiae.co.kr/article/2026072016351825944"
+          "speaker_name": "이재일 유진투자증권 전략산업분석팀장",
+          "content": "현대차·기아 하반기 투자전략 논의에서 LG에너지솔루션이 배터리 공급망 핵심 종목으로 함께 다뤄졌다.",
+          "url": "https://www.youtube.com/watch?v=Fh2K3cQnnQE"
         }
       ],
       "channel_counts": {
@@ -709,47 +662,47 @@
       "weighted_score": 3.31,
       "overlap_count": 1,
       "reasons": [],
-      "price": 167200,
-      "change_pct": -6.59,
+      "price": 317000,
+      "change_pct": -0.16,
       "price_label": "전일종가",
       "panelist_quotes": []
     }
   ],
-  "ai_strategy": "■ 핵심 시나리오\n중동 지정학 리스크(미·이란 충돌 재격화, 홍해·호르무즈 봉쇄 위협)가 단기 최대 변수로 작용하는 가운데, 이번 주 글로벌 빅테크 실적 발표에서 AI 투자 지속성이 확인될 경우 반도체·AI 수혜주를 중심으로 낙폭 과대 반등이 전개될 수 있다. 전쟁 리스크가 완화되지 않을 경우 고유가·공급망 교란이 지속되며 방산·조선 섹터의 상대적 강세가 유지될 가능성이 높다.\n\n■ 섹터 로테이션\n반도체·AI(낙폭 과대 저가매수 국면) → 방산·조선(지정학 수혜 구조적 강세) → ESS·배터리·전력인프라(에너지 전환 중장기 테마)로의 로테이션 흐름이 감지된다. 금리인상 기조 지속으로 금융주는 단기 지배구조 불확실성에도 비은행 이익 확대 스토리를 가진 KB금융 등 선별적 접근이 유효하다.\n\n■ 오늘의 주목 포인트\n• 이번 주 알파벳·테슬라·인텔 등 빅테크 실적 발표: AI 투자 지속 여부 및 설비투자 가이던스 확인이 반도체 반등 여부의 핵심 분기점\n• 미국·이란 군사 충돌 전개 및 홍해·호르무즈 봉쇄 수준: 유가 방향성과 글로벌 공급망 리스크 강도 결정 변수\n• 금융당국의 금융지주 CEO 3연임 금지 포함 지배구조 개편안 이번 주 내 발표 예고\n• 단일종목 레버리지 ETF 집중 모니터링 및 추가 규제 강화 여부\n\n■ 리스크 시나리오\n• [보통] 중동 전면전 확전 및 호르무즈 봉쇄 현실화 → 에너지·방산 비중 확대, 수출 의존도 높은 반도체·자동차 비중 축소, 현금 비중 일시 확대\n• [낮음] 빅테크 실적 발표에서 AI 투자 축소 시그널 → 반도체·AI 관련주 추가 하락 대비 손절 기준 명확화, ESS·방산 등 비AI 성장 테마로 분산\n• [보통] 레버리지 ETF 추가 규제 강화 현실화 → 삼성전자 등 단일종목 레버리지 ETF 관련 수급 왜곡 해소 과정에서의 변동성 확대 대비, 개별 종목 직접 투자 비중 조정\n\n■ 애널리스트 종합 시각\nTSMC 주가 조정 시 클라우드 성장성과 설비투자 지속성 담보가 반등 조건이라는 분석(유진투자증권 박재환)이 제시됐고, 반도체 지수 20% 급락 후 빅테크 실적이 반등 하단 지지선의 관건이라는 시각이 주류를 이루고 있다. 삼성SDI와 KB금융은 52주 신고가 기업 분석 대상으로 선정되며 중장기 성장 스토리가 재조명됐고, 조선 섹터는 하반기 상반기 대비 실적 개선 기대감이 유효하다는 평가가 나오고 있다.",
+  "ai_strategy": "■ 핵심 시나리오\n반도체 수출 역대 최고와 뉴욕증시 반도체주 반등이 맞물리며 국내 반도체 대형주 중심의 강세 흐름이 유지되고 있다. 동시에 중동 군사 충돌 재격화에 따른 유가 급등이 에너지·인플레이션 리스크를 키우며 금리 상단을 높이는 이중 변수로 작용 중이다. 삼성바이오로직스의 2.7조원 비만치료제 기업 인수 추진은 바이오 섹터의 새로운 성장 내러티브로 단기 주목도를 높이고 있다.\n\n■ 섹터 로테이션\n반도체(삼성전자·SK하이닉스) 중심의 수출 모멘텀이 유지되는 가운데, 유가 급등 환경에서 에너지(SK이노베이션) 및 원전(두산에너빌리티) 섹터로의 관심 분산이 감지된다. 금리 인상 사이클 재가동 우려로 성장주 밸류에이션 부담이 커질 경우 바이오(삼성바이오로직스)·원전 등 실적 가시성이 높은 섹터로 자금 이동이 예상된다. 전기차·배터리(삼성SDI·LG에너지솔루션)는 전고체 상용화 기대와 수요 불확실성 사이에서 종목별 차별화 장세가 이어질 전망이다.\n\n■ 오늘의 주목 포인트\n• 알파벳·아마존 등 글로벌 빅테크 실적 발표 결과와 AI 설비투자 확대 여부 확인\n• 미국-이란 군사 충돌 추가 격화 여부 및 호르무즈·홍해 해협 봉쇄 리스크 모니터링\n• 한국은행 추가 기준금리 인상 시기(8월 vs 10월) 관련 금통위 발언 및 데이터 흐름 점검\n• 삼성바이오로직스 2.7조원 비만치료제 기업 인수 세부 조건 및 시장 반응 확인\n\n■ 리스크 시나리오\n• [보통] 중동 유가 추가 급등 및 금리 상단 재상승 → 에너지 섹터(SK이노베이션·GS) 비중 확대, 금리 민감 성장주 비중 축소, 국채 30년물 금리 4.5% 이상 지속 시 주식 비중 전반 조정 검토\n• [보통] 반도체 수출 전월 대비 감소 지속 및 실적 모멘텀 둔화 → 삼성전자·SK하이닉스 단기 차익실현 후 실적 컨펌 시 재진입, 반도체 소부장으로 분산 접근\n• [낮음] 미-이란 종전 합의에 따른 유가 급락 → 에너지 종목 비중 신속 축소, 항공·소비 섹터 및 반도체 비중 확대로 대응\n• [낮음] 카카오뱅크 파업 장기화 및 금융 플랫폼 규제 강화 → 카카오 포지션 보수적 유지, 파업 장기화 시 단기 매도 후 이슈 해소 후 재진입 검토\n\n■ 애널리스트 종합 시각\n유진투자증권은 현대차·기아 하반기 투자전략에서 실적보다 로봇 사업 모멘텀을 핵심으로 제시했으나 목표주가는 하향 조정했다. TomatoTV 나현진 보넥스트투자자문 대표는 NAVER를 AI 서비스 상용화와 다각화 포트폴리오 측면에서 긍정적으로 평가했으며, 이데일리TV 한승연 연구원은 삼성바이오로직스 비만 기업 인수의 실익 분석에 주목했다. 전반적으로 반도체·바이오 대형주 긍정 기조 속에 유가·금리 변수에 따른 단기 변동성 확대를 경계하는 신중한 시각이 공존하고 있다.",
   "market_data": {
     "kospi": {
-      "value": 6516.27,
-      "change_pct": -4.46,
-      "direction": "down",
+      "value": 6747.95,
+      "change_pct": 3.56,
+      "direction": "up",
       "is_premarket": true
     },
     "kosdaq": {
-      "value": 749.64,
-      "change_pct": -5.33,
-      "direction": "down",
+      "value": 753.34,
+      "change_pct": 0.49,
+      "direction": "up",
       "is_premarket": true
     },
     "nasdaq": {
-      "value": 25508.072265625,
-      "change_pct": -0.05,
-      "direction": "down",
+      "value": 25837.20703125,
+      "change_pct": 1.29,
+      "direction": "up",
       "is_premarket": false
     },
     "sp500": {
-      "value": 7443.27978515625,
-      "change_pct": -0.19,
-      "direction": "down",
+      "value": 7509.2001953125,
+      "change_pct": 0.89,
+      "direction": "up",
       "is_premarket": false
     },
     "dow": {
-      "value": 51839.26171875,
-      "change_pct": -0.59,
-      "direction": "down",
+      "value": 52224.640625,
+      "change_pct": 0.74,
+      "direction": "up",
       "is_premarket": false
     },
     "usd_krw": {
-      "value": 1475.1700439453125,
-      "change_pct": -0.25,
+      "value": 1480.239990234375,
+      "change_pct": -0.48,
       "direction": "down",
       "is_premarket": false
     }
