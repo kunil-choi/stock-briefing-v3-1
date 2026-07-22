@@ -585,11 +585,32 @@ def _match_stock_name(raw_name: str, valid_names: set) -> Optional[str]:
     return None
 
 
+def _merge_panelist_entry(existing: dict, new_insight: str, new_source_url: str) -> None:
+    """MERGE-SPEAKER-1: 같은 발언자가 같은 종목에 대해 여러 영상(또는 여러
+    항목)에 걸쳐 언급된 경우, 화면에는 발언자당 1개 항목만 나오도록 내용을
+    하나로 합친다. 이미 포함된 문장과 겹치는 내용은 다시 붙이지 않는다."""
+    existing_fact = existing.get("fact", "")
+    if new_insight and new_insight not in existing_fact:
+        existing["fact"] = f"{existing_fact} {new_insight}".strip()
+    if not existing.get("source_url") and new_source_url:
+        existing["source_url"] = new_source_url
+
+
 def build_panelist_quotes(gemini_results: dict, valid_names: set,
                           video_source_names: dict = None) -> dict:
     """analyze_target_videos() 결과를 종목별 발언 리스트로 정리한다.
     화자 미특정(speaker 빈 문자열) 또는 내용 없는 언급은 버린다 —
-    "구체적으로 누가 뭐라 했는지"가 핵심이므로 애매한 항목은 섞지 않는다."""
+    "구체적으로 누가 뭐라 했는지"가 핵심이므로 애매한 항목은 섞지 않는다.
+
+    REPHRASE-1 + MERGE-SPEAKER-1: Gemini가 반환하는 "insight"는 이미
+    원문 그대로가 아니라 재구성된 문장이다(gemini_youtube_analyzer.py
+    _PROMPT_VIDEO 참고). "quote"는 더 이상 별도로 렌더링하지 않는다 —
+    html_generator._render_stock_detail()이 quote/fact를 함께 표시하면
+    같은 내용이 굵은 글씨·얇은 글씨로 중복 노출되므로, 여기서 quote를
+    항상 비워 fact(=insight) 한 줄만 나오게 한다. 같은 발언자가 같은
+    종목에 대해 여러 영상에 걸쳐 잡힌 경우에도(예: 정기 출연 패널) 발언자당
+    1개 항목으로 병합한다.
+    """
     video_source_names = video_source_names or {}
     quotes_by_stock: dict = {}
     for video_url, payload in gemini_results.items():
@@ -599,17 +620,28 @@ def build_panelist_quotes(gemini_results: dict, valid_names: set,
             if not stock_name:
                 continue
             speaker = (m.get("speaker") or "").strip()
-            fact    = (m.get("fact") or "").strip()
-            quote   = (m.get("quote") or "").strip()
-            if not speaker or not (fact or quote):
+            # insight가 새 필드명. 과거 fact/quote로 응답이 온 경우도 폴백 처리.
+            insight = (m.get("insight") or m.get("fact") or m.get("quote") or "").strip()
+            if not speaker or not insight:
                 continue
             timestamp  = m.get("timestamp", "")
             source_url = f"{video_url}&t={timestamp}" if timestamp else video_url
-            quotes_by_stock.setdefault(stock_name, []).append({
+
+            stock_quotes = quotes_by_stock.setdefault(stock_name, [])
+            existing = next(
+                (q for q in stock_quotes
+                 if q["speaker_name"] == speaker and q["source_name"] == source_name),
+                None,
+            )
+            if existing:
+                _merge_panelist_entry(existing, insight, source_url)
+                continue
+
+            stock_quotes.append({
                 "speaker_name": speaker,
                 "source_name":  source_name,
-                "fact":         fact,
-                "quote":        quote,
+                "fact":         insight,
+                "quote":        "",
                 "sentiment":    m.get("sentiment", "중립"),
                 "confidence":   m.get("confidence", "보통"),
                 "source_url":   source_url,
@@ -816,6 +848,13 @@ def build_analysis_prompt(
         "   그대로 옮기고, 가능하면 직함/소속도 함께 적으세요(예: \"김민수 im증권 연구원\").\n"
         "   \"(발언자:...)\" 표기가 없는 항목은 speaker_name을 빈 문자열로 두세요 —\n"
         "   채널명만으로 특정 인물을 추측해 지어내지 마세요.\n"
+        "   content: 반드시 소스 데이터에 실제로 등장하는 구체적 내용(상품명·전략명·\n"
+        "   수치·계약/이벤트명 등)을 그대로 반영하세요. \"투자 전략이 집중 논의됐다\",\n"
+        "   \"관련 이슈가 다뤄졌다\"처럼 무엇을 다뤘는지만 말하고 정작 그 내용이 무엇인지는\n"
+        "   말하지 않는 두루뭉술한 요약 문장은 금지합니다 — \"무엇이 논의됐는가\"가 아니라\n"
+        "   \"구체적으로 어떤 내용이었는가\"를 써야 합니다(예: 나쁜 예 \"개별 종목 투자\n"
+        "   전략이 논의됐다\" → 좋은 예 \"단일 종목 레버리지 ETF 출시 직후 급등해 개인\n"
+        "   투자자 자금이 빠르게 유입됐다고 분석했다\").\n"
         "5. market_summary: 4단락(\\n\\n 구분), 각 단락 3~4문장, 400자 이상. 순서: 1)최근흐름개요(수집 데이터 기준 최근 24시간 내 흐름 서술, '오늘' 표현 지양) 2)주요이슈(최근 이슈 서술, '오늘' 표현 지양) 3)핵심포인트(긍정·부정 균형 서술, 리스크와 기회 모두 포함, '오늘' 표현 지양) 4)전망(오늘 개장 전망이 수집 데이터에 명시된 경우에만 '오늘' 사용, 없으면 '단기' 또는 '향후' 표현 사용).\n"
         "6. ai_strategy: 수집 데이터 기반으로만 작성. 임의 수치 생성 금지.\n"
         "7. URL은 출처 데이터에 있는 것만 사용. 없으면 빈 문자열.\n"
