@@ -13,6 +13,7 @@
 """
 import json
 import os
+import threading
 import time
 from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
@@ -74,6 +75,10 @@ AD_KEYWORDS = [
 _PANELIST_MAX_RESULTS = 50
 # 검색 대상 기간 (시간) — 사용자 요청에 따라 48h → 24h로 변경
 _PANELIST_HOURS = 24
+# 자막 조회(get_transcript) 타임아웃(초). YouTube가 클라우드/데이터센터 IP를
+# 레이트리밋할 때 응답이 무한정 늦어질 수 있어(라이브러리 자체에 타임아웃 없음),
+# daemon 스레드로 감싸 이 시간 내에 응답이 없으면 포기하고 계속 진행한다.
+_TRANSCRIPT_TIMEOUT_SEC = 8
 # 한 번의 OR 검색에 묶을 패널리스트 수.
 # 22명 ÷ 5명 = 배치 5회 × 100유닛 = 500유닛 (기존 최악 11,000유닛 대비 22배 절감)
 _PANELIST_BATCH_SIZE = 5
@@ -272,32 +277,52 @@ def get_recent_videos_via_playlist(youtube, channel_id: str, hours: int) -> list
 
 
 def get_transcript(video_id: str, max_chars: int = 2000) -> str:
+    """
+    BUG-HANG-1: youtube-transcript-api는 타임아웃을 노출하지 않고, GitHub Actions
+    같은 클라우드 IP에서 YouTube가 레이트리밋을 걸면 응답이 아예 돌아오지 않을
+    수 있다(2026-07-23 아침 실행이 이 호출에서 55분간 멈춘 뒤 60분 job timeout으로
+    강제 종료됨). 실제 조회는 daemon 스레드에서 수행하고 join(timeout=...)으로만
+    기다린다 — 스레드가 안 끝나도 daemon이라 메인 프로세스는 계속 진행 가능.
+    """
     if not _TRANSCRIPT_AVAILABLE:
         return ""
-    try:
-        transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)
+
+    result: dict = {}
+
+    def _fetch():
         try:
-            t = transcript_list.find_transcript(["ko"])
-        except Exception:
+            transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)
             try:
-                t = transcript_list.find_generated_transcript(["ko"])
+                t = transcript_list.find_transcript(["ko"])
             except Exception:
-                return ""
-        entries = t.fetch()
-        texts   = []
-        for e in entries:
-            if hasattr(e, "text"):
-                texts.append(str(e.text))
-            elif isinstance(e, dict):
-                texts.append(e.get("text", ""))
-            else:
                 try:
-                    texts.append(str(e))
+                    t = transcript_list.find_generated_transcript(["ko"])
                 except Exception:
-                    pass
-        return " ".join(texts)[:max_chars]
-    except Exception:
+                    result["text"] = ""
+                    return
+            entries = t.fetch()
+            texts   = []
+            for e in entries:
+                if hasattr(e, "text"):
+                    texts.append(str(e.text))
+                elif isinstance(e, dict):
+                    texts.append(e.get("text", ""))
+                else:
+                    try:
+                        texts.append(str(e))
+                    except Exception:
+                        pass
+            result["text"] = " ".join(texts)[:max_chars]
+        except Exception:
+            result["text"] = ""
+
+    th = threading.Thread(target=_fetch, daemon=True)
+    th.start()
+    th.join(timeout=_TRANSCRIPT_TIMEOUT_SEC)
+    if th.is_alive():
+        print(f"    [자막] {video_id} 응답 없음({_TRANSCRIPT_TIMEOUT_SEC}s 초과) → 스킵")
         return ""
+    return result.get("text", "")
 
 
 def is_stock_related(title: str, transcript: str = "") -> bool:

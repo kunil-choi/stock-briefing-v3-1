@@ -83,6 +83,7 @@ jobs:
           GEMINI_API_KEY:    ${{ secrets.GEMINI_API_KEY }}
           SKIP_YOUTUBE:      ${{ github.event.inputs.skip_youtube || 'false' }}
           MPLBACKEND:        Agg
+          PYTHONUNBUFFERED:  "1"
         run: python main.py
 
       - name: ✅ 결과물 검증
