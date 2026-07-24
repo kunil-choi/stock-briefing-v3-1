@@ -1206,8 +1206,15 @@ def analyze_and_generate_html(
         print("[검수] GEMINI_API_KEY 없음 → Gemini 검수 스킵")
 
     # ── ai_strategy dict → 문자열 변환 ───────────────────────────────────
+    # 문자열 변환 전에 구조화된 원본을 ai_strategy_detail로 따로 보존한다 —
+    # stock-briefing-step1이 "■ 핵심 시나리오\n..." 형식의 문자열을 다시
+    # 파싱하지 않고 core_scenario/watch_points/analyst_consensus 같은 필드를
+    # 직접 읽어 영상의 일부 섹션(예: 핵심 시나리오·오늘의 주목 포인트·
+    # 애널리스트 종합 시각만 발췌)에 쓸 수 있게 하기 위함이다. 이 웹페이지
+    # 자체의 렌더링(ai_strategy 문자열 필드)은 그대로 유지된다.
     ai_strat = result.get("ai_strategy")
     if isinstance(ai_strat, dict):
+        result["ai_strategy_detail"] = ai_strat
         result["ai_strategy"] = _format_ai_strategy(ai_strat)
 
     # ── market_leaders 주가 병합 ─────────────────────────────────────────
