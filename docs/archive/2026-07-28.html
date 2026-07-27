@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>주식 시장 AI 프리뷰 — 2026년 07월 27일</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:         #0d1117;
+  --surface:    #161b22;
+  --surface2:   #21262d;
+  --border:     #30363d;
+  --text:       #e6edf3;
+  --text-muted: #8b949e;
+  --accent:     #58a6ff;
+  --up:         #ff6b6b;
+  --down:       #74c0fc;
+  --flat:       #adb5bd;
+}
+html { font-size: 16px; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  line-height: 1.6;
+  padding: 0 0 4rem;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+.container { max-width: 900px; margin: 0 auto; padding: 0 1rem; }
+.briefing-header {
+  text-align: center;
+  padding: 2.5rem 1rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 2rem;
+}
+.briefing-header h1 { font-size: 1.8rem; font-weight: 700; }
+.subtitle { color: var(--text-muted); font-size: .9rem; margin-top: .4rem; }
+.section { margin-bottom: 2.5rem; }
+.market-leader-card {
+  border-left: 3px solid #ffd43b;
+}
+.market-leader-card .stock-rank {
+  color: #ffd43b;
+}
+.section-title {
+  font-size: 1.15rem; font-weight: 700; color: var(--text);
+  border-left: 4px solid var(--accent);
+  padding-left: .75rem; margin-bottom: 1rem;
+}
+.market-indicators { display: flex; flex-wrap: wrap; gap: .6rem; }
+.indicator-badge {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; padding: .5rem .9rem;
+  display: flex; flex-direction: column; align-items: center; min-width: 100px;
+}
+.ind-label { font-size: .75rem; color: var(--text-muted); margin-bottom: .15rem; }
+.ind-value { font-size: .95rem; font-weight: 600; }
+.ind-pct   { font-size: .8rem;  margin-top: .1rem; }
+.summary-block { margin-bottom: 1.2rem; }
+.summary-title {
+  font-size: .85rem; font-weight: 700; color: var(--accent);
+  margin-bottom: .35rem; text-transform: uppercase; letter-spacing: .04em;
+}
+.summary-text { font-size: .93rem; color: var(--text-muted); line-height: 1.65; }
+.sector-badges { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 1rem; }
+.sector-badge {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 20px; padding: .3rem .85rem;
+  font-size: .82rem; color: var(--accent); cursor: default;
+}
+.stock-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; margin-bottom: 1rem; overflow: hidden;
+}
+.stock-card-header {
+  display: flex; align-items: center; gap: .75rem;
+  padding: .85rem 1rem; border-bottom: 1px solid var(--border);
+  background: var(--surface2);
+}
+.stock-rank  { font-size: .8rem; font-weight: 700; color: var(--text-muted); min-width: 28px; }
+.stock-name-block { display: flex; align-items: center; gap: .5rem; flex: 1; }
+.stock-name  { font-size: 1.05rem; font-weight: 700; color: var(--text); }
+.stock-name:hover { color: var(--accent); }
+.signal-badge {
+  font-size: .72rem; padding: .15rem .5rem;
+  border-radius: 4px; border: 1px solid; font-weight: 600;
+}
+.overlap-badge { font-size: .78rem; color: #ffa94d; font-weight: 600; white-space: nowrap; }
+.stock-card-body { padding: .85rem 1rem; }
+.source-tags { display: flex; flex-wrap: wrap; gap: .4rem; margin-bottom: .6rem; }
+.source-tag  { font-size: .72rem; padding: .15rem .5rem; border-radius: 4px; font-weight: 600; }
+.price-row   { display: flex; align-items: center; gap: .75rem; margin-bottom: .75rem; flex-wrap: wrap; }
+.price-value { font-size: 1.05rem; font-weight: 700; }
+.chart-btn {
+  font-size: .78rem; padding: .3rem .75rem; border-radius: 6px;
+  background: var(--surface2); border: 1px solid var(--border);
+  color: var(--accent); cursor: pointer; text-decoration: none;
+  transition: background .15s;
+}
+.chart-btn:hover { background: var(--border); text-decoration: none; }
+.stock-section { margin-bottom: .75rem; }
+.stock-section-label { font-size: .78rem; font-weight: 700; color: var(--accent); display: block; margin-bottom: .25rem; }
+.stock-section-text  { font-size: .88rem; color: var(--text-muted); line-height: 1.6; }
+.reasons-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: .4rem; }
+.reasons-list li { font-size: .85rem; line-height: 1.55; }
+.reason-source { font-size: .72rem; padding: .1rem .4rem; border-radius: 3px; font-weight: 600; margin-right: .3rem; }
+.hidden-pick-card {
+  background: linear-gradient(135deg, var(--surface) 0%, #1a1f2e 100%);
+  border: 1px solid #3d4f6e; border-radius: 12px;
+  margin-bottom: 1rem; overflow: hidden;
+}
+.hp-card-header {
+  display: flex; align-items: center; gap: .75rem;
+  padding: .85rem 1rem; border-bottom: 1px solid #3d4f6e;
+  background: #1a2235; flex-wrap: wrap;
+}
+.hp-badges { display: flex; gap: .4rem; align-items: center; }
+.hp-source-badge {
+  font-size: .72rem; padding: .2rem .6rem; border-radius: 20px; font-weight: 700;
+}
+.hp-score-badge {
+  font-size: .72rem; padding: .2rem .6rem; border-radius: 20px;
+  background: #ffa94d22; color: #ffa94d; border: 1px solid #ffa94d55; font-weight: 700;
+}
+.hp-stock-name { font-size: 1.05rem; font-weight: 700; color: var(--text); flex: 1; }
+.hp-stock-name:hover { color: var(--accent); }
+.star-rating { font-size: 1rem; }
+.star.filled { color: #ffa94d; }
+.star.empty  { color: #444; }
+.hp-card-body { padding: .85rem 1rem; }
+.analyst-card {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-left-width: 3px; border-left-color: var(--accent);
+  border-radius: 8px; padding: .75rem 1rem; margin-bottom: .6rem;
+  transition: border-color .15s;
+}
+.analyst-card-meta { display: flex; align-items: center; gap: .5rem; margin-bottom: .3rem; flex-wrap: wrap; }
+.analyst-stock  { font-weight: 700; font-size: .92rem; }
+.analyst-broker {
+  font-size: .76rem; font-weight: 600; padding: .12rem .5rem;
+  border-radius: 999px;
+}
+.analyst-cat-badge {
+  font-size: .68rem; padding: .1rem .45rem; border-radius: 4px;
+  font-weight: 700;
+}
+.analyst-title-link, .analyst-title-text { font-size: .88rem; color: var(--text-muted); line-height: 1.5; }
+.analyst-title-link:hover { color: var(--accent); }
+.analyst-category-title {
+  font-size: .85rem; font-weight: 700; color: var(--accent);
+  margin: 1rem 0 .5rem; padding-left: .5rem; border-left: 3px solid var(--accent);
+}
+.strat-section { margin-bottom: 1.2rem; }
+.strat-title { font-size: .9rem; font-weight: 700; color: var(--accent); margin-bottom: .4rem; }
+.strat-body  { font-size: .88rem; color: var(--text-muted); }
+.strat-text  { margin-bottom: .3rem; line-height: 1.6; }
+.strat-item  { margin-bottom: .25rem; line-height: 1.55; }
+.disclaimer {
+  margin-top: 2.5rem;
+  padding: 1rem 1.4rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 4px solid #58a6ff44;
+  border-radius: 8px;
+  font-size: .78rem;
+  color: #6e7681;
+  line-height: 1.8;
+  text-align: center;
+}
+.disclaimer strong {
+  display: block;
+  color: #8b949e;
+  font-weight: 600;
+  margin-bottom: .35rem;
+  font-size: .82rem;
+}
+.modal-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,.75); z-index: 1000;
+  align-items: center; justify-content: center;
+}
+.modal-overlay.active { display: flex; }
+.modal-box {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; padding: 1.5rem; max-width: 700px; width: 95%; position: relative;
+}
+.modal-title  { font-size: 1rem; font-weight: 700; margin-bottom: 1rem; color: var(--text); }
+.modal-close  {
+  position: absolute; top: .75rem; right: .75rem;
+  background: none; border: none; color: var(--text-muted); font-size: 1.2rem; cursor: pointer;
+}
+.modal-close:hover { color: var(--text); }
+#modal-chart-img { width: 100%; border-radius: 8px; }
+@media (max-width: 600px) {
+  .briefing-header h1 { font-size: 1.4rem; }
+  .stock-card-header  { flex-wrap: wrap; }
+  .stock-name         { font-size: .95rem; }
+}</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="briefing-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;text-align:left;">
+    <div style="text-align:left;"><h1>📈 주식 시장 AI 프리뷰</h1>
+    <div class="subtitle">2026년 07월 27일 · 생성 시각 08:10 KST</div></div><a href="https://kunil-choi.github.io/stock-briefing-v3/" target="_blank" rel="noopener" style="flex-shrink:0;background:#1f2937;border:1px solid #374151;border-radius:8px;padding:8px 14px;text-align:center;font-size:12px;line-height:1.4;color:#fbbf24;text-decoration:none;font-weight:700;white-space:nowrap;">주식시장 AI 브리핑<br>오전 10시 업데이트 예정</a>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📊 시장 지표</div>
+    <div class="market-indicators"><div class="indicator-badge"><span class="ind-label">코스피 <span style="font-size:.65rem;color:#adb5bd;">(전일 종가)</span></span><span class="ind-value">6,690.62</span><span class="ind-pct" style="color:#74c0fc;">▼ -5.72%</span></div><div class="indicator-badge"><span class="ind-label">코스닥 <span style="font-size:.65rem;color:#adb5bd;">(전일 종가)</span></span><span class="ind-value">748.22</span><span class="ind-pct" style="color:#74c0fc;">▼ -5.32%</span></div><div class="indicator-badge indicator-badge--empty"><span class="ind-label">나스닥</span><span class="ind-value" style="color:#666;">-</span><span class="ind-pct" style="color:#666;">데이터 없음</span></div><div class="indicator-badge indicator-badge--empty"><span class="ind-label">S&P500</span><span class="ind-value" style="color:#666;">-</span><span class="ind-pct" style="color:#666;">데이터 없음</span></div><div class="indicator-badge indicator-badge--empty"><span class="ind-label">다우존스</span><span class="ind-value" style="color:#666;">-</span><span class="ind-pct" style="color:#666;">데이터 없음</span></div><div class="indicator-badge"><span class="ind-label">달러/원</span><span class="ind-value">1,474.04</span><span class="ind-pct" style="color:#74c0fc;">▼ -0.11%</span></div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🗞 최근 시장 흐름</div>
+    <div class="summary-block"><div class="summary-title">📌 최근 흐름</div><p class="summary-text">전일(7월 26일) 국내 증시는 역대급 변동성 장세를 이어갔다. 코스피는 전전일(7월 25일) 7,000선을 반납한 데 이어 불안정한 흐름을 지속했으며, 개인 투자자들은 코스피 하락에 베팅하는 '곱버스' ETF를 사들이는 한편 미국 S&P500 지수형 ETF로 대거 자금을 이동시키는 '피신' 양상을 보였다. 5대 시중은행 요구불예금은 2022년 이후 월 최대폭으로 감소하며 41조 원 규모의 대기자금 일부가 다시 증시로 유입될 가능성이 관측되고 있다.</p></div><div class="summary-block"><div class="summary-title">📊 주요 이슈</div><p class="summary-text">주요 이슈로는 미국·이란 간 무력 공방이 약 2주 만에 중단된 점이 부각됐다. 이란군 대변인은 미군의 공습 중단을 확인하며 보복 작전도 전면 중단했다고 밝혔고, 이로 인해 배럴당 100달러를 넘었던 국제유가가 90달러대로 하락했다. 한편 엔비디아가 SK하이닉스와 5,000억 달러 규모의 AI 메모리 공동 개발 및 장기 공급 동맹을 체결했으며, 현대차그룹은 엔비디아와 손잡고 피지컬 AI 솔루션 기업으로의 전환을 선언했다. 미국 빅테크 실적 발표와 FOMC가 예정된 이른바 '슈퍼위크'에 대한 기대감도 시장에 혼재하고 있다.</p></div><div class="summary-block"><div class="summary-title">🔍 핵심 포인트</div><p class="summary-text">긍정 요인으로는 미·이란 긴장 완화에 따른 유가 하락, 엔비디아-SK하이닉스 대규모 동맹, 빅테크 실적 기대감 등이 꼽힌다. 반면 인텔이 Capex 우려로 장중 7% 급락하고 AI 과잉투자 공포가 반도체주 전반을 강타하며 SK하이닉스·마이크론이 급락하는 등 부정적 신호도 뚜렷하다. 8월 제조업 업황 전망 PSI가 95로 3개월 만에 기준치(100)를 하회했고, 저신용 취약차주의 대부업 대출 잔액이 1년 새 52% 급감하는 등 내수 기반 약화 우려도 지속되고 있다.</p></div><div class="summary-block"><div class="summary-title">💡 전망</div><p class="summary-text">향후 시장은 이번 주 예정된 미국 빅테크 실적 발표와 FOMC 결과가 핵심 분기점이 될 전망이다. 유가 급등락 변동성이 완화될 경우 방산·전력·AI 관련 수혜주 중심의 선별적 반등이 나타날 수 있으나, AI 과잉투자 논란이 지속되면 반도체·테크주의 추가 조정 가능성도 배제할 수 없다. 단기적으로는 외국인 수급 동향과 원/달러 환율 변화를 면밀히 주시할 필요가 있다.</p></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔥 오늘의 핫 섹터</div>
+    <div class="sector-badges"><div class="sector-badge" title="엔비디아-SK 동맹">AI·반도체</div><div class="sector-badge" title="현대차-엔비디아 협력">휴머노이드 로봇</div><div class="sector-badge" title="미·이란 긴장 완화">방산·에너지</div><div class="sector-badge" title="보유세 개편 논의">부동산·세제</div><div class="sector-badge" title="KB·JP모건 결제망">블록체인 금융</div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🏆 오늘의 대형 주도주</div>
+    
+<div class="stock-card market-leader-card">
+  <div class="stock-card-header">
+    <div class="stock-rank">#1</div>
+    <div class="stock-name-block">
+      <a href="" target="_blank" rel="noopener"
+         class="stock-name">삼성전자</a>
+      <span class="signal-badge signal-neutral"
+            style="border-color:#adb5bd;color:#adb5bd;">중립</span>
+    </div>
+    <div class="overlap-badge" title="비뉴스 채널 중복 언급 수">🔥 2개</div>
+  </div>
+  <div class="stock-card-body">
+    <div class="source-tags"><span class="source-tag" style="background:#2d3a4a;color:#74c0fc;">뉴스</span><span class="source-tag" style="background:#3a2d1a;color:#ffa94d;">경제방송</span><span class="source-tag" style="background:#2d1a3a;color:#cc5de8;">유튜브</span></div>
+    <div class="price-row"><span class="price-value">249,500원</span><span style="font-size:.7rem;color:#adb5bd;margin-left:.3rem;">(전일종가)</span><span style="font-size:.82rem;color:#74c0fc;margin-left:.35rem;">▼ -7.59%</span><span style="font-size:.7rem;color:#adb5bd;margin-left:.2rem;">(전전일 대비)</span></div>
+    <div class="stock-section"><span class="stock-section-label">📋 종목 요약</span><p class="stock-section-text">AI 과잉투자 공포와 반도체주 전반의 급락 속에서 삼성전자도 하락 압력을 받고 있다. 다만 코스피 7,000선 이탈 이후 41조 원 규모 대기자금의 증시 재유입 기대감과 밸류에이션 메리트 논의가 이어지고 있다.</p></div><div class="stock-section"><span class="stock-section-label">🚀 상승 촉매</span><p class="stock-section-text">코스피 급락 이후 5대 시중은행 요구불예금이 2022년 이후 월 최대폭으로 감소하며 개인 자금의 증시 복귀 가능성이 제기됐다. 단일 종목 레버리지 ETF 매도세 속에서도 삼성 가전 판촉 효과로 삼성카드 신규 회원이 한 달 새 16만 명 증가하는 등 삼성 그룹 계열 전반의 소비자 접점은 확대되고 있다.</p></div><div class="stock-section"><span class="stock-section-label">⚠️ 리스크</span><p class="stock-section-text">AI 과잉투자 공포로 인텔이 장중 7% 급락하는 등 반도체주 전반에 투자 심리 악화가 지속되고 있으며, 8월 제조업 업황 전망 PSI가 95로 기준치를 하회해 수요 둔화 우려가 존재한다.</p></div><div class="stock-section"><span class="stock-section-label">🎙️ 패널 발언</span><ul class="reasons-list"><li><span style="color:#ffd43b;font-weight:700;">김진 이사 · 김작가TV</span> <a href="https://www.youtube.com/watch?v=o2frLA_7igU&t=03:15" target="_blank" rel="noopener" style="color:#adb5bd;text-decoration:none;">삼성전자는 글로벌 AI 인프라 투자 효율화 우려와 CapEx 감소 추세로 인해 주가 반등이 제한적이며, 한국 주식시장의 레버리지 상품 영향으로 변동성이 커져 신중한 접근이 필요합니다.</a></li><li><span style="color:#ffd43b;font-weight:700;">이정윤 세무사 · 경제 읽어주는 남자 김광석TV</span> <a href="https://www.youtube.com/watch?v=4P9cgTy7iVc&t=02:35" target="_blank" rel="noopener" style="color:#adb5bd;text-decoration:none;">주식의 방향성만 예측하여 투자할 것이라면, 레버리지 ETF보다는 삼성전자와 같은 보통주를 사는 것이 더 합리적인 선택입니다. 5월 말부터 6월 말까지 한 달도 안 되는 기간 동안 지수가 8,000에서 9,300으로 15% 상승했을 때, 삼성전자와 SK하이닉스가 주요 상승 동력이 되었고, 개인 투자자들의 레버리지 매수가 주가 상승을 견인했습니다. 지난 1년 2개월 동안 삼성전자가 4만 5천원에서 37만원까지 약 7배, SK하이닉스가 16만원에서 290만원까지 약 18배 상승한 것은 탐욕과 공포가 반영된 결과입니다. 삼성전자의 역대급 실적은 이미 시장에 &#x27;선반영&#x27;되어 주가가 움직였기 때문에, 실제 발표 시점의 주가에 미치는 영향은 제한적이었습니다. 삼성전자와 SK하이닉스 같은 기업의 실적이 절대적으로는 좋아질지라도, 핵심은 &#x27;성장률&#x27;이므로 과거와 같은 폭발적인 성장률을 이어갈 확률은 점점 낮아지고 있습니다.</a></li><li><span style="color:#ffd43b;font-weight:700;">Host · 경제 읽어주는 남자 김광석TV</span> <a href="https://www.youtube.com/watch?v=4P9cgTy7iVc&t=12:35" target="_blank" rel="noopener" style="color:#adb5bd;text-decoration:none;">삼성전자와 다른 반도체 기업들이 역대급 실적을 발표했음에도 불구하고, 주식 시장이 대대적으로 조정된 현상에 대한 해석이 필요합니다.</a></li><li><span style="color:#ffd43b;font-weight:700;">박정호 교수 · 김작가TV</span> <a href="https://www.youtube.com/watch?v=fbez21xOglk&t=04:10" target="_blank" rel="noopener" style="color:#adb5bd;text-decoration:none;">최근 30~40% 주가 하락에도 불구하고, 신산업의 &#x27;대서사&#x27;를 따라가는 과정에서 나타나는 조정이라고 보며, 단기적인 외부 충격(예: 전쟁)이 없다면 주가가 더 크게 악영향을 받을 일은 없을 것으로 판단했습니다.</a></li><li><span style="color:#ffd43b;font-weight:700;">신일섭 위원 (아이데일리TV) · 이데일리TV</span> <a href="https://www.youtube.com/watch?v=itHIfUzdBpE&t=02:55" target="_blank" rel="noopener" style="color:#adb5bd;text-decoration:none;">엔비디아 젠슨 황 CEO가 HBM 물량을 지속적으로 요구하는 상황에서 SK하이닉스와 함께 삼성전자 역시 HBM 시장에서 중요한 역할을 하며 수요 증가의 혜택을 볼 것으로 예상된다.</a></li></ul></div><div class="stock-section"><span class="stock-section-label">📢 채널별 언급 내용</span><ul class="reasons-list"><li><span style="color:#ffa94d;font-weight:600;">이데일리TV</span> <a href="https://www.youtube.com/watch?v=itHIfUzdBpE" target="_blank" rel="noopener" style="color:#adb5bd;text-decoration:none;">엔비디아·SK 5,000억 달러 AI 동맹 체결로 한국 AI 투자판이 커지는 가운데, 삼성전자 등 반도체주가 시장 주도주로 언급됐다.</a></li><li><span style="color:#ffa94d;font-weight:600;">KBS 1라디오</span> <a href="https://www.youtube.com/watch?v=Lh-KGzDUxaM" target="_blank" rel="noopener" style="color:#adb5bd;text-decoration:none;">AI 과잉투자 공포로 하이닉스·마이크론이 급락하며 미국 증시가 혼조 마감했고, 삼성전자도 반도체주 약세 흐름에서 자유롭지 못한 상황이라고 분석했다.</a></li><li><span style="color:#cc5de8;font-weight:600;">815머니톡</span> <a href="https://www.youtube.com/watch?v=MGgR-Crg_jw" target="_blank" rel="noopener" style="color:#adb5bd;text-decoration:none;">삼성전자와 SK하이닉스는 여러 이슈에도 불구하고 밸류에이션 매력이 여전하며, 현 주가 수준에서 없으면 후회할 이유가 있다고 강조했다.</a></li><li><span style="color:#74c0fc;font-weight:600;">매일경제</span> <a href="https://www.mk.co.kr/news/economy/12107914" target="_blank" rel="noopener" style="color:#adb5bd;text-decoration:none;">코스피 6,000~7,000대 급락 이후 은행 대기자금 41조 원이 다시 증시로 이동할 조짐이며, 삼성전자·SK하이닉스 주가 하락세에 수시입출금 통장 자금부터 활용되는 패턴이 관측됐다.</a></li></ul></div>
+  </div>
+</div>
+<div class="stock-card market-leader-card">
+  <div class="stock-card-header">
+    <div class="stock-rank">#2</div>
+    <div class="stock-name-block">
+      <a href="" target="_blank" rel="noopener"
+         class="stock-name">SK하이닉스</a>
+      <span class="signal-badge signal-positive"
+            style="border-color:#51cf66;color:#51cf66;">긍정</span>
+    </div>
+    <div class="overlap-badge" title="비뉴스 채널 중복 언급 수">🔥 2개</div>
+  </div>
+  <div class="stock-card-body">
+    <div class="source-tags"><span class="source-tag" style="background:#2d3a4a;color:#74c0fc;">뉴스</span><span class="source-tag" style="background:#3a2d1a;color:#ffa94d;">경제방송</span><span class="source-tag" style="background:#2d1a3a;color:#cc5de8;">유튜브</span></div>
+    <div class="price-row"><span class="price-value">1,759,000원</span><span style="font-size:.7rem;color:#adb5bd;margin-left:.3rem;">(전일종가)</span><span style="font-size:.82rem;color:#74c0fc;margin-left:.35rem;">▼ -8.34%</span><span style="font-size:.7rem;color:#adb5bd;margin-left:.2rem;">(전전일 대비)</span></div>
+    <div class="stock-section"><span class="stock-section-label">📋 종목 요약</span><p class="stock-section-text">엔비디아와 5,000억 달러 규모의 AI 메모리 공동 개발 및 장기 공급 동맹을 체결하며 HBM 공급망의 핵심 파트너로 부상했다. 단기적으로는 AI 과잉투자 공포로 주가가 급락했으나, 중장기 수요 확보 측면에서 긍정적 평가가 우세하다.</p></div><div class="stock-section"><span class="stock-section-label">🚀 상승 촉매</span><p class="stock-section-text">엔비디아가 HBM 품귀 현상 지속에 따라 SK하이닉스와 차세대 AI 메모리 공동 개발 및 장기 공급 계약을 체결했다. AI 서버 수요 폭증으로 삼성전기 등 부품사까지 1조 5,000억 원 규모 LTA(장기공급계약)를 확보하는 등 AI 반도체 공급망 전반의 수혜가 확대되고 있다.</p></div><div class="stock-section"><span class="stock-section-label">⚠️ 리스크</span><p class="stock-section-text">AI 과잉투자 우려로 인텔 급락 등 반도체주 전반이 단기 조정을 받았으며, 마이크론과 함께 미국 증시에서 급락하는 등 투자 심리 악화가 이어지고 있다.</p></div><div class="stock-section"><span class="stock-section-label">🎙️ 패널 발언</span><ul class="reasons-list"><li><span style="color:#ffd43b;font-weight:700;">김진 이사 · 김작가TV</span> <a href="https://www.youtube.com/watch?v=o2frLA_7igU&t=03:15" target="_blank" rel="noopener" style="color:#adb5bd;text-decoration:none;">SK하이닉스 역시 AI 인프라 투자 효율화 및 CapEx 감소 우려로 주가 반등이 약하며, 한국 주식시장의 레버리지 상품 영향으로 변동성이 확대되어 신중한 포트폴리오 관리가 요구됩니다.</a></li><li><span style="color:#ffd43b;font-weight:700;">이정윤 세무사 · 경제 읽어주는 남자 김광석TV</span> <a href="https://www.youtube.com/watch?v=4P9cgTy7iVc&t=02:03" target="_blank" rel="noopener" style="color:#adb5bd;text-decoration:none;">단일 종목 레버리지 및 인버스 ETF는 삼성전자와 SK하이닉스 같은 종목의 파생상품까지 포함되어 있어 변동성이 더 심하며, 시장 방향성만 보고 일반 주식을 사는 것보다 위험합니다.</a></li><li><span style="color:#ffd43b;font-weight:700;">신일섭 위원 (아이데일리TV) · 이데일리TV</span> <a href="https://www.youtube.com/watch?v=itHIfUzdBpE&t=00:14" target="_blank" rel="noopener" style="color:#adb5bd;text-decoration:none;">엔비디아와의 5천억 달러 규모 AI 동맹에서 HBM4 메모리의 장기 공급 파트너십을 체결하며, AI 반도체 시장에서 SK하이닉스가 핵심적인 역할을 할 것으로 예상된다. 젠슨 황 엔비디아 CEO가 SK하이닉스와 삼성전자에 HBM 물량을 계속 요구하고 있어 HBM 시장의 강력한 수요를 보여준다.</a></li></ul></div><div class="stock-section"><span class="stock-section-label">📢 채널별 언급 내용</span><ul class="reasons-list"><li><span style="color:#74c0fc;font-weight:600;">아시아경제</span> <a href="https://view.asiae.co.kr/article/2026072703420181536" target="_blank" rel="noopener" style="color:#adb5bd;text-decoration:none;">엔비디아가 SK하이닉스와 차세대 AI 메모리 공동 개발 및 장기 공급 계약을 체결했으며, 규모는 5,000억 달러로 보도됐다.</a></li><li><span style="color:#ffa94d;font-weight:600;">이데일리TV</span> <a href="https://www.youtube.com/watch?v=itHIfUzdBpE" target="_blank" rel="noopener" style="color:#adb5bd;text-decoration:none;">엔비디아·SK 5,000억 달러 AI 동맹으로 한국 AI 투자판이 확대되고 HBM 중심의 수혜 기대감이 부각됐다.</a></li><li><span style="color:#ffa94d;font-weight:600;">KBS 1라디오</span> <a href="https://www.youtube.com/watch?v=Lh-KGzDUxaM" target="_blank" rel="noopener" style="color:#adb5bd;text-decoration:none;">AI 과잉투자 공포가 반도체주를 강타하며 SK하이닉스와 마이크론이 미국 증시에서 급락 마감했다고 전했다.</a></li><li><span style="color:#cc5de8;font-weight:600;">815머니톡</span> <a href="https://www.youtube.com/watch?v=MGgR-Crg_jw" target="_blank" rel="noopener" style="color:#adb5bd;text-decoration:none;">SK하이닉스는 다양한 이슈에도 밸류에이션 매력이 유효하며, 현 주가 하락이 오히려 매수 기회가 될 수 있다고 분석했다.</a></li></ul></div>
+  </div>
+</div>
+    <div class="section-title">👀 오늘의 관심종목</div>
+    
+<div class="stock-card">
+  <div class="stock-card-header">
+    <div class="stock-rank">#1</div>
+    <div class="stock-name-block">
+      <a href="https://finance.naver.com/item/main.naver?code=005380" target="_blank" rel="noopener"
+         class="stock-name">현대차</a>
+      <span class="signal-badge signal-positive"
+            style="border-color:#51cf66;color:#51cf66;">긍정</span>
+    </div>
+    <div class="overlap-badge" title="비뉴스 채널 중복 언급 수">🔥 2개</div>
+  </div>
+  <div class="stock-card-body">
+    <div class="source-tags"><span class="source-tag" style="background:#2d3a4a;color:#74c0fc;">뉴스 1</span><span class="source-tag" style="background:#3a2d1a;color:#ffa94d;">경제방송 1</span><span class="source-tag" style="background:#2d1a3a;color:#cc5de8;">유튜브 2</span></div>
+    <div class="price-row"><span class="price-value">401,000원</span><span style="font-size:.7rem;color:#adb5bd;margin-left:.3rem;">(전일종가)</span><span style="font-size:.82rem;color:#74c0fc;margin-left:.35rem;">▼ -7.18%</span><span style="font-size:.7rem;color:#adb5bd;margin-left:.2rem;">(전전일 대비)</span><a href="https://finance.naver.com/item/main.naver?code=005380" target="_blank" rel="noopener" class="chart-btn">🔗 Naver 차트</a></div>
+    <div class="stock-section"><span class="stock-section-label">📋 종목 요약</span><p class="stock-section-text">정의선 현대차그룹 회장이 피지컬 AI 솔루션 기업으로의 전환을 선언하고 엔비디아 등 빅테크와의 협력을 공식화했다. 전일 종가는 401,000원으로 7.18% 하락했으나, 휴머노이드 로봇 생태계 구축이라는 중장기 성장 내러티브가 부각되고 있다.</p></div><div class="stock-section"><span class="stock-section-label">🚀 상승 촉매</span><p class="stock-section-text">현대차그룹이 엔비디아와 손잡고 휴머노이드 로봇 생태계를 구축하겠다는 청사진을 발표했으며, 정의선 회장이 직접 피지컬 AI 솔루션 기업으로의 전환을 선언했다. LG전자와 함께 로봇주로 분류되며 엔비디아와의 협력 시너지가 주목받고 있다.</p></div><div class="stock-section"><span class="stock-section-label">⚠️ 리스크</span><p class="stock-section-text">전일 주가가 7.18% 급락하는 등 최근 증시 변동성이 크고, 글로벌 관세 정책 불확실성과 AI 과잉투자 우려가 단기 주가 반등을 제한할 수 있다.</p></div><div class="stock-section"><span class="stock-section-label">🎙️ 패널 발언</span><ul class="reasons-list"><li><span style="color:#ffd43b;font-weight:700;">신일섭 위원 (아이데일리TV) · 이데일리TV</span> <a href="https://www.youtube.com/watch?v=itHIfUzdBpE&t=04:33" target="_blank" rel="noopener" style="color:#adb5bd;text-decoration:none;">현대차그룹은 피지컬 AI에 엔비디아의 &#x27;블랙웰&#x27; GPU 5만 개를 사용하는 계획을 발표하며, 이는 로보틱스 및 자율주행 분야에서 AI 기술 적용을 확대하는 중요한 발판이 될 것이다.</a></li></ul></div><div class="stock-section"><span class="stock-section-label">📢 채널별 언급 내용</span><ul class="reasons-list"><li><span style="color:#74c0fc;font-weight:600;">매일경제</span> <a href="https://www.mk.co.kr/news/economy/12107695" target="_blank" rel="noopener" style="color:#adb5bd;text-decoration:none;">정의선 현대자동차그룹 회장이 피지컬 AI 솔루션 기업으로 변신한다는 청사진을 내놓으며 엔비디아 등 빅테크 기업과 적극 협력하겠다고 밝혔다.</a></li><li><span style="color:#ffa94d;font-weight:600;">이데일리TV</span> <a href="https://www.youtube.com/watch?v=itHIfUzdBpE" target="_blank" rel="noopener" style="color:#adb5bd;text-decoration:none;">엔비디아·SK 5,000억 달러 AI 동맹 맥락에서 현대차가 빅테크·AI 수혜 종목으로 함께 언급됐다.</a></li><li><span style="color:#cc5de8;font-weight:600;">웅달 책방</span> <a href="https://www.youtube.com/watch?v=MMn0hs8PxEw" target="_blank" rel="noopener" style="color:#adb5bd;text-decoration:none;">로봇주 테마에서 현대차와 LG전자가 핵심 종목으로 거론됐으며, 엔비디아와의 협력 구도가 주목됐다.</a></li><li><span style="color:#cc5de8;font-weight:600;">슈퍼개미 이세무사TV</span> <a href="https://www.youtube.com/watch?v=hFCiAtQB-OY" target="_blank" rel="noopener" style="color:#adb5bd;text-decoration:none;">고금리 시장에서 살아남는 투자전략 맥락에서 삼성전자·SK하이닉스와 함께 현대차가 관심 종목으로 언급됐다.</a></li></ul></div>
+  </div>
+</div>
+<div class="stock-card">
+  <div class="stock-card-header">
+    <div class="stock-rank">#2</div>
+    <div class="stock-name-block">
+      <a href="https://finance.naver.com/item/main.naver?code=051910" target="_blank" rel="noopener"
+         class="stock-name">LG전자</a>
+      <span class="signal-badge signal-neutral"
+            style="border-color:#adb5bd;color:#adb5bd;">중립</span>
+    </div>
+    <div class="overlap-badge" title="비뉴스 채널 중복 언급 수">🔥 1개</div>
+  </div>
+  <div class="stock-card-body">
+    <div class="source-tags"><span class="source-tag" style="background:#2d1a3a;color:#cc5de8;">유튜브 1</span></div>
+    <div class="price-row"><span class="price-value">259,000원</span><span style="font-size:.7rem;color:#adb5bd;margin-left:.3rem;">(전일종가)</span><span style="font-size:.82rem;color:#74c0fc;margin-left:.35rem;">▼ -4.60%</span><span style="font-size:.7rem;color:#adb5bd;margin-left:.2rem;">(전전일 대비)</span><a href="https://finance.naver.com/item/main.naver?code=051910" target="_blank" rel="noopener" class="chart-btn">🔗 Naver 차트</a></div>
+    <div class="stock-section"><span class="stock-section-label">📋 종목 요약</span><p class="stock-section-text">로봇주 테마에서 현대차와 함께 언급되며 엔비디아 협력 수혜 기대가 제기됐다. 전일 종가는 259,000원으로 4.60% 하락했으며, 구체적인 개별 사업 모멘텀보다는 테마 연동 흐름이 주된 언급 배경이다.</p></div><div class="stock-section"><span class="stock-section-label">🚀 상승 촉매</span><p class="stock-section-text">현대차그룹의 피지컬 AI·휴머노이드 로봇 생태계 구축 발표와 연계해 LG전자가 로봇주 테마 종목으로 함께 부각됐다. 엔비디아와 빅테크 협력 흐름이 국내 로봇·AI 관련 대형주 전반으로 확산되는 분위기다.</p></div><div class="stock-section"><span class="stock-section-label">⚠️ 리스크</span><p class="stock-section-text">전일 4.60% 하락하는 등 최근 변동성 장세에서 하락 압력을 받고 있으며, 로봇 테마 외 자체적인 실적 모멘텀이나 구체적 협업 공시가 아직 확인되지 않아 단기 변동성 리스크가 있다.</p></div><div class="stock-section"><span class="stock-section-label">📢 채널별 언급 내용</span><ul class="reasons-list"><li><span style="color:#cc5de8;font-weight:600;">웅달 책방</span> <a href="https://www.youtube.com/watch?v=MMn0hs8PxEw" target="_blank" rel="noopener" style="color:#adb5bd;text-decoration:none;">현대차와 함께 로봇주 대표 종목으로 언급됐으며, 엔비디아와의 협력 생태계 확장 맥락에서 주목받았다.</a></li></ul></div>
+  </div>
+</div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🤖 AI 투자 전략</div>
+    <div class="strat-section"><div class="strat-title">🎯 핵심 시나리오</div><div class="strat-body"><p class="strat-text">미·이란 군사 공방 중단으로 유가가 배럴당 90달러대로 하락하고 빅테크 실적 발표 및 FOMC가 예정된 &#x27;슈퍼위크&#x27;를 앞두고 시장이 방향성을 탐색하고 있다. 엔비디아-SK하이닉스 5,000억 달러 AI 동맹과 현대차그룹의 피지컬 AI 전환 선언으로 AI·로봇 테마 중심의 중장기 성장 내러티브는 유효하나, AI 과잉투자 공포와 반도체주 단기 급락이 혼재하는 상황이다.</p></div></div><div class="strat-section"><div class="strat-title">🔄 섹터 로테이션</div><div class="strat-body"><p class="strat-text">AI 과잉투자 우려로 단기 반도체·테크주 조정이 나타나는 가운데, 개인 자금은 국내 코스피 하락 베팅(곱버스)과 미국 S&amp;P500 ETF로 분산되는 흐름이다. 유가 안정 시 방산·에너지 수혜 기대가 줄고, 빅테크 실적이 예상을 상회할 경우 AI·HBM 중심의 반도체 섹터로 자금이 재유입될 가능성이 있다. 로봇·피지컬 AI 테마는 현대차·LG전자 중심으로 관심이 지속될 전망이다.</p></div></div><div class="strat-section"><div class="strat-title">📌 오늘의 주목 포인트</div><div class="strat-body"><div class="strat-item">• 미국 빅테크(엔비디아·마이크로소프트 등) 실적 발표 결과 및 AI 투자 지속 여부 발언</div><div class="strat-item">• FOMC 금리 결정 및 파월 의장 발언(7월 인상 확률 40% 육박 상황에서 9월 여부 포함)</div><div class="strat-item">• 국제유가 90달러대 안착 여부 및 미·이란 물밑 협상 진전</div><div class="strat-item">• 외국인 수급 동향과 코스피 7,000선 회복 여부</div></div></div><div class="strat-section"><div class="strat-title">⚠️ 리스크 시나리오</div><div class="strat-body"><div class="strat-item">• [보통] AI 과잉투자 공포 확산 → 인텔·마이크론 등 반도체주 추가 급락 시 단기 비중 축소 후 HBM 장기 공급계약 확보 종목(SK하이닉스) 중심으로 분할 매수 대응</div><div class="strat-item">• [낮음] 미·이란 갈등 재격화 및 유가 재급등 → 방산주 단기 수혜 모니터링, 에너지 비용 상승에 따른 제조업 마진 압박 종목 회피</div><div class="strat-item">• [보통] FOMC 7월 금리 인상 단행 → 성장주·레버리지 ETF 비중 축소, 고배당·금융주로 단기 방어적 포지션 전환 검토</div><div class="strat-item">• [보통] 빅테크 실적 호조로 AI 투자 우려 해소 → AI 반도체(SK하이닉스)·로봇(현대차) 중심 비중 확대, 은행 대기자금 41조 원 증시 재유입 가속화 기대</div></div></div><div class="strat-section"><div class="strat-title">📊 애널리스트 종합 시각</div><div class="strat-body"><p class="strat-text">수집 데이터 내 애널리스트 리포트 형식의 공식 컨센서스는 확인되지 않으나, 복수 전문가(윤여민 LSK파트너스 이사, 이영훈 iM증권 이사)는 반도체주의 단기 급락에도 불구하고 밸류에이션 매력을 강조하며 분할 매수 관점을 유지했다. 빅테크 실적과 FOMC 결과를 확인한 뒤 방향성을 잡는 관망 기조가 단기적으로 우세한 것으로 판단된다.</p></div></div>
+  </div>
+
+  <div class="disclaimer">
+    <strong>📌 투자 유의사항</strong>
+    본 브리핑은 뉴스·유튜브·애널리스트 리포트 등 공개 데이터를 AI가 수집·분석한 참고 자료입니다.
+    투자 권유 또는 종목 추천이 아니며, 수익을 보장하지 않습니다.
+    최종 투자 판단과 그에 따른 책임은 전적으로 본인에게 있습니다.
+  </div>
+
+</div>
+
+<div class="modal-overlay" id="chartModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeChart()">✕</button>
+    <div class="modal-title" id="modal-chart-title"></div>
+    <img id="modal-chart-img" src="" alt="차트">
+  </div>
+</div>
+
+<script>
+const chartDataMap = {};
+
+function showChart(key, name) {
+  const src = chartDataMap[key];
+  if (!src) return;
+  document.getElementById('modal-chart-title').textContent = name + ' 주가 차트';
+  document.getElementById('modal-chart-img').src = src;
+  document.getElementById('chartModal').classList.add('active');
+}
+
+function closeChart() {
+  document.getElementById('chartModal').classList.remove('active');
+  document.getElementById('modal-chart-img').src = '';
+}
+
+document.getElementById('chartModal').addEventListener('click', function(e) {
+  if (e.target === this) closeChart();
+});
+</script>
+
+</body>
+</html>
