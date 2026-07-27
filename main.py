@@ -29,7 +29,7 @@ import checkpoint
 from config import (
     ANTHROPIC_API_KEY, YOUTUBE_API_KEY, GH_TOKEN, GITHUB_REPO,
     GEMINI_API_KEY,
-    NEWS_RSS_FEEDS, load_channels,
+    NEWS_RSS_FEEDS, NEWS_SITE_HOMEPAGES, load_channels,
 )
 from collectors.news_collector    import collect_news
 from collectors.youtube_collector import (
@@ -178,7 +178,10 @@ def main():
     if news_data is not None:
         print(f"  [재개] 체크포인트에서 로드 ({len(news_data)}건) → 재수집 스킵")
     else:
-        news_data = safe_collect(collect_news, NEWS_RSS_FEEDS, label="뉴스")
+        news_data = safe_collect(
+            collect_news, NEWS_RSS_FEEDS,
+            site_homepages=NEWS_SITE_HOMEPAGES, label="뉴스",
+        )
         checkpoint.save_stage("news", news_data)
     all_data.extend(news_data)
     print(f"  → {len(news_data)}건")

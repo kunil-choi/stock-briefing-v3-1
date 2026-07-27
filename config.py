@@ -41,15 +41,38 @@ PANELIST_MIN_VIEWS      = 50000
 PANELIST_MAX_RESULTS    = 10
 
 # ── RSS 뉴스 피드 ───────────────────────────────────────────────
+# FIX-NEWS-RSS-1: 2026-07-27 기준 실행 로그에서 8개 피드 중 6개가
+# 403/404/커넥션 리셋으로 죽어있는 것을 확인 → 조사 가능한 범위에서 최신
+# 주소로 교체. 파이낸셜뉴스는 URL 자체가 "fn_realestate_stock"(부동산)으로
+# 잘못돼 있어 애초에 증권 피드가 아니었던 것으로 보임 → "fn_realnews_stock"
+# (실시간 증권)로 수정. 언론사 RSS 주소는 사전 예고 없이 자주 바뀌므로,
+# 이 값이 다시 죽더라도 news_collector.collect_news()가
+# NEWS_SITE_HOMEPAGES를 이용해 자동으로 최신 주소를 탐지·재접속한다
+# (RSS-AUTO-1 참고).
 NEWS_RSS_FEEDS = {
-    "한국경제":     "https://www.hankyung.com/feed/finance",
+    "한국경제":     "http://rss.hankyung.com/stock.xml",
     "매일경제":     "https://www.mk.co.kr/rss/30100041/",
-    "머니투데이":   "https://rss.mt.co.kr/news/rss.xml",
-    "이데일리":     "https://rss.edaily.co.kr/edaily/stock.xml",
+    "머니투데이":   "http://rss.mt.co.kr/mt_news.xml",
+    "이데일리":     "http://rss.edaily.co.kr/edaily/stock.xml",
     "연합인포맥스": "https://news.einfomax.co.kr/rss/subList/2.xml",
     "뉴스핌":       "https://www.newspim.com/rss/",
-    "파이낸셜뉴스": "https://www.fnnews.com/rss/fn_realestate_stock.xml",
+    "파이낸셜뉴스": "http://www.fnnews.com/rss/fn_realnews_stock.xml",
     "아시아경제":   "https://www.asiae.co.kr/rss/all.htm",
+}
+
+# FIX-NEWS-RSS-1: RSS 피드 주소가 죽어있을 때 자동 재탐지에 쓸 앵커 페이지.
+# 표준 RSS 자동탐지 태그(<link rel="alternate" type="application/rss+xml">)가
+# 있을 가능성이 높은 페이지(가능하면 증권/경제 섹션, 없으면 RSS 안내 페이지나
+# 홈페이지)를 지정한다.
+NEWS_SITE_HOMEPAGES = {
+    "한국경제":     "https://www.hankyung.com/finance",
+    "매일경제":     "https://www.mk.co.kr/",
+    "머니투데이":   "https://www.mt.co.kr/rss/rss.html",
+    "이데일리":     "https://www.edaily.co.kr/article/stock",
+    "연합인포맥스": "https://news.einfomax.co.kr/",
+    "뉴스핌":       "https://www.newspim.com/",
+    "파이낸셜뉴스": "https://www.fnnews.com/rss",
+    "아시아경제":   "https://www.asiae.co.kr/",
 }
 
 # ── 주요 패널리스트 이름 목록 ────────────────────────────────────

@@ -13,16 +13,28 @@
 - BUG-7B FIX: link가 있는 항목은 seen_titles에 등록하지 않도록 수정
 - V3-NEWS-1: 기사 본문 크롤링 추가 (V2 이식) — RSS 요약보다 본문이 길면 본문 사용
              날짜 확인된 기사만 크롤링 슬롯 사용 (피드당 최대 15건)
+- RSS-AUTO-1: 언론사 RSS 주소는 예고 없이 자주 바뀌는데(2026-07-27 기준
+              8개 중 6개가 403/404/커넥션 리셋), 죽은 URL을 방치하면 그
+              언론사의 기사가 통째로 브리핑에서 빠진다. 피드가 죽은 것으로
+              확인되면 해당 언론사 페이지에서 표준 RSS 자동탐지 태그
+              (<link rel="alternate" type="application/rss+xml">)를 읽어
+              최신 주소를 찾아 즉시 재접속을 시도하고, 성공하면
+              data/rss_feed_cache.json에 저장해 다음 실행부터는 재탐지 없이
+              바로 그 주소를 우선 시도한다.
 """
+import json
+import os
 import re
 import requests
 import feedparser
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta, timezone
 from email.utils import parsedate_to_datetime
-from urllib.parse import urlparse, urlunparse
+from urllib.parse import urlparse, urlunparse, urljoin
 
 KST = timezone(timedelta(hours=9))
+
+_RSS_CACHE_FILE = "data/rss_feed_cache.json"
 
 
 def fetch_article_body(url: str, max_chars: int = 1500) -> str:
@@ -170,32 +182,142 @@ def _fetch_feed(feed_url: str, timeout: int = 10):
     return feedparser.parse(resp.content)
 
 
-def collect_news(rss_feeds: dict, hours: int = 24) -> list:
+def _fetch_valid_feed(feed_url: str, timeout: int = 10):
+    """_fetch_feed() + _is_valid_feed() + entries 존재 여부까지 확인해
+    "실제로 쓸 수 있는 피드"일 때만 feed 객체를 반환하고, 아니면 None."""
+    feed = _fetch_feed(feed_url, timeout)
+    if not _is_valid_feed(feed) or not feed.entries:
+        return None
+    return feed
+
+
+# ── RSS-AUTO-1: 죽은 피드 자동 재탐지 ────────────────────────────────────
+
+def _load_rss_cache() -> dict:
+    try:
+        with open(_RSS_CACHE_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
+def _save_rss_cache(cache: dict) -> None:
+    try:
+        os.makedirs("data", exist_ok=True)
+        with open(_RSS_CACHE_FILE, "w", encoding="utf-8") as f:
+            json.dump(cache, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        print(f"  [RSS캐시] 저장 실패: {e}")
+
+
+_RSS_LINK_RE = re.compile(
+    r'rss|\.xml$', re.IGNORECASE
+)
+
+
+def _discover_rss_url(homepage_url: str, timeout: int = 10) -> str:
+    """
+    RSS-AUTO-1: 언론사 페이지에서 표준 RSS 자동탐지 태그
+    (<link rel="alternate" type="application/rss+xml" href="...">)를 찾아
+    현재 유효한 RSS 주소를 추정한다. 못 찾으면 본문 <a> 태그 중 RSS로
+    보이는 링크(경로에 rss가 들어가거나 .xml로 끝남)로 한 번 더 시도한다.
+    아무것도 못 찾으면 빈 문자열을 반환한다 (탐지 실패 ≠ 예외).
+    """
+    try:
+        resp = requests.get(homepage_url, headers=_FEED_REQUEST_HEADERS, timeout=timeout)
+        resp.raise_for_status()
+        soup = BeautifulSoup(resp.text, "html.parser")
+
+        for link in soup.find_all("link", href=True):
+            rel  = " ".join(link.get("rel", [])).lower()
+            type_attr = (link.get("type") or "").lower()
+            if "alternate" in rel and ("rss" in type_attr or "xml" in type_attr):
+                return urljoin(homepage_url, link["href"])
+
+        for a in soup.find_all("a", href=True):
+            href = a["href"]
+            if _RSS_LINK_RE.search(href):
+                return urljoin(homepage_url, href)
+    except Exception as e:
+        print(f"    [RSS자동탐지] {homepage_url} 실패: {e}")
+    return ""
+
+
+def _recover_dead_feed(source_name: str, homepage_url: str, cache: dict,
+                        already_tried: set, timeout: int = 10):
+    """
+    죽은 피드 하나를 복구 시도한다.
+    1순위: 이전에 자동탐지로 찾아 캐시에 저장해둔 주소(있고, 이번에 아직
+           안 써봤다면) 재시도 — 매번 홈페이지를 다시 긁는 비용을 피한다.
+    2순위: 홈페이지에서 실시간으로 RSS 주소를 재탐지해 시도.
+    성공하면 (feed, 사용한 URL)을 반환하고 캐시를 갱신, 실패하면 (None, "").
+    """
+    cached_url = cache.get(source_name, "")
+    if cached_url and cached_url not in already_tried:
+        feed = _fetch_valid_feed(cached_url, timeout)
+        if feed:
+            return feed, cached_url
+        already_tried.add(cached_url)
+
+    if not homepage_url:
+        return None, ""
+
+    discovered_url = _discover_rss_url(homepage_url, timeout)
+    if not discovered_url or discovered_url in already_tried:
+        return None, ""
+
+    feed = _fetch_valid_feed(discovered_url, timeout)
+    if feed:
+        cache[source_name] = discovered_url
+        return feed, discovered_url
+    return None, ""
+
+
+def collect_news(rss_feeds: dict, hours: int = 24, site_homepages: dict = None) -> list:
     """
     RSS 피드에서 최근 N시간 이내 뉴스를 수집하고,
     날짜가 확인된 기사는 본문을 직접 크롤링하여 요약을 보강합니다.
 
     V3-NEWS-1: 피드당 최대 15건 본문 크롤링
                본문이 RSS 요약보다 길 경우에만 본문으로 교체
+    RSS-AUTO-1: rss_feeds에 등록된 주소가 죽어있으면 site_homepages(같은
+               source_name 키)를 이용해 최신 RSS 주소를 자동 탐지·재접속한다.
+               탐지 성공 시 data/rss_feed_cache.json에 저장해 다음 실행부터는
+               해당 주소를 바로 우선 시도한다.
     """
-    cutoff        = datetime.now(KST) - timedelta(hours=hours)
-    results       = []
+    cutoff         = datetime.now(KST) - timedelta(hours=hours)
+    results        = []
     failed_feeds: list[str] = []
+    site_homepages = site_homepages or {}
+    rss_cache      = _load_rss_cache()
+    cache_dirty    = False
 
     for source_name, feed_url in rss_feeds.items():
+        used_url = feed_url
+        feed     = None
         try:
-            feed = _fetch_feed(feed_url)
+            feed = _fetch_valid_feed(feed_url)
+            if feed is None:
+                print(f"  [뉴스] {source_name} 피드 무효/엔트리 없음 → 최신 주소 재탐지 시도")
+        except Exception as e:
+            print(f"  [뉴스] {source_name} 수집 실패: {e} → 최신 주소 재탐지 시도")
 
-            if not _is_valid_feed(feed):
-                print(f"  [뉴스] {source_name} 피드 파싱 오류 → 스킵")
+        if feed is None:
+            recovered_feed, recovered_url = _recover_dead_feed(
+                source_name, site_homepages.get(source_name, ""),
+                rss_cache, already_tried={feed_url},
+            )
+            if recovered_feed:
+                feed        = recovered_feed
+                used_url    = recovered_url
+                cache_dirty = True
+                print(f"  [뉴스] {source_name} 재접속 성공 → {used_url}")
+            else:
+                print(f"  [뉴스] {source_name} 최신 주소 탐지 실패 → 스킵")
                 failed_feeds.append(source_name)
                 continue
 
-            if not feed.entries:
-                print(f"  [뉴스] {source_name} 엔트리 없음 → 스킵")
-                failed_feeds.append(source_name)
-                continue
-
+        try:
             count       = 0
             crawl_count = 0  # V3-NEWS-1: 피드당 크롤링 슬롯 카운터
 
@@ -235,11 +357,15 @@ def collect_news(rss_feeds: dict, hours: int = 24) -> list:
                 })
                 count += 1
 
-            print(f"  [뉴스] {source_name}: {count}건 (본문크롤링 {crawl_count}건)")
+            recovered_tag = f" [주소갱신됨]" if used_url != feed_url else ""
+            print(f"  [뉴스] {source_name}: {count}건 (본문크롤링 {crawl_count}건){recovered_tag}")
 
         except Exception as e:
-            print(f"  [뉴스] {source_name} 수집 실패: {e}")
+            print(f"  [뉴스] {source_name} 항목 처리 실패: {e}")
             failed_feeds.append(source_name)
+
+    if cache_dirty:
+        _save_rss_cache(rss_cache)
 
     # ── 중복 제거 (BUG-7, BUG-7B 로직 유지) ─────────────────────────────────
     seen_links:  set[str] = set()
