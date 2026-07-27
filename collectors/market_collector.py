@@ -11,6 +11,10 @@
 - FIX-MKT-5  : 장 시작 전(09:00 KST 이전)에는 전일 종가 + "전일종가" 라벨 표시
 - FIX-MKT-6  : _is_premarket() 주말(토·일) 처리 추가
 - FIX-MKT-7  : 나스닥/S&P500/다우존스/달러원은 is_premarket=False 고정
+- FIX-MKT-13 : 미개장 구간 NaN placeholder 행 때문에 미국 지수 3종이 통째로
+               수집 실패 처리되던 버그 수정 (NaN 종가 행을 먼저 제거한 뒤
+               최근 유효 거래일 2개로 등락률 계산). 아울러 나스닥/S&P500/다우존스에
+               한국시간 요일 기준 "새벽 마감"/"전일 종가" 라벨을 추가.
 """
 
 import re
@@ -51,19 +55,32 @@ def _is_premarket() -> bool:
     return now.hour < 9
 
 
+def _us_close_label(now: datetime) -> str:
+    """
+    FIX-MKT-13: 나스닥/S&P500/다우존스는 미국 현지 마감가를 그대로 보여준다.
+    한국시간 기준 화~금요일 아침에는 그날 새벽(미국 전일장)에 막 마감한 지수이므로
+    "새벽 마감"으로, 월요일(및 주말) 아침에는 주말 동안 거래가 없어 금요일 마감가가
+    하루 이상 지난 데이터이므로 "전일 종가"로 구분 표시한다.
+    """
+    return "새벽 마감" if now.weekday() in (1, 2, 3, 4) else "전일 종가"
+
+
 def _make_indicator(value, change_pct, direction: str = "",
-                    is_premarket: bool = False) -> dict:
+                    is_premarket: bool = False, close_label: str = "") -> dict:
     try:
         pct_num = float(change_pct) if change_pct is not None else 0.0
     except (TypeError, ValueError):
         pct_num = 0.0
     if not direction:
         direction = "up" if pct_num > 0 else "down" if pct_num < 0 else "flat"
+    if not close_label and is_premarket:
+        close_label = "전일 종가"
     return {
         "value":        value,
         "change_pct":   pct_num,
         "direction":    direction,
         "is_premarket": is_premarket,
+        "close_label":  close_label,
     }
 
 
@@ -126,6 +143,12 @@ def _fetch_yf(ticker: str, is_krx: bool = False):
         # 주말 행 제외: 날짜 문자열(YYYY-MM-DD) 기준으로 weekday 판단 (timezone 무관)
         import pandas as pd
         valid_hist = hist[hist.index.map(lambda x: pd.Timestamp(str(x)[:10]).weekday() < 5)]
+        # FIX-MKT-13: 장 시작 전 yfinance가 "오늘" 자리에 NaN 종가 placeholder 행을
+        # 얹어 보내는 경우가 있음(특히 미국장 개장 전 아침 수집 시). 이 행을 그대로
+        # 마지막 행으로 쓰면 실제로는 존재하는 직전 거래일(예: 금요일) 종가까지
+        # 통째로 "수집 실패"가 되어버리므로, NaN 종가 행은 먼저 제거하고
+        # 남은 유효 거래일 중 최근 2개로 등락률을 계산한다.
+        valid_hist = valid_hist[valid_hist["Close"].notna()]
         if len(valid_hist) < 2:
             print(f"  [yfinance] {ticker} 유효 거래일 데이터 부족 (행수={len(valid_hist)})")
             return None, None
@@ -272,18 +295,23 @@ def collect_market_overview() -> dict:
     print("\n[시장수집] 지표 수집 시작...")
     result    = {}
     premarket = _is_premarket()
+    now_kst   = datetime.now(KST)
+    us_label  = _us_close_label(now_kst)
 
     if premarket:
         print("  [장전/주말] 전일 종가 기준으로 표시")
 
-    def _set(key: str, label: str, val, pct, is_pre: bool = False) -> None:
+    def _set(key: str, label: str, val, pct, is_pre: bool = False,
+             close_label: str = "") -> None:
         """FIX-MKT-10: 성공/실패 모두 result[key]를 채운다 (실패 시 value=None)."""
         if val is not None:
-            result[key] = _make_indicator(val, pct, is_premarket=is_pre)
-            suffix = " [전일종가]" if is_pre else ""
+            result[key] = _make_indicator(val, pct, is_premarket=is_pre,
+                                           close_label=close_label)
+            suffix = f" [{close_label}]" if close_label else ""
             print(f"  {label}: {val:,.2f} ({pct:+.2f}%){suffix}")
         else:
-            result[key] = _make_indicator(None, 0.0, direction="flat", is_premarket=is_pre)
+            result[key] = _make_indicator(None, 0.0, direction="flat",
+                                           is_premarket=is_pre, close_label=close_label)
             print(f"  {label}: 데이터 없음")
 
     # ── KOSPI ─────────────────────────────────────────────────────────────────
@@ -306,16 +334,18 @@ def collect_market_overview() -> dict:
     _set("kosdaq", "KOSDAQ", val, pct, premarket)
 
     # ── NASDAQ ────────────────────────────────────────────────────────────────
+    # FIX-MKT-13: 미국 지수는 항상 "마감된" 값이므로, 한국시간 요일에 따라
+    # 새벽 마감(화~금) / 전일 종가(월) 라벨을 함께 표시한다.
     val, pct = _fetch_yf("^IXIC")
-    _set("nasdaq", "NASDAQ", val, pct, False)
+    _set("nasdaq", "NASDAQ", val, pct, False, us_label)
 
     # ── S&P 500 ───────────────────────────────────────────────────────────────
     val, pct = _fetch_yf("^GSPC")
-    _set("sp500", "S&P500", val, pct, False)
+    _set("sp500", "S&P500", val, pct, False, us_label)
 
     # ── 다우존스 ──────────────────────────────────────────────────────────────
     val, pct = _fetch_yf("^DJI")
-    _set("dow", "DOW", val, pct, False)
+    _set("dow", "DOW", val, pct, False, us_label)
 
     # ── USD/KRW ───────────────────────────────────────────────────────────────
     val, pct = _fetch_yf("KRW=X")
