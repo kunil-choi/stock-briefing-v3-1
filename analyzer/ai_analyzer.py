@@ -43,6 +43,13 @@ AI 주식 브리핑 분석 엔진
 - FIX-PRICE-LABEL-1: is_open_market 조건 명확화
                      15:30 이후 → "종가", 09:00~15:30 → "현재가",
                      09:00 이전 → "전일종가"
+- FIX-CODE-MISMATCH-1: Claude가 응답 JSON에 직접 채워 넣은 stocks/market_leaders의
+                     "code" 필드를 그대로 신뢰하던 버그 수정. LG전자/LG화학/
+                     LG디스플레이처럼 이름이 비슷한 계열사끼리 코드를 혼동해
+                     엉뚱한 네이버 금융 페이지로 연결되는 사례가 있었음 →
+                     name이 이미 stock_map과 정확히 일치함을 이용해, 주가/채널
+                     정보 병합 시 code도 항상 stock_map(mention_lookup/ml_lookup)
+                     조회값으로 덮어쓰도록 수정.
 """
 
 import json
@@ -1232,6 +1239,13 @@ def analyze_and_generate_html(
             leader["price_label"] = price_label_default
         if name in ml_lookup:
             data = ml_lookup[name]
+            # FIX-CODE-MISMATCH-1: Claude가 응답 JSON에 직접 채운 "code"는
+            # LG전자/LG화학/LG디스플레이처럼 이름이 비슷한 계열사끼리 헷갈려
+            # 엉뚱한 종목코드를 써버리는 경우가 있었다(네이버 링크가 다른
+            # 종목 페이지로 연결되는 원인). name은 이미 stock_map 키와 정확히
+            # 일치하는 것이 보장되므로, code는 항상 stock_map에서 조회한
+            # 값으로 덮어써 신뢰할 수 있는 값만 쓰게 한다.
+            leader["code"] = data.get("code", "") or leader.get("code", "")
             leader["channel_counts"] = {
                 ch_type: len(items)
                 for ch_type, items in data["channels"].items()
@@ -1258,6 +1272,10 @@ def analyze_and_generate_html(
 
         if name in mention_lookup:
             data = mention_lookup[name]
+            # FIX-CODE-MISMATCH-1: leader와 동일한 이유로 code를 stock_map
+            # 조회값으로 덮어써, LLM이 비슷한 이름의 계열사 코드를 잘못
+            # 채워넣어도 최종 네이버 링크는 항상 올바른 종목을 가리키게 한다.
+            stock["code"] = data.get("code", "") or stock.get("code", "")
             stock["channel_counts"] = {
                 ch_type: len(items)
                 for ch_type, items in data["channels"].items()

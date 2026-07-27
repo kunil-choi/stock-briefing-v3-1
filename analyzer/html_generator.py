@@ -82,7 +82,7 @@ def _safe_float(d: dict, key: str, default: float = 0.0) -> float:
 
 
 def _indicator_badge(label: str, value, pct, direction: str = "",
-                     is_premarket: bool = False) -> str:
+                     close_label: str = "") -> str:
     # FIX-MKT-10: 값이 없어도 카드 자체는 항상 표출 ("-" placeholder)
     if value is None:
         return (
@@ -108,13 +108,13 @@ def _indicator_badge(label: str, value, pct, direction: str = "",
         val_str = str(value)
 
     pct_str   = f"{pct_num:+.2f}%"
-    pre_label = (
-        ' <span style="font-size:.65rem;color:#adb5bd;">(전일 종가)</span>'
-        if is_premarket else ""
+    close_note = (
+        f' <span style="font-size:.65rem;color:#adb5bd;">({close_label})</span>'
+        if close_label else ""
     )
     return (
         f'<div class="indicator-badge">'
-        f'<span class="ind-label">{label}{pre_label}</span>'
+        f'<span class="ind-label">{label}{close_note}</span>'
         f'<span class="ind-value">{val_str}</span>'
         f'<span class="ind-pct" style="color:{color_map[direction]};">'
         f'{arrow_map[direction]} {pct_str}</span>'
@@ -142,9 +142,9 @@ def _build_market_indicators(market_overview: dict) -> str:
                      item.get("price") or item.get("index"))
         pct       = (item.get("change_pct") or item.get("pct") or
                      item.get("percent")    or item.get("change_percent"))
-        direction = item.get("direction", "")
-        is_pre    = item.get("is_premarket", False)
-        badges   += _indicator_badge(label, value, pct, direction, is_pre)
+        direction   = item.get("direction", "")
+        close_label = item.get("close_label", "")
+        badges     += _indicator_badge(label, value, pct, direction, close_label)
     if not badges:
         return ('<div class="market-indicators">'
                 '<p style="color:#666;font-size:.85em;">시장 데이터 없음</p></div>')

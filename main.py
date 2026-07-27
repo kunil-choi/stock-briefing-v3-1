@@ -29,7 +29,7 @@ import checkpoint
 from config import (
     ANTHROPIC_API_KEY, YOUTUBE_API_KEY, GH_TOKEN, GITHUB_REPO,
     GEMINI_API_KEY,
-    NEWS_RSS_FEEDS, load_channels,
+    NEWS_RSS_FEEDS, NEWS_SITE_HOMEPAGES, load_channels,
 )
 from collectors.news_collector    import collect_news
 from collectors.youtube_collector import (
@@ -67,12 +67,12 @@ def _label_preview_html(html: str) -> str:
     # FIX-BADGE-1: 상단 전체폭 경고 배너 대신, 헤더 우측 끝에 작은 사각형
     # 배지로 "정식 브리핑은 오전 10시에 별도 업데이트된다"만 짧게 안내한다.
     badge = (
-        '<a href="https://kunil-choi.github.io/stock-briefing-v3/" '
+        '<a href="https://kunil-choi.github.io/stock-briefing-v3-2/" '
         'target="_blank" rel="noopener" style="flex-shrink:0;background:#1f2937;'
         'border:1px solid #374151;border-radius:8px;padding:8px 14px;'
         'text-align:center;font-size:12px;line-height:1.4;color:#fbbf24;'
         'text-decoration:none;font-weight:700;white-space:nowrap;">'
-        "주식시장 AI 브리핑<br>오전 10시 업데이트 예정"
+        "증권사 리포트 AI 분석<br>오전 10시 업데이트 예정"
         "</a>"
     )
     html = re.sub(
@@ -178,7 +178,10 @@ def main():
     if news_data is not None:
         print(f"  [재개] 체크포인트에서 로드 ({len(news_data)}건) → 재수집 스킵")
     else:
-        news_data = safe_collect(collect_news, NEWS_RSS_FEEDS, label="뉴스")
+        news_data = safe_collect(
+            collect_news, NEWS_RSS_FEEDS,
+            site_homepages=NEWS_SITE_HOMEPAGES, label="뉴스",
+        )
         checkpoint.save_stage("news", news_data)
     all_data.extend(news_data)
     print(f"  → {len(news_data)}건")
