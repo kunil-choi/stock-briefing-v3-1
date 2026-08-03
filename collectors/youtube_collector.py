@@ -419,12 +419,19 @@ def _normalize_channel_list(raw) -> list:
 
 # ── 섹션1: 등록 채널 플레이리스트 수집 ─────────────────────────────────
 
-def collect_section1_youtube(youtube, channels: dict) -> list:
+def collect_section1_youtube(youtube, channels: dict, hours_override: int = None) -> list:
+    """
+    WEEKEND-GAP-1: hours_override를 주면 broadcast/youtuber/securities 세
+    카테고리 모두 이 값으로 수집 창을 통일한다 (기본은 각 카테고리별
+    BROADCAST_HOURS/YOUTUBER_HOURS/SECURITIES_HOURS, 현재 모두 24h).
+    월요일 브리핑이 일요일(콘텐츠 최소)만 보고 금요일 정규장 당일 콘텐츠를
+    영영 놓치는 구멍을 메우기 위해 main.py가 월요일에만 72h를 넘겨준다.
+    """
     all_items  = []
     categories = [
-        ("broadcast",  BROADCAST_HOURS,  "경제방송", False),  # 경제방송 채널 추가
-        ("youtuber",   YOUTUBER_HOURS,   "유튜브",   False),
-        ("securities", SECURITIES_HOURS, "증권사",   True),
+        ("broadcast",  hours_override or BROADCAST_HOURS,  "경제방송", False),  # 경제방송 채널 추가
+        ("youtuber",   hours_override or YOUTUBER_HOURS,   "유튜브",   False),
+        ("securities", hours_override or SECURITIES_HOURS, "증권사",   True),
     ]
 
     for cat_key, hours, source_type, securities_filter in categories:
@@ -508,7 +515,7 @@ def collect_section1_youtube(youtube, channels: dict) -> list:
 
 # ── 섹션2: 패널리스트 이름 검색 수집 ────────────────────────────────────
 
-def collect_panelist_youtube(youtube) -> list:
+def collect_panelist_youtube(youtube, hours_override: int = None) -> list:
     """
     PANELIST-2: POPULAR_PANELISTS를 배치로 묶어 OR(|) 검색으로 후보를 모으고,
     실제 발언자/내용 검증은 다운스트림 Gemini 분석(gemini_youtube_analyzer.py)에
@@ -532,14 +539,19 @@ def collect_panelist_youtube(youtube) -> list:
     3. 비등록 채널 → channels.list로 구독자 수 배치 조회 (1유닛/호출)
        → _PANELIST_MIN_SUBSCRIBERS 미만이면 제외
 
-    - 수집 기간: _PANELIST_HOURS (24h, 사용자 요청 반영)
+    - 수집 기간: _PANELIST_HOURS (24h, 사용자 요청 반영) — hours_override가 있으면 그 값 사용
     - source_type: "유튜브"
     - 중복 제거: video_id 기준
     - BUG-1: cutoff를 UTC 기준으로 계산 (publishedAfter는 UTC 기준 RFC3339 요구)
+
+    WEEKEND-GAP-1: hours_override는 collect_section1_youtube()와 같은 이유로
+    main.py가 월요일에만 72h를 넘겨준다.
     """
     if not youtube:
         print("  [패널리스트 검색] YouTube 클라이언트 없음 → 스킵")
         return []
+
+    panelist_hours = hours_override or _PANELIST_HOURS
 
     # CHANNEL-FILTER-1: 채널 필터 세트 로드
     whitelist_ids, blacklist_ids, blacklist_names = _load_channel_filter_sets()
@@ -547,7 +559,7 @@ def collect_panelist_youtube(youtube) -> list:
     # BUG-1 수정: KST → UTC 기준으로 변경
     # publishedAfter 파라미터는 UTC 기준 RFC3339 포맷("Z" suffix)을 요구함
     # 기존 코드는 KST 시각에 "Z"를 붙여 UTC인 척 전달 → 실제로 9시간 오차 발생
-    cutoff    = datetime.now(UTC) - timedelta(hours=_PANELIST_HOURS)
+    cutoff    = datetime.now(UTC) - timedelta(hours=panelist_hours)
     cutoff_str = cutoff.strftime("%Y-%m-%dT%H:%M:%SZ")
     all_items = []
     seen_ids  = set()
@@ -558,7 +570,7 @@ def collect_panelist_youtube(youtube) -> list:
     ]
 
     print(f"  [패널리스트 검색] {len(POPULAR_PANELISTS)}명 → {len(batches)}배치, "
-          f"최근 {_PANELIST_HOURS}h (예상 quota: {len(batches) * 100}유닛)")
+          f"최근 {panelist_hours}h (예상 quota: {len(batches) * 100}유닛)")
 
     # CHANNEL-FILTER-1: 1단계 — 검색 후보를 수집하되 채널 ID를 기록해둠
     # 구독자 수 조회는 배치로 한꺼번에 처리 (quota 최소화)
