@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>주식 시장 AI 프리뷰 — 2026년 08월 03일</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:         #0d1117;
+  --surface:    #161b22;
+  --surface2:   #21262d;
+  --border:     #30363d;
+  --text:       #e6edf3;
+  --text-muted: #8b949e;
+  --accent:     #58a6ff;
+  --up:         #ff6b6b;
+  --down:       #74c0fc;
+  --flat:       #adb5bd;
+}
+html { font-size: 16px; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  line-height: 1.6;
+  padding: 0 0 4rem;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+.container { max-width: 900px; margin: 0 auto; padding: 0 1rem; }
+.briefing-header {
+  text-align: center;
+  padding: 2.5rem 1rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 2rem;
+}
+.briefing-header h1 { font-size: 1.8rem; font-weight: 700; }
+.subtitle { color: var(--text-muted); font-size: .9rem; margin-top: .4rem; }
+.section { margin-bottom: 2.5rem; }
+.market-leader-card {
+  border-left: 3px solid #ffd43b;
+}
+.market-leader-card .stock-rank {
+  color: #ffd43b;
+}
+.section-title {
+  font-size: 1.15rem; font-weight: 700; color: var(--text);
+  border-left: 4px solid var(--accent);
+  padding-left: .75rem; margin-bottom: 1rem;
+}
+.market-indicators { display: flex; flex-wrap: wrap; gap: .6rem; }
+.indicator-badge {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; padding: .5rem .9rem;
+  display: flex; flex-direction: column; align-items: center; min-width: 100px;
+}
+.ind-label { font-size: .75rem; color: var(--text-muted); margin-bottom: .15rem; }
+.ind-value { font-size: .95rem; font-weight: 600; }
+.ind-pct   { font-size: .8rem;  margin-top: .1rem; }
+.summary-block { margin-bottom: 1.2rem; }
+.summary-title {
+  font-size: .85rem; font-weight: 700; color: var(--accent);
+  margin-bottom: .35rem; text-transform: uppercase; letter-spacing: .04em;
+}
+.summary-text { font-size: .93rem; color: var(--text-muted); line-height: 1.65; }
+.sector-badges { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 1rem; }
+.sector-badge {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 20px; padding: .3rem .85rem;
+  font-size: .82rem; color: var(--accent); cursor: default;
+}
+.stock-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; margin-bottom: 1rem; overflow: hidden;
+}
+.stock-card-header {
+  display: flex; align-items: center; gap: .75rem;
+  padding: .85rem 1rem; border-bottom: 1px solid var(--border);
+  background: var(--surface2);
+}
+.stock-rank  { font-size: .8rem; font-weight: 700; color: var(--text-muted); min-width: 28px; }
+.stock-name-block { display: flex; align-items: center; gap: .5rem; flex: 1; }
+.stock-name  { font-size: 1.05rem; font-weight: 700; color: var(--text); }
+.stock-name:hover { color: var(--accent); }
+.signal-badge {
+  font-size: .72rem; padding: .15rem .5rem;
+  border-radius: 4px; border: 1px solid; font-weight: 600;
+}
+.overlap-badge { font-size: .78rem; color: #ffa94d; font-weight: 600; white-space: nowrap; }
+.stock-card-body { padding: .85rem 1rem; }
+.source-tags { display: flex; flex-wrap: wrap; gap: .4rem; margin-bottom: .6rem; }
+.source-tag  { font-size: .72rem; padding: .15rem .5rem; border-radius: 4px; font-weight: 600; }
+.price-row   { display: flex; align-items: center; gap: .75rem; margin-bottom: .75rem; flex-wrap: wrap; }
+.price-value { font-size: 1.05rem; font-weight: 700; }
+.chart-btn {
+  font-size: .78rem; padding: .3rem .75rem; border-radius: 6px;
+  background: var(--surface2); border: 1px solid var(--border);
+  color: var(--accent); cursor: pointer; text-decoration: none;
+  transition: background .15s;
+}
+.chart-btn:hover { background: var(--border); text-decoration: none; }
+.stock-section { margin-bottom: .75rem; }
+.stock-section-label { font-size: .78rem; font-weight: 700; color: var(--accent); display: block; margin-bottom: .25rem; }
+.stock-section-text  { font-size: .88rem; color: var(--text-muted); line-height: 1.6; }
+.reasons-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: .4rem; }
+.reasons-list li { font-size: .85rem; line-height: 1.55; }
+.reason-source { font-size: .72rem; padding: .1rem .4rem; border-radius: 3px; font-weight: 600; margin-right: .3rem; }
+.hidden-pick-card {
+  background: linear-gradient(135deg, var(--surface) 0%, #1a1f2e 100%);
+  border: 1px solid #3d4f6e; border-radius: 12px;
+  margin-bottom: 1rem; overflow: hidden;
+}
+.hp-card-header {
+  display: flex; align-items: center; gap: .75rem;
+  padding: .85rem 1rem; border-bottom: 1px solid #3d4f6e;
+  background: #1a2235; flex-wrap: wrap;
+}
+.hp-badges { display: flex; gap: .4rem; align-items: center; }
+.hp-source-badge {
+  font-size: .72rem; padding: .2rem .6rem; border-radius: 20px; font-weight: 700;
+}
+.hp-score-badge {
+  font-size: .72rem; padding: .2rem .6rem; border-radius: 20px;
+  background: #ffa94d22; color: #ffa94d; border: 1px solid #ffa94d55; font-weight: 700;
+}
+.hp-stock-name { font-size: 1.05rem; font-weight: 700; color: var(--text); flex: 1; }
+.hp-stock-name:hover { color: var(--accent); }
+.star-rating { font-size: 1rem; }
+.star.filled { color: #ffa94d; }
+.star.empty  { color: #444; }
+.hp-card-body { padding: .85rem 1rem; }
+.analyst-card {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-left-width: 3px; border-left-color: var(--accent);
+  border-radius: 8px; padding: .75rem 1rem; margin-bottom: .6rem;
+  transition: border-color .15s;
+}
+.analyst-card-meta { display: flex; align-items: center; gap: .5rem; margin-bottom: .3rem; flex-wrap: wrap; }
+.analyst-stock  { font-weight: 700; font-size: .92rem; }
+.analyst-broker {
+  font-size: .76rem; font-weight: 600; padding: .12rem .5rem;
+  border-radius: 999px;
+}
+.analyst-cat-badge {
+  font-size: .68rem; padding: .1rem .45rem; border-radius: 4px;
+  font-weight: 700;
+}
+.analyst-title-link, .analyst-title-text { font-size: .88rem; color: var(--text-muted); line-height: 1.5; }
+.analyst-title-link:hover { color: var(--accent); }
+.analyst-category-title {
+  font-size: .85rem; font-weight: 700; color: var(--accent);
+  margin: 1rem 0 .5rem; padding-left: .5rem; border-left: 3px solid var(--accent);
+}
+.strat-section { margin-bottom: 1.2rem; }
+.strat-title { font-size: .9rem; font-weight: 700; color: var(--accent); margin-bottom: .4rem; }
+.strat-body  { font-size: .88rem; color: var(--text-muted); }
+.strat-text  { margin-bottom: .3rem; line-height: 1.6; }
+.strat-item  { margin-bottom: .25rem; line-height: 1.55; }
+.disclaimer {
+  margin-top: 2.5rem;
+  padding: 1rem 1.4rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 4px solid #58a6ff44;
+  border-radius: 8px;
+  font-size: .78rem;
+  color: #6e7681;
+  line-height: 1.8;
+  text-align: center;
+}
+.disclaimer strong {
+  display: block;
+  color: #8b949e;
+  font-weight: 600;
+  margin-bottom: .35rem;
+  font-size: .82rem;
+}
+.modal-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,.75); z-index: 1000;
+  align-items: center; justify-content: center;
+}
+.modal-overlay.active { display: flex; }
+.modal-box {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; padding: 1.5rem; max-width: 700px; width: 95%; position: relative;
+}
+.modal-title  { font-size: 1rem; font-weight: 700; margin-bottom: 1rem; color: var(--text); }
+.modal-close  {
+  position: absolute; top: .75rem; right: .75rem;
+  background: none; border: none; color: var(--text-muted); font-size: 1.2rem; cursor: pointer;
+}
+.modal-close:hover { color: var(--text); }
+#modal-chart-img { width: 100%; border-radius: 8px; }
+@media (max-width: 600px) {
+  .briefing-header h1 { font-size: 1.4rem; }
+  .stock-card-header  { flex-wrap: wrap; }
+  .stock-name         { font-size: .95rem; }
+}</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="briefing-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;text-align:left;">
+    <div style="text-align:left;"><h1>📈 주식 시장 AI 프리뷰</h1>
+    <div class="subtitle">2026년 08월 03일 · 생성 시각 07:59 KST</div></div><a href="https://kunil-choi.github.io/stock-briefing-v3-2/" target="_blank" rel="noopener" style="flex-shrink:0;background:#1f2937;border:1px solid #374151;border-radius:8px;padding:8px 14px;text-align:center;font-size:12px;line-height:1.4;color:#fbbf24;text-decoration:none;font-weight:700;white-space:nowrap;">증권사 리포트 AI 분석<br>오전 10시 업데이트 예정</a>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📊 시장 지표</div>
+    <div class="market-indicators"><div class="indicator-badge"><span class="ind-label">코스피 <span style="font-size:.65rem;color:#adb5bd;">(전일 종가)</span></span><span class="ind-value">6,595.45</span><span class="ind-pct" style="color:#ff6b6b;">▲ +17.91%</span></div><div class="indicator-badge"><span class="ind-label">코스닥 <span style="font-size:.65rem;color:#adb5bd;">(전일 종가)</span></span><span class="ind-value">719.76</span><span class="ind-pct" style="color:#ff6b6b;">▲ +11.63%</span></div><div class="indicator-badge"><span class="ind-label">나스닥 <span style="font-size:.65rem;color:#adb5bd;">(전일 종가)</span></span><span class="ind-value">25,373.85</span><span class="ind-pct" style="color:#ff6b6b;">▲ +1.00%</span></div><div class="indicator-badge"><span class="ind-label">S&P500 <span style="font-size:.65rem;color:#adb5bd;">(전일 종가)</span></span><span class="ind-value">7,489.72</span><span class="ind-pct" style="color:#ff6b6b;">▲ +0.70%</span></div><div class="indicator-badge"><span class="ind-label">다우존스 <span style="font-size:.65rem;color:#adb5bd;">(전일 종가)</span></span><span class="ind-value">52,485.03</span><span class="ind-pct" style="color:#ff6b6b;">▲ +0.53%</span></div><div class="indicator-badge"><span class="ind-label">달러/원</span><span class="ind-value">1,420.60</span><span class="ind-pct" style="color:#74c0fc;">▼ -1.50%</span></div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🗞 최근 시장 흐름</div>
+    <div class="summary-block"><div class="summary-title">📌 최근 흐름</div><p class="summary-text">전일(8월 2일) 기준 국내외 주요 시장에서는 환율·금리·수출 등 복합 변수가 동시에 작동하며 변동성이 높은 흐름이 이어졌다. 미·일 양국이 15년 만의 공조 외환 개입을 통해 엔화 방어에 나서면서 원·엔 환율이 100엔당 917.6원으로 900원대에 복귀했다. 원·달러 환율도 SK하이닉스 ADR 자금 국내 유입, 조선사 선물환 매도(18년래 최대), 정부의 대기업 환전·환헤지 독려, 한국은행 기준금리 인상 등이 복합 작용하며 한 달 전 1600원대에서 빠르게 강세 전환했다. 한국 7월 수출은 989억 달러로 역대 두 번째 실적을 기록했고, 반도체 수출이 두 달 연속 400억 달러를 돌파하며 시장 심리를 지지했다.</p></div><div class="summary-block"><div class="summary-title">📊 주요 이슈</div><p class="summary-text">주요 이슈로는 미국 재무장관 베선트가 100억 달러 규모의 엔화 매입을 공개적으로 언급하며 달러 약세·엔화 강세 기조를 공식화했고, 시장에서는 일본의 추가 금리 인상이 뒤따라야 한다는 지적이 나왔다. 연준 FOMC 직후 채권 자경단(Bond Vigilante) 움직임이 강화되면서 기준금리 추가 인상 명분이 커졌다는 분석도 제기됐다. OPEC+는 9월부터 하루 18만 8000배럴 증산을 결정해 원유 공급 확대 신호를 보냈으며, 전국 주유소 휘발유 평균 판매가는 리터당 1869.1원으로 11주 연속 하락세를 이어갔다. 한편 이란과 미국이 8월 3일부터 호르무즈·비핵화 협상을 시작한다는 트럼프 발언이 전해지며 중동 지정학 리스크 해소 기대감도 형성됐다.</p></div><div class="summary-block"><div class="summary-title">🔍 핵심 포인트</div><p class="summary-text">긍정 요인으로는 반도체 중심의 수출 역대급 실적, 원화 강세 전환에 따른 외국인 투자 환경 개선, 미·일 공조로 인한 엔저 압력 완화 등이 꼽힌다. 반면 채권 자경단 발 장기금리 상승 압력, OPEC+ 증산에 따른 유가 하방 리스크, 기준금리 인상 가능성에 따른 대출·소비 위축 우려, 국내 기상관측 122년 만의 극한 폭염(최고 42.5도)으로 인한 온열질환자 급증 등 사회·경제 전반의 불안 요인도 병존한다. 삼성화재가 국내 민간기업 최초로 S&P 신용등급 AA를 획득하고 한국 7월 수출 20대 주력 품목 중 19개가 증가하는 등 펀더멘털 지표는 견조하나, 변동성 장세에서 목표전환형 펀드의 조기 익절 한계 등 수급 불안 요소도 주의가 필요하다.</p></div><div class="summary-block"><div class="summary-title">💡 전망</div><p class="summary-text">향후 시장의 핵심 변수는 이번 주 발표 예정인 미국 7월 고용지표와 스페이스X 상장 후 첫 실적 발표다. 고용지표가 견조하게 나올 경우 연준의 추가 금리 인상 기대가 강화되며 장기금리 상승과 함께 주식 시장 변동성이 재차 확대될 수 있다. 반면 빅테크의 AI 투자 지속, 반도체 수출 모멘텀, 원화 강세에 따른 외국인 수급 개선이 맞물릴 경우 국내 증시는 단기 반등 흐름을 이어갈 가능성이 있다. 미·이란 협상 개시와 엔화 강세 공조 지속 여부도 단기 방향성을 결정짓는 중요 체크포인트다.</p></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔥 오늘의 핫 섹터</div>
+    <div class="sector-badges"><div class="sector-badge" title="수출 역대급">반도체</div><div class="sector-badge" title="미일 엔화공조">외환·환율</div><div class="sector-badge" title="선물환매도 최대">조선</div><div class="sector-badge" title="삼성화재 S&P AA">보험</div><div class="sector-badge" title="AI데이터센터 수요">철강</div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🏆 오늘의 대형 주도주</div>
+    
+<div class="stock-card market-leader-card">
+  <div class="stock-card-header">
+    <div class="stock-rank">#1</div>
+    <div class="stock-name-block">
+      <a href="" target="_blank" rel="noopener"
+         class="stock-name">삼성전자</a>
+      <span class="signal-badge signal-neutral"
+            style="border-color:#adb5bd;color:#adb5bd;">중립</span>
+    </div>
+    <div class="overlap-badge" title="비뉴스 채널 중복 언급 수">🔥 1개</div>
+  </div>
+  <div class="stock-card-body">
+    <div class="source-tags"><span class="source-tag" style="background:#2d3a4a;color:#74c0fc;">뉴스</span><span class="source-tag" style="background:#2d1a3a;color:#cc5de8;">유튜브</span></div>
+    <div class="price-row"><span class="price-value">262,500원</span><span style="font-size:.7rem;color:#adb5bd;margin-left:.3rem;">(전일종가)</span><span style="font-size:.82rem;color:#ff6b6b;margin-left:.35rem;">▲ +26.81%</span><span style="font-size:.7rem;color:#adb5bd;margin-left:.2rem;">(전전일 대비)</span></div>
+    <div class="stock-section"><span class="stock-section-label">📋 종목 요약</span><p class="stock-section-text">반도체 수출이 두 달 연속 400억 달러를 돌파하며 한국 수출 역대 2위 실적을 견인했다. 다만 중국 CXMT의 생산능력 확대 및 DUV 자체 개발 이슈가 경쟁 리스크로 부각되고 있다.</p></div><div class="stock-section"><span class="stock-section-label">🚀 상승 촉매</span><p class="stock-section-text">7월 한국 반도체 수출 두 달 연속 400억 달러 돌파로 업종 전반의 수요 강도가 확인됐다. 원화 강세 전환과 외국인 수급 개선 가능성도 대형 수출주에 우호적 환경을 형성한다.</p></div><div class="stock-section"><span class="stock-section-label">⚠️ 리스크</span><p class="stock-section-text">중국 CXMT의 생산능력 60만 장 확대 계획 및 DUV 노광장비 자체 개발 추진이 중장기 경쟁 심화 리스크로 작용할 수 있다. 미국 기준금리 추가 인상 시 글로벌 수요 둔화 우려도 상존한다.</p></div><div class="stock-section"><span class="stock-section-label">🎙️ 패널 발언</span><ul class="reasons-list"><li><span style="color:#ffd43b;font-weight:700;">이형수 대표 (HSL Partners 대표) · 김작가TV</span> <a href="https://www.youtube.com/watch?v=1kbX6sA4OqQ&t=00:10" target="_blank" rel="noopener" style="color:#adb5bd;text-decoration:none;">삼성전자와 SK하이닉스, 그리고 소부장 기업들이 고점 대비 40%가량 빠진 상황은 이례적이며, 펀더멘털에 문제가 있는 것은 아니고 수급 이슈가 크다고 판단합니다. 현재 삼성전자와 SK하이닉스는 PER 기준 약 4배 수준으로, 마이크론의 5~6배에 비하면 상당히 저평가되어 있습니다. 반도체 업종에 긍정적인 투자자에게는 매력적인 가격대입니다.</a></li><li><span style="color:#ffd43b;font-weight:700;">이형수 대표 (HSL Partners CEO) · 김작가TV</span> <a href="https://www.youtube.com/watch?v=XhjThFGrVDU&t=01:09" target="_blank" rel="noopener" style="color:#adb5bd;text-decoration:none;">삼성전자가 브로드컴과 메모리 및 파운드리 관련 2,000억 달러 규모의 5년 장기 계약을 체결했으며, 이는 기존 양해각서(MOU) 수준을 넘어선 구매 조건부 공동 개발 형태의 실질적인 계약으로 시장에 긍정적인 신호이다.</a></li><li><span style="color:#ffd43b;font-weight:700;">이경민 부장 · 웅달 책방</span> <a href="https://www.youtube.com/watch?v=pcjvkavh08A&t=05:28" target="_blank" rel="noopener" style="color:#adb5bd;text-decoration:none;">삼성전자의 로봇 사업 확대는 긍정적인 방향이지만, 2028년 상용화 예정임에도 불구하고 현재 시장이 악재에 예민하게 반응하고 호재를 반영하지 못하고 있습니다. 후발주자로서 성공 가능성은 높지만, 시장의 평가가 반영되기까지는 시간이 걸릴 수 있습니다.</a></li></ul></div><div class="stock-section"><span class="stock-section-label">📢 채널별 언급 내용</span><ul class="reasons-list"><li><span style="color:#cc5de8;font-weight:600;">815머니톡</span> <a href="https://www.youtube.com/watch?v=DTBLizmRE_4" target="_blank" rel="noopener" style="color:#adb5bd;text-decoration:none;">CXMT가 실제로 생산능력을 60만 장까지 늘릴 수 있는지, 그리고 중국의 DUV 노광장비 자체 개발 뉴스가 어디까지 사실인지를 분석하며 삼성전자·SK하이닉스에 대한 실질적 위협 수준을 점검했다.</a></li><li><span style="color:#74c0fc;font-weight:600;">매일경제</span> <a href="https://www.mk.co.kr/news/economy/12114602" target="_blank" rel="noopener" style="color:#adb5bd;text-decoration:none;">7월 수출이 989억 달러로 역대 두 번째 실적을 기록했으며, 반도체 수출이 두 달 연속 400억 달러를 넘어서고 20대 주력 품목 중 19개의 수출이 증가했다.</a></li></ul></div>
+  </div>
+</div>
+<div class="stock-card market-leader-card">
+  <div class="stock-card-header">
+    <div class="stock-rank">#2</div>
+    <div class="stock-name-block">
+      <a href="" target="_blank" rel="noopener"
+         class="stock-name">SK하이닉스</a>
+      <span class="signal-badge signal-positive"
+            style="border-color:#51cf66;color:#51cf66;">긍정</span>
+    </div>
+    <div class="overlap-badge" title="비뉴스 채널 중복 언급 수">🔥 1개</div>
+  </div>
+  <div class="stock-card-body">
+    <div class="source-tags"><span class="source-tag" style="background:#2d3a4a;color:#74c0fc;">뉴스</span><span class="source-tag" style="background:#2d1a3a;color:#cc5de8;">유튜브</span></div>
+    <div class="price-row"><span class="price-value">1,718,000원</span><span style="font-size:.7rem;color:#adb5bd;margin-left:.3rem;">(전일종가)</span><span style="font-size:.82rem;color:#ff6b6b;margin-left:.35rem;">▲ +29.95%</span><span style="font-size:.7rem;color:#adb5bd;margin-left:.2rem;">(전전일 대비)</span></div>
+    <div class="stock-section"><span class="stock-section-label">📋 종목 요약</span><p class="stock-section-text">반도체 수출 호조와 함께 SK하이닉스 ADR 자금의 국내 유입이 원화 강세 전환의 주요 동력 중 하나로 작용했다. CXMT 위협 논의 속에서도 HBM 중심의 AI 반도체 수요가 실적을 뒷받침하고 있다.</p></div><div class="stock-section"><span class="stock-section-label">🚀 상승 촉매</span><p class="stock-section-text">SK하이닉스 ADR 자금이 국내로 유입되며 원·달러 환율 강세 전환에 기여했고, 이는 외국인 수급 개선으로 이어질 수 있다. 빅테크의 AI 투자 지속이 HBM 수요의 핵심 드라이버로 꼽히며 반도체 수출 400억 달러 돌파가 실적 모멘텀을 확인시켰다.</p></div><div class="stock-section"><span class="stock-section-label">⚠️ 리스크</span><p class="stock-section-text">중국 CXMT의 생산능력 60만 장 확대 및 DUV 자체 개발 추진은 중장기 메모리 공급 과잉 우려를 자극할 수 있다. 레버리지 투자로 꼬인 수급의 정상화 여부도 단기 변동성 확대 요인이다.</p></div><div class="stock-section"><span class="stock-section-label">🎙️ 패널 발언</span><ul class="reasons-list"><li><span style="color:#ffd43b;font-weight:700;">이형수 대표 (HSL Partners 대표) · 김작가TV</span> <a href="https://www.youtube.com/watch?v=1kbX6sA4OqQ&t=00:10" target="_blank" rel="noopener" style="color:#adb5bd;text-decoration:none;">삼성전자와 SK하이닉스, 그리고 소부장 기업들이 고점 대비 40%가량 빠진 상황은 이례적이며, 펀더멘털에 문제가 있는 것은 아니고 수급 이슈가 크다고 판단합니다. 현재 삼성전자와 SK하이닉스는 PER 기준 약 4배 수준으로, 마이크론의 5~6배에 비하면 상당히 저평가되어 있습니다. 반도체 업종에 긍정적인 투자자에게는 매력적인 가격대입니다.</a></li><li><span style="color:#ffd43b;font-weight:700;">이형수 대표 (HSL Partners CEO) · 김작가TV</span> <a href="https://www.youtube.com/watch?v=XhjThFGrVDU&t=01:06" target="_blank" rel="noopener" style="color:#adb5bd;text-decoration:none;">SK하이닉스가 엔비디아(5,000억 달러) 및 아마존/앤트로픽(2,500억 달러) 등과 총 7,500억 달러 규모의 5년 장기 계약을 체결했으며, 이는 파운드리 사업 전환을 가속화하고 미래 성장 동력을 확보하는 중요한 계기가 될 것이다.</a></li></ul></div><div class="stock-section"><span class="stock-section-label">📢 채널별 언급 내용</span><ul class="reasons-list"><li><span style="color:#cc5de8;font-weight:600;">815머니톡</span> <a href="https://www.youtube.com/watch?v=DTBLizmRE_4" target="_blank" rel="noopener" style="color:#adb5bd;text-decoration:none;">CXMT 상장이 삼성전자·SK하이닉스를 실질적으로 위협하는 사건인지를 진단하며, CXMT의 생산능력 확대 가능성과 DUV 자체 개발 뉴스의 사실 여부를 구체적으로 분석했다.</a></li><li><span style="color:#74c0fc;font-weight:600;">매일경제</span> <a href="https://www.mk.co.kr/news/economy/12114322" target="_blank" rel="noopener" style="color:#adb5bd;text-decoration:none;">SK하이닉스 ADR 자금이 국내로 유입되고 조선사 선물환 매도가 18년 만에 최대치를 기록하면서 불과 한 달 전 1600원대였던 원·달러 환율이 빠르게 강세 전환했다고 보도했다.</a></li><li><span style="color:#74c0fc;font-weight:600;">매일경제</span> <a href="https://www.mk.co.kr/news/economy/12114564" target="_blank" rel="noopener" style="color:#adb5bd;text-decoration:none;">앞으로 증시를 좌우할 핵심 변수로 반도체 수요와 빅테크의 AI 투자, 레버리지 투자로 꼬인 수급의 정상화 여부, 그리고 미국 장기 국채금리를 꼽으며 베선트의 엔화 매입이 미 장기금리를 낮춰 증시를 살리는 효과를 낼 수 있는지 주목했다.</a></li></ul></div>
+  </div>
+</div>
+    <div class="section-title">👀 오늘의 관심종목</div>
+    
+<div class="stock-card">
+  <div class="stock-card-header">
+    <div class="stock-rank">#1</div>
+    <div class="stock-name-block">
+      <a href="https://finance.naver.com/item/main.naver?code=005380" target="_blank" rel="noopener"
+         class="stock-name">현대차</a>
+      <span class="signal-badge signal-positive"
+            style="border-color:#51cf66;color:#51cf66;">긍정</span>
+    </div>
+    <div class="overlap-badge" title="비뉴스 채널 중복 언급 수">🔥 1개</div>
+  </div>
+  <div class="stock-card-body">
+    <div class="source-tags"><span class="source-tag" style="background:#2d1a3a;color:#cc5de8;">유튜브 2</span></div>
+    <div class="price-row"><span class="price-value">388,000원</span><span style="font-size:.7rem;color:#adb5bd;margin-left:.3rem;">(전일종가)</span><span style="font-size:.82rem;color:#ff6b6b;margin-left:.35rem;">▲ +10.54%</span><span style="font-size:.7rem;color:#adb5bd;margin-left:.2rem;">(전전일 대비)</span><a href="https://finance.naver.com/item/main.naver?code=005380" target="_blank" rel="noopener" class="chart-btn">🔗 Naver 차트</a></div>
+    <div class="stock-section"><span class="stock-section-label">📋 종목 요약</span><p class="stock-section-text">전일 현대차 주가는 388,000원으로 전거래일 대비 10.54% 급등하며 강한 상승 모멘텀을 나타냈다. 로봇 사업 등 미래 성장 분야에 대한 기대감과 함께 증권가의 향후 전망 논의가 활발하게 이뤄졌다.</p></div><div class="stock-section"><span class="stock-section-label">🚀 상승 촉매</span><p class="stock-section-text">이경민 부장(웅달 책방)은 하락장에서 로봇주를 판 개미들의 패닉 매도 이후 현대차의 믿기 힘든 전망이 나왔다고 언급하며 로봇 사업 중심의 재평가 가능성을 제시했다. 전일 10.54%의 큰 폭 상승이 이미 시장에서 기대감이 선반영되고 있음을 시사한다.</p></div><div class="stock-section"><span class="stock-section-label">⚠️ 리스크</span><p class="stock-section-text">단기 급등에 따른 가격 부담과 차익 실현 매물 출회 가능성이 존재한다. 원화 강세 지속 시 수출 채산성 악화가 실적에 부정적으로 작용할 수 있다.</p></div><div class="stock-section"><span class="stock-section-label">🎙️ 패널 발언</span><ul class="reasons-list"><li><span style="color:#ffd43b;font-weight:700;">이형수 대표 (HSL Partners 대표) · 김작가TV</span> <a href="https://www.youtube.com/watch?v=1kbX6sA4OqQ&t=20:09" target="_blank" rel="noopener" style="color:#adb5bd;text-decoration:none;">로봇 대장주인 현대차 그룹의 주가가 반토막 났지만, 이는 테슬라 옵티머스 3세대 출시 지연의 영향이 큽니다. 현대차 그룹은 보스턴 다이내믹스 인수를 통해 로봇 제조에 강점을 가지고 있어, 중장기적으로는 유망하다고 판단합니다.</a></li><li><span style="color:#ffd43b;font-weight:700;">이경민 부장 · 웅달 책방</span> <a href="https://www.youtube.com/watch?v=pcjvkavh08A&t=01:02" target="_blank" rel="noopener" style="color:#adb5bd;text-decoration:none;">현대차 주가는 최근 40% 가까이 급락하여 선행 PER이 7배, PBR이 0.6배가 안 되는 매력적인 가격대에 도달했으나, 본업 실적이 예상보다 부진하고 흔들리는 상황이라 실적 안정성 확보가 최우선 과제입니다. 다만, 샌프란시스코 AI 서밋에서의 협력 및 엔비디아와의 자율주행 기술 협력은 장기적인 성장 동력으로서 주가의 상방을 열어줄 수 있는 긍정적인 요인으로 작용할 것입니다. 로봇 사업 재평가 가능성이 있으며, 방향성 투자자라면 지금부터 모아가는 것이 적절합니다.</a></li></ul></div><div class="stock-section"><span class="stock-section-label">📢 채널별 언급 내용</span><ul class="reasons-list"><li><span style="color:#cc5de8;font-weight:600;">웅달 책방</span> <a href="https://www.youtube.com/watch?v=pcjvkavh08A" target="_blank" rel="noopener" style="color:#adb5bd;text-decoration:none;">하락장에서 로봇주를 판 개미들의 패닉 상황을 짚으며 현대차에 대해 믿기 힘든 전망이 나왔다고 언급했고, 앞으로 현대차가 어떻게 될지에 대해 솔직한 전망을 제시했다.</a></li><li><span style="color:#cc5de8;font-weight:600;">815머니톡</span> <a href="https://www.youtube.com/watch?v=DTBLizmRE_4" target="_blank" rel="noopener" style="color:#adb5bd;text-decoration:none;">현대차증권 리서치센터 노근창 센터장이 출연해 반도체·AI 관련 종목과 시장 흐름을 분석했으며, 현대차 관련 주제도 함께 다뤄졌다.</a></li></ul></div>
+  </div>
+</div>
+<div class="stock-card">
+  <div class="stock-card-header">
+    <div class="stock-rank">#2</div>
+    <div class="stock-name-block">
+      <a href="https://finance.naver.com/item/main.naver?code=035720" target="_blank" rel="noopener"
+         class="stock-name">카카오</a>
+      <span class="signal-badge signal-neutral"
+            style="border-color:#adb5bd;color:#adb5bd;">중립</span>
+    </div>
+    <div class="overlap-badge" title="비뉴스 채널 중복 언급 수">🔥 1개</div>
+  </div>
+  <div class="stock-card-body">
+    <div class="source-tags"><span class="source-tag" style="background:#2d1a3a;color:#cc5de8;">유튜브 1</span></div>
+    <div class="price-row"><span class="price-value">37,400원</span><span style="font-size:.7rem;color:#adb5bd;margin-left:.3rem;">(전일종가)</span><span style="font-size:.82rem;color:#ff6b6b;margin-left:.35rem;">▲ +3.46%</span><span style="font-size:.7rem;color:#adb5bd;margin-left:.2rem;">(전전일 대비)</span><a href="https://finance.naver.com/item/main.naver?code=035720" target="_blank" rel="noopener" class="chart-btn">🔗 Naver 차트</a></div>
+    <div class="stock-section"><span class="stock-section-label">📋 종목 요약</span><p class="stock-section-text">전일 카카오 주가는 37,400원으로 전거래일 대비 3.46% 상승했다. 유튜브 채널 하와이 대저택에서 카카오톡 선물하기 등 카카오 플랫폼 서비스가 도서 판매 링크로 언급되는 등 간접적인 노출이 있었으나 종목 전망에 대한 직접적 분석은 수집되지 않았다.</p></div><div class="stock-section"><span class="stock-section-label">🚀 상승 촉매</span><p class="stock-section-text">전일 3.46% 상승하며 단기 상승 모멘텀이 확인됐다. 카카오톡 선물하기 등 플랫폼 커머스 서비스의 일상적 활용도는 안정적인 트래픽 기반을 뒷받침한다.</p></div><div class="stock-section"><span class="stock-section-label">⚠️ 리스크</span><p class="stock-section-text">이번 수집 데이터에서 카카오에 대한 직접적인 애널리스트 분석이나 사업 촉매 뉴스가 없어 상승의 지속성을 판단하기 어렵다. 금리 인상 환경에서 플랫폼·성장주 전반에 대한 밸류에이션 부담이 상존한다.</p></div><div class="stock-section"><span class="stock-section-label">📢 채널별 언급 내용</span><ul class="reasons-list"><li><span style="color:#cc5de8;font-weight:600;">하와이 대저택</span> <a href="https://www.youtube.com/watch?v=oE6PWcQQHn8" target="_blank" rel="noopener" style="color:#adb5bd;text-decoration:none;">도서 판매 링크 안내 중 카카오톡 선물하기 및 알라딘 등 플랫폼 서비스 URL이 포함됐으며, 카카오 종목 자체에 대한 투자 분석은 별도로 다뤄지지 않았다.</a></li></ul></div>
+  </div>
+</div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🤖 AI 투자 전략</div>
+    <div class="strat-section"><div class="strat-title">🎯 핵심 시나리오</div><div class="strat-body"><p class="strat-text">반도체 수출 역대급 실적(7월 400억 달러 돌파)과 미·일 공조 엔화 강세 전환, 원화 강세 흐름이 맞물리며 국내 대형 수출주 중심의 외국인 수급 개선 기대가 형성되고 있다. 그러나 채권 자경단 발 미국 장기금리 상승 압력과 OPEC+ 증산 결정, 기준금리 추가 인상 가능성이 동시에 작동 중이어서 변동성 관리가 핵심이다. 이번 주 미국 7월 고용지표와 스페이스X 첫 실적 발표가 단기 방향성을 결정지을 분기점이다.</p></div></div><div class="strat-section"><div class="strat-title">🔄 섹터 로테이션</div><div class="strat-body"><p class="strat-text">AI·반도체(삼성전자·SK하이닉스) 중심의 수출 모멘텀이 지속되는 가운데, 원화 강세 수혜가 제한적인 내수·금융(보험, 은행) 섹터로의 관심도 높아지고 있다. 삼성화재의 S&amp;P AA 등급 획득은 국내 보험주 리레이팅의 신호탄이 될 수 있으며, 한전의 호남 반도체 산단 전력망 공사 단축은 AI 인프라 관련 전력·철강 섹터의 수혜 가능성을 시사한다. 조선주는 선물환 매도 18년 최대치가 확인되며 수주 모멘텀이 견조함을 간접 증명했다.</p></div></div><div class="strat-section"><div class="strat-title">📌 오늘의 주목 포인트</div><div class="strat-body"><div class="strat-item">• 이번 주 미국 7월 고용지표: 예상치 상회 시 연준 추가 금리 인상 기대 강화→장기금리 상승→성장주 밸류에이션 부담 확대</div><div class="strat-item">• 미·일 엔화 공조 개입 지속 여부 및 일본 추가 금리 인상 결정: 100엔당 원화값 900원대 안착 여부가 일본 여행·수입 소비 관련 섹터에 영향</div><div class="strat-item">• CXMT 생산능력 확대 및 DUV 자체 개발 진전 여부: 삼성전자·SK하이닉스 중장기 경쟁 구도 변화의 핵심 변수</div><div class="strat-item">• 미·이란 호르무즈·비핵화 협상 진행 상황: 협상 진전 시 유가 하락 압력 완화 및 에너지 비용 안정 기대</div></div></div><div class="strat-section"><div class="strat-title">⚠️ 리스크 시나리오</div><div class="strat-body"><div class="strat-item">• [보통] 미국 고용지표 서프라이즈 → 연준 추가 금리 인상 현실화 → 채권 자경단 활동 강화로 장기금리 급등 시 성장주·플랫폼주 비중 축소, 배당·가치주 및 단기채 비중 확대 고려</div><div class="strat-item">• [낮음] CXMT 생산능력 급속 확대 확인 → 메모리 공급 과잉 우려 재점화 → 삼성전자·SK하이닉스 단기 비중 조절, HBM 등 고부가 AI 반도체 중심 포지션 유지</div><div class="strat-item">• [낮음] 미·이란 협상 결렬 및 호르무즈 해협 긴장 재고조 → 유가 급등에 대비해 에너지·조선 관련 헤지 포지션 검토, 항공·운송 등 유가 민감 섹터 비중 축소</div></div></div><div class="strat-section"><div class="strat-title">📊 애널리스트 종합 시각</div><div class="strat-body"><p class="strat-text">노근창 현대차증권 리서치센터장은 CXMT의 실질적 위협 수준을 점검하며 생산능력 60만 장 확대 가능성과 DUV 자체 개발 뉴스의 사실 여부를 신중하게 평가했고, 과장된 우려보다는 실증 데이터 기반의 접근을 강조했다. 이경민 부장(웅달 책방)은 하락장에서 로봇주를 매도한 개인투자자들의 패닉을 경계하며 현대차의 로봇 사업 중심 장기 전망에 대해 긍정적 시각을 제시했다. 한국투자증권은 에이피알에 대해 7월 주가 조정으로 밸류에이션 매력이 크게 높아진 만큼 8월에는 실적과 성장성이 재평가되며 반등 가능성이 높다고 전망했다.</p></div></div>
+  </div>
+
+  <div class="disclaimer">
+    <strong>📌 투자 유의사항</strong>
+    본 브리핑은 뉴스·유튜브·애널리스트 리포트 등 공개 데이터를 AI가 수집·분석한 참고 자료입니다.
+    투자 권유 또는 종목 추천이 아니며, 수익을 보장하지 않습니다.
+    최종 투자 판단과 그에 따른 책임은 전적으로 본인에게 있습니다.
+  </div>
+
+</div>
+
+<div class="modal-overlay" id="chartModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeChart()">✕</button>
+    <div class="modal-title" id="modal-chart-title"></div>
+    <img id="modal-chart-img" src="" alt="차트">
+  </div>
+</div>
+
+<script>
+const chartDataMap = {};
+
+function showChart(key, name) {
+  const src = chartDataMap[key];
+  if (!src) return;
+  document.getElementById('modal-chart-title').textContent = name + ' 주가 차트';
+  document.getElementById('modal-chart-img').src = src;
+  document.getElementById('chartModal').classList.add('active');
+}
+
+function closeChart() {
+  document.getElementById('chartModal').classList.remove('active');
+  document.getElementById('modal-chart-img').src = '';
+}
+
+document.getElementById('chartModal').addEventListener('click', function(e) {
+  if (e.target === this) closeChart();
+});
+</script>
+
+</body>
+</html>
