@@ -36,7 +36,10 @@ SECURITIES_HOURS = 24
 REPORT_DAYS      = 1
 
 # ── 패널리스트 YouTube 검색 기준 ────────────────────────────────
-PANELIST_SEARCH_HOURS   = 48
+# DEAD-CONFIG-1: PANELIST_SEARCH_HOURS(구 48h)는 실제로는 어디서도 참조되지
+# 않던 죽은 값이었다 — 실제 검색 창은 collectors/youtube_collector.py의
+# _PANELIST_HOURS(24h, main.py에서 요일별로 override)가 단독으로 쓰인다.
+# 혼동 방지를 위해 삭제.
 PANELIST_MIN_VIEWS      = 50000
 PANELIST_MAX_RESULTS    = 10
 

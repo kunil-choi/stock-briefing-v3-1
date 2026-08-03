@@ -13,6 +13,10 @@
 #              (의미 혼동 방지 — 어제 종가에 오늘 등락률 붙이지 않음)
 # FIX-API-2  : Naver Stock API 응답 구조 변화 대응
 #              stockPrice 중첩 객체 내 키도 탐색
+# KRX-LOGIN-WALL-1: KRX가 2025-12-27부로 로그인 필수(회원제)로 전환돼
+#              data.krx.co.kr 직접 조회가 막힌 것을 대체하기 위해
+#              fetch_naver_stock_list()/fetch_naver_full_stock_map() 추가
+#              (전체 상장 종목명→코드 매핑을 네이버 시가총액 페이지에서 조회)
 
 import re
 import json
@@ -35,6 +39,18 @@ def _get(url: str, timeout: int = 10) -> str:
         req = urllib.request.Request(url, headers=HEADERS)
         with urllib.request.urlopen(req, timeout=timeout) as res:
             return res.read().decode("utf-8", errors="ignore")
+    except Exception as e:
+        print(f"[naver_finance] GET 실패 {url}: {e}")
+        return ""
+
+
+def _get_euckr(url: str, timeout: int = 10) -> str:
+    """공통 HTTP GET 헬퍼(EUC-KR 디코딩). 네이버 금융의 구버전 페이지들은
+    EUC-KR 인코딩을 쓰므로, UTF-8로 디코딩하면 한글이 깨진다."""
+    try:
+        req = urllib.request.Request(url, headers=HEADERS)
+        with urllib.request.urlopen(req, timeout=timeout) as res:
+            return res.read().decode("euc-kr", errors="ignore")
     except Exception as e:
         print(f"[naver_finance] GET 실패 {url}: {e}")
         return ""
@@ -109,6 +125,72 @@ def verify_stock_via_naver(stock_name: str) -> dict:
     if result:
         return {"verified": True, "code": result["code"], "name": result["name"]}
     return {"verified": False, "code": "", "name": stock_name}
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 전체 종목 목록 조회 (KRX 로그인 벽 우회)
+# ─────────────────────────────────────────────────────────────────────────────
+# KRX-LOGIN-WALL-1: KRX 정보데이터시스템이 2025-12-27부로 로그인 필수(회원제)로
+# 전환되면서, 익명 요청으로 전체 상장 종목 목록을 가져오던 기존 방식
+# (data.krx.co.kr/comm/bldAttendant/getJsonData.cmd)이 막혔다 — 로그인 세션이
+# 없으면 JSON 대신 오류 페이지가 와서 "Expecting value" 파싱 실패로 이어졌다.
+# pykrx 등 기존에 이 엔드포인트에 의존하던 라이브러리들도 동일한 문제를 겪고
+# 있어(관련 이슈 확인), KRX 도메인 자체를 계속 써서는 근본 해결이 안 된다.
+# 같은 종목명→코드 매핑을 KRX가 아닌 네이버 금융 "시가총액" 페이지(로그인
+# 불필요, 이 모듈이 가격 조회에도 이미 쓰고 있는 소스)에서 페이지네이션으로
+# 긁어와 대체한다.
+
+_MARKET_CAP_URL    = "https://finance.naver.com/sise/sise_market_sum.naver"
+_MARKET_CAP_ROW_RE = re.compile(
+    r'<a href="/item/main\.naver\?code=(\d{6})"[^>]*>([^<]+)</a>'
+)
+_MAX_MARKET_CAP_PAGES = 60  # 안전장치: 페이지당 최대 50종목 × 60페이지 = 3,000종목까지
+
+
+def fetch_naver_stock_list(sosok: int) -> dict:
+    """
+    네이버 금융 시가총액 페이지를 페이지네이션으로 순회해 종목명→코드
+    매핑을 만든다. sosok=0: 코스피, sosok=1: 코스닥.
+
+    새로 들어오는 종목이 없는 페이지를 만나면(=마지막 페이지를 지났음)
+    중단한다 — 페이지네이션 위젯을 별도로 파싱하지 않아도 되게 하는
+    단순하고 견고한 종료 조건. 안전장치로 _MAX_MARKET_CAP_PAGES를
+    넘지 않는다. 실패해도 예외를 던지지 않고 지금까지 모은 값(빈 dict
+    포함)을 반환한다 — 호출부(ai_analyzer.load_stock_names)가 fallback
+    처리를 담당.
+    """
+    stock_map = {}
+    page = 1
+    while page <= _MAX_MARKET_CAP_PAGES:
+        url  = f"{_MARKET_CAP_URL}?sosok={sosok}&page={page}"
+        html = _get_euckr(url)
+        if not html:
+            break
+
+        matches = _MARKET_CAP_ROW_RE.findall(html)
+        if not matches:
+            break
+
+        new_count = 0
+        for code, name in matches:
+            name = name.strip()
+            if name and name not in stock_map:
+                stock_map[name] = code
+                new_count += 1
+
+        if new_count == 0:
+            break
+        page += 1
+
+    return stock_map
+
+
+def fetch_naver_full_stock_map() -> dict:
+    """코스피 + 코스닥 전체 종목명→코드 매핑. 한쪽이 실패해도 나머지는 반환."""
+    kospi  = fetch_naver_stock_list(0)
+    kosdaq = fetch_naver_stock_list(1)
+    print(f"[naver_finance] 전체 종목 목록: 코스피 {len(kospi)}개 + 코스닥 {len(kosdaq)}개")
+    return {**kospi, **kosdaq}
 
 
 # ─────────────────────────────────────────────────────────────────────────────

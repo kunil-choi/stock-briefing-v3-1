@@ -36,7 +36,6 @@ from collectors.youtube_collector import (
     get_youtube_client,
     collect_section1_youtube,
     collect_panelist_youtube,
-    _PANELIST_HOURS,
 )
 from analyzer.ai_analyzer import analyze_and_generate_html
 
@@ -112,10 +111,33 @@ def safe_collect(fn, *args, label="", **kwargs):
         return []
 
 
+# ── WEEKEND-GAP-1: 월요일 수집 창 확장 ───────────────────────────────────
+# 뉴스/유튜브 수집은 모두 "최근 N시간" 창으로 동작하는데, 월~금 07:00에만
+# 실행되는 cron 특성상 화~금은 24h로 전날 하루(평일, 콘텐츠 많음)를 정확히
+# 커버하지만, 월요일은 24h로는 일요일(주말, 콘텐츠 최소)만 보게 된다.
+# 그 결과 금요일 정규장 당일(콘텐츠가 제일 많은 날)에 나온 뉴스·영상이
+# 어느 브리핑에도 포함되지 못하는 구멍이 생긴다 — 금요일 브리핑은 목요일까지만
+# 보고, 월요일 브리핑은 24h로는 일요일부터만 본다.
+# 월요일만 72h로 넓히면 금요일 07:00~월요일 07:00(금요일 전체+주말)를 정확히
+# 커버해 이 구멍을 메운다. API quota는 조회 횟수가 아니라 publishedAfter
+# 파라미터만 바뀌는 것이므로 추가 비용이 거의 없다.
+_DEFAULT_COLLECTION_HOURS = 24
+_MONDAY_COLLECTION_HOURS  = 72
+
+
+def _collection_window_hours(now: datetime) -> int:
+    return _MONDAY_COLLECTION_HOURS if now.weekday() == 0 else _DEFAULT_COLLECTION_HOURS
+
+
 def main():
     now_kst    = datetime.now(KST)
     print(f"=== V3_1 morning_core 데이터 생성 시작: {now_kst.strftime('%Y-%m-%d %H:%M:%S KST')} ===")
     start_time = now_kst.timestamp()
+
+    collection_hours = _collection_window_hours(now_kst)
+    if collection_hours != _DEFAULT_COLLECTION_HOURS:
+        print(f"  [수집기간] 월요일 확장 적용 → 최근 {collection_hours}h "
+              f"(금요일 전체+주말 커버)")
 
     # ── 체크포인트 정리/확인 ────────────────────────────────────────────────
     # RESUME-1: 이전 실행이 타임아웃/취소로 죽은 뒤 코드 수정 후 재실행하는
@@ -179,7 +201,7 @@ def main():
         print(f"  [재개] 체크포인트에서 로드 ({len(news_data)}건) → 재수집 스킵")
     else:
         news_data = safe_collect(
-            collect_news, NEWS_RSS_FEEDS,
+            collect_news, NEWS_RSS_FEEDS, collection_hours,
             site_homepages=NEWS_SITE_HOMEPAGES, label="뉴스",
         )
         checkpoint.save_stage("news", news_data)
@@ -195,13 +217,14 @@ def main():
     if SKIP_YOUTUBE:
         print("\n[2/3] 유튜브 수집 스킵 (SKIP_YOUTUBE=true)")
     else:
-        print("\n[2/3] 유튜브 수집 (경제방송/유튜버/증권사 24h)...")
+        print(f"\n[2/3] 유튜브 수집 (경제방송/유튜버/증권사 {collection_hours}h)...")
         yt_data = checkpoint.load_stage("youtube_section1")
         if yt_data is not None:
             print(f"  [재개] 체크포인트에서 로드 ({len(yt_data)}건) → 재수집 스킵")
         elif youtube:
             yt_data = safe_collect(
-                collect_section1_youtube, youtube, channels, label="유튜브"
+                collect_section1_youtube, youtube, channels, collection_hours,
+                label="유튜브",
             )
             print(f"  → {len(yt_data)}건")
             checkpoint.save_stage("youtube_section1", yt_data)
@@ -209,13 +232,14 @@ def main():
             yt_data = []
             print("  → YouTube 클라이언트 없음, 스킵")
 
-        print(f"\n[3/3] 패널리스트 이름 검색 수집 ({_PANELIST_HOURS}h)...")
+        print(f"\n[3/3] 패널리스트 이름 검색 수집 ({collection_hours}h)...")
         panelist_data = checkpoint.load_stage("youtube_panelist")
         if panelist_data is not None:
             print(f"  [재개] 체크포인트에서 로드 ({len(panelist_data)}건) → 재수집 스킵")
         elif youtube:
             panelist_data = safe_collect(
-                collect_panelist_youtube, youtube, label="패널리스트검색"
+                collect_panelist_youtube, youtube, collection_hours,
+                label="패널리스트검색",
             )
             print(f"  → {len(panelist_data)}건")
             checkpoint.save_stage("youtube_panelist", panelist_data)

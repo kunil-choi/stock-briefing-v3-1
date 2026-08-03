@@ -50,6 +50,11 @@ AI 주식 브리핑 분석 엔진
                      name이 이미 stock_map과 정확히 일치함을 이용해, 주가/채널
                      정보 병합 시 code도 항상 stock_map(mention_lookup/ml_lookup)
                      조회값으로 덮어쓰도록 수정.
+- KRX-LOGIN-WALL-1 : load_stock_names()의 KRX 직접 조회(data.krx.co.kr)가
+                     2025-12-27 KRX 회원제 전환 이후 항상 실패("Expecting
+                     value" 파싱 오류)해 31개짜리 fallback 리스트로만 동작
+                     하던 문제 수정. 네이버 금융 시가총액 페이지 기반 조회
+                     (naver_finance.fetch_naver_full_stock_map)로 교체.
 """
 
 import json
@@ -224,25 +229,15 @@ def load_stock_names() -> dict:
         except Exception:
             pass
 
-    stock_map = {}
+    # KRX-LOGIN-WALL-1: data.krx.co.kr가 2025-12-27부로 로그인 필수(회원제)로
+    # 전환되면서 익명 POST로 전체 종목 목록을 가져오던 기존 방식이 항상
+    # 실패했다("Expecting value" JSON 파싱 오류 — 로그인 세션 없이는 KRX가
+    # JSON 대신 오류 페이지를 반환). KRX 도메인을 계속 쓰는 한 근본 해결이
+    # 안 되므로, 같은 매핑을 로그인이 필요 없는 네이버 금융 시가총액
+    # 페이지에서 가져오도록 교체했다 (naver_finance.fetch_naver_full_stock_map).
     try:
-        import requests
-        for market_id in ["STK", "KSQ"]:
-            url     = "http://data.krx.co.kr/comm/bldAttendant/getJsonData.cmd"
-            payload = {
-                "bld":         "dbms/MDC/STAT/standard/MDCSTAT01901",
-                "mktId":       market_id,
-                "share":       "1",
-                "csvxls_isNo": "false",
-            }
-            headers = {"Referer": "http://data.krx.co.kr/"}
-            resp    = requests.post(url, data=payload, headers=headers, timeout=10)
-            data    = resp.json()
-            for item in data.get("OutBlock_1", []):
-                name = item.get("ISU_ABBRV", "").strip()
-                code = item.get("ISU_SRT_CD", "").strip()
-                if name and code:
-                    stock_map[name] = code
+        from .naver_finance import fetch_naver_full_stock_map
+        stock_map = fetch_naver_full_stock_map()
         if stock_map:
             os.makedirs("data", exist_ok=True)
             with open(STOCK_CACHE_FILE, "w", encoding="utf-8") as f:
@@ -250,10 +245,10 @@ def load_stock_names() -> dict:
                     {"date": today_kst, "stock_map": stock_map, "stocks": stock_map},
                     f, ensure_ascii=False,
                 )
-            print(f"[종목로드] KRX에서 {len(stock_map)}개 로드")
+            print(f"[종목로드] 네이버 금융에서 {len(stock_map)}개 로드")
             return stock_map
     except Exception as e:
-        print(f"[종목로드] KRX 요청 실패: {e}, fallback 사용")
+        print(f"[종목로드] 네이버 금융 요청 실패: {e}, fallback 사용")
 
     stock_map = {
         "삼성전자": "005930", "SK하이닉스": "000660", "LG에너지솔루션": "373220",
