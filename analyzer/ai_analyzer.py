@@ -213,6 +213,34 @@ def _normalize_result_stocks(result: dict, mention_lookup: dict) -> dict:
     return result
 
 
+def _normalize_result_market_leaders(result: dict, market_leaders_raw: list) -> dict:
+    """
+    FIX-LEADER-NAME-1: result["market_leaders"]의 name을 rank/순서 기준으로
+    강제 교정한다. market_leaders_raw는 Claude 호출 전 파이썬이 가중점수로
+    직접 선정한 대형 주도주 목록("진짜" 이름)이므로, Claude가 응답에서 이름을
+    손상시켜도("SK하이닉스" → "이닉스" 등) name만큼은 항상 신뢰할 수 있는
+    값으로 덮어쓴다. FIX-CODE-MISMATCH-1이 code에 적용한 것과 같은 신뢰
+    모델을 name에도 적용한 것 — name이 손상되면 code 보정용 ml_lookup 매칭도
+    실패해 잘못된 code가 그대로 남는 문제가 있었다.
+    """
+    leader_order = [name for name, _ in market_leaders_raw]
+
+    for idx, leader in enumerate(result.get("market_leaders", [])):
+        rank = leader.get("rank")
+        if isinstance(rank, int) and 1 <= rank <= len(leader_order):
+            auth_name = leader_order[rank - 1]
+        elif idx < len(leader_order):
+            auth_name = leader_order[idx]
+        else:
+            continue
+        if leader.get("name") != auth_name:
+            print(f"[정규화] market_leaders[{idx}] name 교정: "
+                  f"{leader.get('name')!r} → {auth_name!r}")
+        leader["name"] = auth_name
+
+    return result
+
+
 # ── 종목 이름 로드 ───────────────────────────────────────────────────────
 
 def load_stock_names() -> dict:
@@ -831,6 +859,8 @@ def build_analysis_prompt(
             f"0. market_leaders 배열에 아래 대형 주도주 {len(market_leaders_raw)}개를 반드시 포함.\n"
             f"   (오늘 가장 높은 언급 점수를 받은 시장 주도 대형주)\n"
             f"{leaders_text}\n"
+            f"   이 종목명은 반드시 위에 적힌 그대로(줄임말·오타 없이) 사용하세요.\n"
+            f"   그리고 이 종목들은 stocks 배열에 절대 다시 넣지 마세요(중복 등재 금지).\n"
         )
     else:
         leaders_rule = "0. market_leaders는 빈 배열 []로.\n"
@@ -1196,6 +1226,21 @@ def analyze_and_generate_html(
     # ── FIX-JSON-NAME-1: name 필드 정규화 (종목명 공백 버그 수정) ─────────
     mention_lookup = dict(filtered)
     result = _normalize_result_stocks(result, mention_lookup)
+    # ── FIX-LEADER-NAME-1: market_leaders name 손상 교정 ──────────────────
+    result = _normalize_result_market_leaders(result, market_leaders_raw)
+
+    # ── FIX-LEADER-DUP-1: market_leaders와 중복되는 stocks 항목 제거 ──────
+    # market_leaders_raw는 관심종목 후보(filtered)에서 이미 제외된 목록이지만,
+    # Claude가 헤드라인에 자주 등장하는 대형 주도주(예: SK하이닉스)를 stocks
+    # 배열에 자체적으로 다시 추가해버리는 경우가 있었다 → 대형 주도주 이름과
+    # 겹치는 stocks 항목은 여기서 강제로 제거한다.
+    leader_names = {name for name, _ in market_leaders_raw}
+    stocks_before = result.get("stocks", [])
+    result["stocks"] = [s for s in stocks_before if s.get("name") not in leader_names]
+    removed = len(stocks_before) - len(result["stocks"])
+    if removed:
+        dup_names = [s.get("name") for s in stocks_before if s.get("name") in leader_names]
+        print(f"[중복제거] market_leaders와 중복된 stocks {removed}개 제거: {dup_names}")
 
     # ── GEMINI-VAL-1: 검수 파이프라인 ───────────────────────────────────
     if GEMINI_API_KEY:
