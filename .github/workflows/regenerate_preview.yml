@@ -1,0 +1,49 @@
+name: 프리뷰(docs/index.html) 재생성
+
+# 관리자 페이지(docs/admin/)에서 브리핑 교정을 "승인"하면 이 워크플로우가
+# workflow_dispatch로 트리거된다. data/briefing_data.json은 관리자 페이지가
+# GitHub API로 이미 직접 커밋해 둔 뒤이므로, 여기서는 scripts/regenerate_preview.py로
+# 그 최신 JSON을 docs/index.html에 다시 반영하기만 한다 — Claude/Gemini/수집기
+# 호출이 전혀 없어 몇 초 안에 끝나고 비용도 들지 않는다.
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  regenerate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: 📥 저장소 체크아웃
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: 🐍 Python 환경 설정
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 🔄 docs/index.html 재생성
+        run: python scripts/regenerate_preview.py
+
+      - name: 🚀 변경사항 커밋 및 푸시
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add docs/index.html
+          if git diff --staged --quiet; then
+            echo "ℹ️  변경사항 없음 → 커밋 스킵"
+          else
+            git commit -m "🩹 관리자 교정 반영: docs/index.html 재생성 ($(TZ='Asia/Seoul' date +'%Y-%m-%d %H:%M KST'))"
+            for i in 1 2 3; do
+              git push && break || {
+                echo "⚠️  push 실패 (${i}회) → rebase 후 재시도"
+                sleep 3
+                git pull --rebase origin main || true
+              }
+            done
+          fi
