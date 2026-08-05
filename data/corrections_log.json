@@ -3,5 +3,10 @@
     "timestamp": "2026. 8. 5. 오전 10:35:15",
     "action": "delete_card",
     "detail": "이닉스 (market_leaders)"
+  },
+  {
+    "timestamp": "2026. 8. 5. 오전 10:35:23",
+    "action": "move_card",
+    "detail": "SK하이닉스: stocks → market_leaders"
   }
 ]
