@@ -121,11 +121,9 @@
           "source_url": "https://www.youtube.com/watch?v=BtxqebNW5vY&t=12:55"
         }
       ]
-    }
-  ],
-  "stocks": [
+    },
     {
-      "rank": 1,
+      "rank": 2,
       "name": "SK하이닉스",
       "code": "000660",
       "signal": "긍정",
@@ -212,9 +210,11 @@
           "source_url": "https://www.youtube.com/watch?v=C0TuIaF9KUY&t=00:45"
         }
       ]
-    },
+    }
+  ],
+  "stocks": [
     {
-      "rank": 2,
+      "rank": 1,
       "name": "레이",
       "code": "228670",
       "signal": "부정",
@@ -252,7 +252,7 @@
       "panelist_quotes": []
     },
     {
-      "rank": 3,
+      "rank": 2,
       "name": "현대차",
       "code": "005380",
       "signal": "중립",
@@ -314,7 +314,7 @@
       ]
     },
     {
-      "rank": 4,
+      "rank": 3,
       "name": "알테오젠",
       "code": "196170",
       "signal": "긍정",
@@ -376,7 +376,7 @@
       ]
     },
     {
-      "rank": 5,
+      "rank": 4,
       "name": "삼성전기",
       "code": "009150",
       "signal": "중립",
@@ -437,7 +437,7 @@
       ]
     },
     {
-      "rank": 6,
+      "rank": 5,
       "name": "삼성증권",
       "code": "016360",
       "signal": "중립",
@@ -481,7 +481,7 @@
       "panelist_quotes": []
     },
     {
-      "rank": 7,
+      "rank": 6,
       "name": "삼성SDI",
       "code": "006400",
       "signal": "긍정",
@@ -528,7 +528,7 @@
       ]
     },
     {
-      "rank": 8,
+      "rank": 7,
       "name": "에코프로",
       "code": "086520",
       "signal": "긍정",
