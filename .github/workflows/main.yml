@@ -125,14 +125,34 @@ jobs:
             echo "committed=false" >> "$GITHUB_OUTPUT"
           else
             git commit -m "📊 V3_1 morning_core 데이터 갱신: $(TZ='Asia/Seoul' date +'%Y-%m-%d %H:%M KST')"
+            # PUSH-DETACHED-HEAD-1: actions/checkout@v4는 detached HEAD 상태로
+            # 체크아웃하므로 인자 없는 `git push`는 "not currently on a branch"로
+            # 무조건 실패한다 — HEAD:main으로 대상 브랜치를 명시해 detached
+            # 상태에서도 push되게 한다. 실패 시 재시도 전에 이전 시도가 남겼을
+            # 수 있는 rebase 상태를 정리하고, 충돌은 방금 재생성한 내용을
+            # 우선(rebase에서 -X theirs = 리플레이되는 내 커밋 우선)해 해결한다.
+            # 이전엔 3회 재시도가 전부 실패해도 committed=true를 무조건 출력해
+            # 실제로는 아무것도 push되지 않았는데 워크플로우가 초록불로
+            # 끝나버리는 사고(2026-08-05 강제 재실행 결과 유실)가 있었다 —
+            # 이제 최종 실패 시 워크플로우 자체를 실패 처리한다.
+            PUSHED=false
             for i in 1 2 3; do
-              git push && break || {
-                echo "⚠️  push 실패 (${i}회) → rebase 후 재시도"
-                sleep 3
-                git pull --rebase origin main || true
-              }
+              if git push origin HEAD:main; then
+                PUSHED=true
+                break
+              fi
+              echo "⚠️  push 실패 (${i}회) → 최신 main 기준으로 리베이스 후 재시도"
+              git fetch origin main
+              git rebase --abort >/dev/null 2>&1 || true
+              git rebase -X theirs origin/main
+              sleep 3
             done
-            echo "committed=true" >> "$GITHUB_OUTPUT"
+            if [ "$PUSHED" = "true" ]; then
+              echo "committed=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "❌ 3회 재시도 후에도 push 실패 — 이번 실행 결과가 저장되지 않았습니다"
+              exit 1
+            fi
           fi
 
       # stock-briefing-step1(morning_core.yml, 실제 영상 생성 — OpenAI/TTS 과금 발생)은
