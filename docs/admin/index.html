@@ -144,6 +144,28 @@ details.card-acc .acc-body { padding: 1rem; }
 @media (max-width: 760px) { .two-col { grid-template-columns: 1fr; } }
 .notice { font-size: .8rem; color: var(--muted); background: var(--surface2);
   border: 1px solid var(--border); border-radius: 8px; padding: .7rem .9rem; margin-bottom: 1rem; }
+
+/* 승인 전 대기 변경사항 표시줄 */
+.pending-bar { background: #d2992215; border: 1px solid var(--orange); border-radius: 10px;
+  padding: .9rem 1rem; margin: 1rem 0; }
+.pending-bar.empty-state { background: var(--surface2); border-color: var(--border); }
+.pending-bar-title { font-size: .88rem; font-weight: 700; color: var(--orange); margin-bottom: .5rem;
+  display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }
+.pending-bar.empty-state .pending-bar-title { color: var(--muted); }
+.pending-list { list-style: none; font-size: .8rem; color: var(--text); margin: 0 0 .8rem; padding: 0; }
+.pending-list li { padding: .2rem 0; }
+.workflow-status { font-size: .8rem; color: var(--muted); margin-top: .6rem; }
+
+/* 미리보기 패널 */
+.preview-pane { border: 1px dashed var(--border); border-radius: 10px; padding: 1rem; margin-top: 1.2rem; }
+.preview-pane-title { font-size: .88rem; font-weight: 700; margin-bottom: .3rem; }
+.preview-pane-note { font-size: .74rem; color: var(--muted); margin-bottom: .9rem; }
+.preview-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+  padding: .8rem .9rem; margin-bottom: .6rem; }
+.preview-card-name { font-weight: 700; font-size: .92rem; margin-bottom: .4rem;
+  display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }
+.preview-field { font-size: .8rem; color: var(--text); margin-bottom: .35rem; line-height: 1.5; }
+.preview-field b { color: var(--muted); font-weight: 600; margin-right: .3rem; }
 </style>
 </head>
 <body>
@@ -197,10 +219,16 @@ const REPOS = {
 let activeRepoKey = "v3_1";
 let GH_TOKEN = "";
 // 저장소별 캐시: 브리핑 JSON, sha, 서브탭 상태 등을 보관
+// pending/pendingLog: "변경 승인" 전까지 브라우저 메모리에만 쌓이는 임시 수정
+// 사항. 카드 이동/삭제, 텍스트 수정 모두 이 상태를 거쳐 쌓이고, GitHub에는
+// approveChanges()가 한 번에 반영한다(REGEN-PREVIEW-1).
 const state = {
-  v3_1: { subtab: "registered", correctTab: "text", briefing: null, briefingSha: null },
-  v3_2: { subtab: "brokerRegistered", correctTab: "text", briefing: null, briefingSha: null },
-  v3:   { subtab: "correct", correctTab: "text", briefing: null, briefingSha: null },
+  v3_1: { subtab: "registered", correctTab: "text", briefing: null, briefingSha: null,
+          pending: false, pendingLog: [] },
+  v3_2: { subtab: "brokerRegistered", correctTab: "text", briefing: null, briefingSha: null,
+          pending: false, pendingLog: [] },
+  v3:   { subtab: "correct", correctTab: "text", briefing: null, briefingSha: null,
+          pending: false, pendingLog: [] },
 };
 
 // ── 인증 ──────────────────────────────────────────────────────────
@@ -660,12 +688,20 @@ function renderCorrect(el, repoCfg) {
     <div style="display:flex;gap:.75rem;margin-bottom:1.2rem;">
       <button class="btn" style="background:var(--accent);color:#000;" onclick="loadBriefingForCorrection()">🔄 브리핑 불러오기</button>
     </div>
+    <div id="pending-bar"></div>
     <div id="correct-inner"></div>
+    <div id="preview-pane"></div>
+    <div id="workflow-status" class="workflow-status"></div>
     <div class="card" style="padding:1.1rem;margin-top:1.5rem;">
       <div class="section-title" style="font-size:.9rem;margin-bottom:.75rem;">📋 교정 이력</div>
       <div id="correct-log"><div style="color:var(--muted);font-size:.82rem;">브리핑을 불러오면 표시됩니다.</div></div>
     </div>`;
-  if (st.briefing) { _renderCorrectInner(repoCfg); loadCorrectionLog(repoCfg); }
+  if (st.briefing) {
+    _renderCorrectInner(repoCfg);
+    _refreshPendingBar(repoCfg);
+    _refreshPreview(repoCfg);
+    loadCorrectionLog(repoCfg);
+  }
 }
 
 async function loadBriefingForCorrection() {
@@ -677,8 +713,14 @@ async function loadBriefingForCorrection() {
     const d = await ghGet(repoCfg, BRIEFING_PATH);
     st.briefing = JSON.parse(b64DecodeUtf8(d.content));
     st.briefingSha = d.sha;
+    // REGEN-PREVIEW-1: 새로 불러오면 GitHub의 최신 상태로 되돌아온 것이므로
+    // 이전에 쌓여 있던(승인 전) 임시 수정 내역은 모두 버린다.
+    st.pending = false;
+    st.pendingLog = [];
     statusEl.textContent = `✅ 로드 완료 (${new Date().toLocaleTimeString("ko-KR")})`;
     _renderCorrectInner(repoCfg);
+    _refreshPendingBar(repoCfg);
+    _refreshPreview(repoCfg);
     loadCorrectionLog(repoCfg);
   } catch(e) {
     statusEl.textContent = `❌ 로드 실패: ${e.message} (아직 브리핑이 생성되지 않았을 수 있습니다)`;
@@ -733,6 +775,220 @@ async function loadCorrectionLog(repoCfg) {
       </div>`).join("");
   } catch(e) {
     el.innerHTML = `<div style="color:var(--muted);font-size:.82rem;">이력 로드 실패: ${e.message}</div>`;
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════
+// REGEN-PREVIEW-1: 승인 전 임시 반영 / 미리보기 / 승인·취소
+// ══════════════════════════════════════════════════════════════════
+// 카드 이동·삭제, 텍스트 수정은 더 이상 그 자리에서 바로 GitHub에 저장하지
+// 않는다. 브라우저 메모리(state[repoKey].briefing)만 고치고 _markPending()으로
+// 표시해 둔 뒤, 사람이 미리보기로 확인하고 "변경 승인"을 눌러야 비로소
+// (1) data/briefing_data.json 커밋 (2) docs/index.html을 실제로 다시 만드는
+// GitHub Actions 워크플로우 트리거, 두 단계가 순서대로 일어난다.
+function _markPending(repoCfg, logEntry) {
+  const st = state[repoCfg.key];
+  st.pending = true;
+  st.pendingLog.push(logEntry);
+  _refreshPendingBar(repoCfg);
+  _refreshPreview(repoCfg);
+}
+
+function _refreshPendingBar(repoCfg) {
+  const el = document.getElementById("pending-bar");
+  if (!el) return;
+  const st = state[repoCfg.key];
+  if (!st.pending) {
+    el.innerHTML = `<div class="pending-bar empty-state"><div class="pending-bar-title">✅ 저장되지 않은 변경사항 없음</div></div>`;
+    return;
+  }
+  el.innerHTML = `
+    <div class="pending-bar">
+      <div class="pending-bar-title">⏳ 저장되지 않은 변경 ${st.pendingLog.length}건 — 아래 미리보기를 확인한 뒤 승인하세요</div>
+      <ul class="pending-list">
+        ${st.pendingLog.map(e => `<li>▸ ${escapeHtml(e.detail || e.action || "")}</li>`).join("")}
+      </ul>
+      <div class="btn-row" style="margin-top:0;">
+        <button class="btn btn-approve" onclick="approveChanges()">✅ 변경 승인 (JSON 저장 + 페이지 재생성)</button>
+        <button class="btn btn-reject" onclick="discardChanges()">↩️ 변경 취소</button>
+      </div>
+    </div>`;
+}
+
+function _refreshPreview(repoCfg) {
+  const el = document.getElementById("preview-pane");
+  if (!el) return;
+  const data = state[repoCfg.key].briefing;
+  if (!data) { el.innerHTML = ""; return; }
+  const inner = repoCfg.schema === "stock" ? _previewHtml_stock(data) : _previewHtml_report(data);
+  el.innerHTML = `
+    <div class="preview-pane-title">🔍 미리보기</div>
+    <div class="preview-pane-note">
+      실제 브리핑 페이지 디자인과 100% 동일하지 않은 구조 미리보기입니다 — 카드 순서·내용이
+      맞는지 확인하는 용도입니다. 정확한 최종 결과는 "변경 승인" 후 실제 페이지에서 확인하세요.
+    </div>
+    ${inner}`;
+}
+
+function _previewHtml_stock(data) {
+  const cardHtml = (bucket, c) => `
+    <div class="preview-card">
+      <div class="preview-card-name">
+        ${bucket === "market_leaders" ? "🏆" : "📌"} ${escapeHtml(c.name)}
+        <span class="badge ${bucket === "market_leaders" ? "badge-orange" : "badge-blue"}">
+          ${bucket === "market_leaders" ? "대형 주도주" : "관심종목"} · rank ${c.rank ?? "-"}
+        </span>
+      </div>
+      <div class="preview-field"><b>summary</b>${escapeHtml(c.summary || "")}</div>
+      <div class="preview-field"><b>catalyst</b>${escapeHtml(c.catalyst || "")}</div>
+      <div class="preview-field"><b>risk</b>${escapeHtml(c.risk || "")}</div>
+    </div>`;
+  return `
+    <div class="preview-card">
+      <div class="preview-card-name">📝 시장 요약</div>
+      <div class="preview-field">${escapeHtml(data.market_summary || "")}</div>
+    </div>
+    <div class="preview-card">
+      <div class="preview-card-name">🧠 AI 전략</div>
+      <div class="preview-field">${escapeHtml(data.ai_strategy || "")}</div>
+    </div>
+    ${(data.market_leaders || []).map(c => cardHtml("market_leaders", c)).join("")}
+    ${(data.stocks || []).map(c => cardHtml("stocks", c)).join("")}`;
+}
+
+function _previewHtml_report(data) {
+  const ab = data.analyst_briefing || { sector_themes: [], stocks: [] };
+  const br = data.brokerage_reports || { simultaneous: [], new_coverage: [], single_significant: [] };
+  let html = `
+    <div class="preview-card">
+      <div class="preview-card-name">🧠 AI 전략 업데이트</div>
+      <div class="preview-field">${escapeHtml(data.ai_strategy_update || "")}</div>
+    </div>`;
+  (ab.sector_themes || []).forEach(s => {
+    html += `
+      <div class="preview-card">
+        <div class="preview-card-name">🏭 ${escapeHtml(s.sector || "섹터")}</div>
+        <div class="preview-field">${escapeHtml(s.narrative || "")}</div>
+      </div>`;
+  });
+  (ab.stocks || []).forEach(s => {
+    html += `
+      <div class="preview-card">
+        <div class="preview-card-name">📇 ${escapeHtml(s.name)}
+          <span class="badge badge-blue">${escapeHtml(s.opinion || "")} · ${escapeHtml(s.target_price || "")}</span>
+        </div>
+        <div class="preview-field">${escapeHtml(s.analysis || "")}</div>
+      </div>`;
+  });
+  for (const [bucket, label] of REPORT_BUCKETS) {
+    (br[bucket] || []).forEach(r => {
+      html += `
+        <div class="preview-card">
+          <div class="preview-card-name">📑 ${escapeHtml(r.stock_name || "")}
+            <span class="badge badge-purple">${label}</span>
+          </div>
+          <div class="preview-field"><b>발행</b>${escapeHtml((r.brokers || []).join(", "))}</div>
+          <div class="preview-field"><b>요약</b>${escapeHtml(r.ai_summary || "")}</div>
+        </div>`;
+    });
+  }
+  return html;
+}
+
+async function approveChanges() {
+  const repoCfg = REPOS[activeRepoKey];
+  const st = state[repoCfg.key];
+  if (!st.pending) { showToast("승인할 변경사항이 없습니다", "error"); return; }
+  if (!confirm(`저장되지 않은 변경 ${st.pendingLog.length}건을 저장하고, 브리핑 페이지도 다시 만들까요?`)) return;
+  const wfEl = document.getElementById("workflow-status");
+  try {
+    if (wfEl) wfEl.textContent = "💾 data/briefing_data.json 저장 중...";
+    await saveBriefingJson(repoCfg, `admin: 브리핑 교정 승인 — ${st.pendingLog.length}건`);
+    await appendCorrectionLog(repoCfg, {
+      action: "approve_batch",
+      detail: st.pendingLog.map(e => e.detail || e.action).join(" / "),
+    });
+
+    if (wfEl) wfEl.textContent = "🚀 페이지 재생성 워크플로우 트리거 중...";
+    const dispatchedAt = await triggerRegeneratePreview(repoCfg);
+
+    st.pending = false;
+    st.pendingLog = [];
+    _refreshPendingBar(repoCfg);
+    showToast("✅ 저장 완료 — 페이지 재생성 진행 중");
+    pollWorkflowStatus(repoCfg, dispatchedAt, 0);
+  } catch(e) {
+    showToast(`오류: ${e.message}`, "error");
+    if (wfEl) wfEl.textContent = `❌ 승인 처리 중 오류: ${e.message}`;
+  }
+}
+
+async function discardChanges() {
+  const repoCfg = REPOS[activeRepoKey];
+  const st = state[repoCfg.key];
+  if (!st.pending) { showToast("취소할 변경사항이 없습니다", "error"); return; }
+  if (!confirm(`저장되지 않은 변경 ${st.pendingLog.length}건을 모두 버리고 GitHub의 최신 내용으로 다시 불러올까요?`)) return;
+  await loadBriefingForCorrection();
+  showToast("변경사항을 취소했습니다");
+}
+
+// REGEN-PREVIEW-1: "변경 승인" 시 이 워크플로우(regenerate_preview.yml)를
+// workflow_dispatch로 트리거해, Claude/Gemini 재호출 없이 scripts/regenerate_preview.py로
+// 최신 briefing_data.json을 docs/index.html에 반영한다. v3-1/v3-2 양쪽에 동일한
+// 파일명으로 만들어 둬야 한다. v3(오후) 저장소는 아직 파이프라인/워크플로우 자체가
+// 없어 트리거를 시도하지 않고 안내만 한다.
+const REGEN_WORKFLOW_FILE = "regenerate_preview.yml";
+
+async function triggerRegeneratePreview(repoCfg) {
+  if (repoCfg.key === "v3") {
+    showToast("V3 저장소는 아직 재생성 워크플로우가 없습니다 — JSON만 저장됐습니다", "error");
+    return null;
+  }
+  const dispatchedAt = new Date();
+  const r = await fetch(`https://api.github.com/repos/${repoCfg.repo}/actions/workflows/${REGEN_WORKFLOW_FILE}/dispatches`, {
+    method: "POST",
+    headers: { Authorization: `token ${GH_TOKEN}`, Accept: "application/vnd.github.v3+json",
+               "Content-Type": "application/json" },
+    body: JSON.stringify({ ref: repoCfg.branch })
+  });
+  if (!r.ok) {
+    const t = await r.text().catch(() => "");
+    throw new Error(`재생성 워크플로우 트리거 실패 (${r.status}): ${t.slice(0, 200)}`);
+  }
+  return dispatchedAt;
+}
+
+async function pollWorkflowStatus(repoCfg, dispatchedAt, attempts) {
+  const wfEl = document.getElementById("workflow-status");
+  if (!dispatchedAt) return; // v3처럼 트리거 자체를 안 한 경우
+  if (!wfEl) return;
+  try {
+    const r = await fetch(
+      `https://api.github.com/repos/${repoCfg.repo}/actions/workflows/${REGEN_WORKFLOW_FILE}/runs?per_page=5`,
+      { headers: { Authorization: `token ${GH_TOKEN}`, Accept: "application/vnd.github.v3+json" }, cache: "no-store" }
+    );
+    const j = await r.json();
+    const run = (j.workflow_runs || []).find(x => new Date(x.created_at) >= dispatchedAt);
+    if (run) {
+      if (run.status !== "completed") {
+        wfEl.textContent = `⏳ 페이지 재생성 워크플로우: ${run.status}...`;
+      } else if (run.conclusion === "success") {
+        wfEl.textContent = "✅ 페이지 재생성 완료 — 브리핑 페이지에 반영됐습니다.";
+        return;
+      } else {
+        wfEl.textContent = `❌ 페이지 재생성 워크플로우 실패 (${run.conclusion}) — Actions 탭에서 확인하세요.`;
+        return;
+      }
+    } else {
+      wfEl.textContent = "⏳ 페이지 재생성 워크플로우 시작 대기 중...";
+    }
+  } catch(e) {
+    wfEl.textContent = `⚠️ 상태 확인 중 오류: ${e.message}`;
+  }
+  if (attempts < 30) {
+    setTimeout(() => pollWorkflowStatus(repoCfg, dispatchedAt, attempts + 1), 4000);
+  } else {
+    wfEl.textContent = "⚠️ 상태 확인 시간 초과 — GitHub Actions 탭에서 직접 확인하세요.";
   }
 }
 
@@ -812,11 +1068,11 @@ function renderCorrectText_stock(el, repoCfg) {
         </div>
       </details>
     `).join("")}
-    <button class="btn btn-approve" style="margin-top:.5rem;" onclick="saveCorrectText_stock()">💾 텍스트 전체 저장</button>
+    <button class="btn btn-approve" style="margin-top:.5rem;" onclick="applyCorrectText_stock()">📝 이 내용 반영 (미리보기용, 승인 전)</button>
   `;
 }
 
-async function saveCorrectText_stock() {
+function applyCorrectText_stock() {
   const repoCfg = REPOS[activeRepoKey];
   const data = state[repoCfg.key].briefing;
   data.market_summary = document.getElementById("ft-market_summary").value;
@@ -830,11 +1086,8 @@ async function saveCorrectText_stock() {
     if (c) data[bucket][idx].catalyst = c.value;
     if (r) data[bucket][idx].risk     = r.value;
   });
-  try {
-    await saveBriefingJson(repoCfg, "admin: 브리핑 교정 — 텍스트 수정");
-    await appendCorrectionLog(repoCfg, { action: "edit_text", detail: "요약/전략/카드 본문 수정" });
-    showToast("✅ 저장 완료");
-  } catch(e) { showToast(`오류: ${e.message}`, "error"); }
+  _markPending(repoCfg, { action: "edit_text", detail: "요약/전략/카드 본문 수정" });
+  showToast("📝 임시 반영 완료 — 아래 미리보기 확인 후 승인하세요");
 }
 
 function renderCorrectCards_stock(el, repoCfg) {
@@ -870,7 +1123,7 @@ function _findCardIndex(data, bucket, name) {
 }
 function _renumber(list) { list.forEach((c, i) => { c.rank = i + 1; }); }
 
-async function moveCard_stock(bucket, name) {
+function moveCard_stock(bucket, name) {
   const repoCfg = REPOS[activeRepoKey];
   const data = state[repoCfg.key].briefing;
   const from = bucket;
@@ -881,7 +1134,7 @@ async function moveCard_stock(bucket, name) {
   if (to === "market_leaders" && (data.market_leaders || []).length >= 2) {
     if (!confirm(`대형 주도주가 이미 ${data.market_leaders.length}개입니다. "${name}"을(를) 추가해 ${data.market_leaders.length + 1}개로 만들까요? (보통은 2개를 유지합니다)`)) return;
   }
-  if (!confirm(`"${name}"을(를) ${to === "market_leaders" ? "대형 주도주로" : "관심종목으로"} 옮길까요?`)) return;
+  if (!confirm(`"${name}"을(를) ${to === "market_leaders" ? "대형 주도주로" : "관심종목으로"} 옮길까요? (아직 저장은 안 됩니다 — 승인 전까지는 임시 반영)`)) return;
 
   const [card] = data[from].splice(idx, 1);
   data[to] = data[to] || [];
@@ -889,28 +1142,22 @@ async function moveCard_stock(bucket, name) {
   _renumber(data.market_leaders || []);
   _renumber(data.stocks || []);
 
-  try {
-    await saveBriefingJson(repoCfg, `admin: 브리핑 교정 — 카드 이동 (${name}: ${from} → ${to})`);
-    await appendCorrectionLog(repoCfg, { action: "move_card", detail: `${name}: ${from} → ${to}` });
-    showToast(`✅ ${name} 이동 완료`);
-    renderCorrectCards_stock(document.getElementById("correct-tab-body"), repoCfg);
-  } catch(e) { showToast(`오류: ${e.message}`, "error"); }
+  _markPending(repoCfg, { action: "move_card", detail: `${name}: ${from} → ${to}` });
+  showToast(`📝 ${name} 이동 임시 반영 — 승인 전까지 저장 안 됨`);
+  renderCorrectCards_stock(document.getElementById("correct-tab-body"), repoCfg);
 }
 
-async function deleteCard_stock(bucket, name) {
+function deleteCard_stock(bucket, name) {
   const repoCfg = REPOS[activeRepoKey];
   const data = state[repoCfg.key].briefing;
-  if (!confirm(`"${name}" 카드를 삭제할까요?`)) return;
+  if (!confirm(`"${name}" 카드를 삭제할까요? (아직 저장은 안 됩니다 — 승인 전까지는 임시 반영)`)) return;
   const idx = _findCardIndex(data, bucket, name);
   if (idx === -1) { showToast("카드를 찾을 수 없습니다", "error"); return; }
   data[bucket].splice(idx, 1);
   _renumber(data[bucket]);
-  try {
-    await saveBriefingJson(repoCfg, `admin: 브리핑 교정 — 카드 삭제 (${name})`);
-    await appendCorrectionLog(repoCfg, { action: "delete_card", detail: `${name} (${bucket})` });
-    showToast(`🗑 ${name} 삭제 완료`);
-    renderCorrectCards_stock(document.getElementById("correct-tab-body"), repoCfg);
-  } catch(e) { showToast(`오류: ${e.message}`, "error"); }
+  _markPending(repoCfg, { action: "delete_card", detail: `${name} (${bucket})` });
+  showToast(`📝 ${name} 삭제 임시 반영 — 승인 전까지 저장 안 됨`);
+  renderCorrectCards_stock(document.getElementById("correct-tab-body"), repoCfg);
 }
 
 // ────────────────────────────────────────────────────────────────
@@ -943,11 +1190,11 @@ function renderCorrectText_report(el, repoCfg) {
         </div>
       </details>
     `).join("")}
-    <button class="btn btn-approve" style="margin-top:.5rem;" onclick="saveCorrectText_report()">💾 텍스트 전체 저장</button>
+    <button class="btn btn-approve" style="margin-top:.5rem;" onclick="applyCorrectText_report()">📝 이 내용 반영 (미리보기용, 승인 전)</button>
   `;
 }
 
-async function saveCorrectText_report() {
+function applyCorrectText_report() {
   const repoCfg = REPOS[activeRepoKey];
   const data = state[repoCfg.key].briefing;
   data.ai_strategy_update = document.getElementById("ft-ai_strategy_update").value;
@@ -960,11 +1207,8 @@ async function saveCorrectText_report() {
     const t = document.getElementById(`ft-abstock-${i}`);
     if (t) s.analysis = t.value;
   });
-  try {
-    await saveBriefingJson(repoCfg, "admin: 브리핑 교정 — 텍스트 수정");
-    await appendCorrectionLog(repoCfg, { action: "edit_text", detail: "AI전략/섹터/종목 분석 수정" });
-    showToast("✅ 저장 완료");
-  } catch(e) { showToast(`오류: ${e.message}`, "error"); }
+  _markPending(repoCfg, { action: "edit_text", detail: "AI전략/섹터/종목 분석 수정" });
+  showToast("📝 임시 반영 완료 — 아래 미리보기 확인 후 승인하세요");
 }
 
 const REPORT_BUCKETS = [
@@ -1022,37 +1266,31 @@ function renderCorrectCards_report(el, repoCfg) {
   el.innerHTML = html;
 }
 
-async function deleteAnalystStock_report(idx) {
+function deleteAnalystStock_report(idx) {
   const repoCfg = REPOS[activeRepoKey];
   const data = state[repoCfg.key].briefing;
   const ab = data.analyst_briefing || { stocks: [] };
   const name = ab.stocks[idx]?.name || "";
-  if (!confirm(`"${name}" 종목 분석 카드를 삭제할까요?`)) return;
+  if (!confirm(`"${name}" 종목 분석 카드를 삭제할까요? (아직 저장은 안 됩니다 — 승인 전까지는 임시 반영)`)) return;
   ab.stocks.splice(idx, 1);
-  try {
-    await saveBriefingJson(repoCfg, `admin: 브리핑 교정 — 종목 분석 카드 삭제 (${name})`);
-    await appendCorrectionLog(repoCfg, { action: "delete_card", detail: `${name} (analyst_briefing.stocks)` });
-    showToast(`🗑 ${name} 삭제 완료`);
-    renderCorrectCards_report(document.getElementById("correct-tab-body"), repoCfg);
-  } catch(e) { showToast(`오류: ${e.message}`, "error"); }
+  _markPending(repoCfg, { action: "delete_card", detail: `${name} (analyst_briefing.stocks)` });
+  showToast(`📝 ${name} 삭제 임시 반영 — 승인 전까지 저장 안 됨`);
+  renderCorrectCards_report(document.getElementById("correct-tab-body"), repoCfg);
 }
 
-async function deleteReportCard_report(bucket, idx) {
+function deleteReportCard_report(bucket, idx) {
   const repoCfg = REPOS[activeRepoKey];
   const data = state[repoCfg.key].briefing;
   const br = data.brokerage_reports || {};
   const name = br[bucket]?.[idx]?.stock_name || "";
-  if (!confirm(`"${name}" 리포트 카드를 삭제할까요?`)) return;
+  if (!confirm(`"${name}" 리포트 카드를 삭제할까요? (아직 저장은 안 됩니다 — 승인 전까지는 임시 반영)`)) return;
   br[bucket].splice(idx, 1);
-  try {
-    await saveBriefingJson(repoCfg, `admin: 브리핑 교정 — 리포트 카드 삭제 (${name})`);
-    await appendCorrectionLog(repoCfg, { action: "delete_card", detail: `${name} (${bucket})` });
-    showToast(`🗑 ${name} 삭제 완료`);
-    renderCorrectCards_report(document.getElementById("correct-tab-body"), repoCfg);
-  } catch(e) { showToast(`오류: ${e.message}`, "error"); }
+  _markPending(repoCfg, { action: "delete_card", detail: `${name} (${bucket})` });
+  showToast(`📝 ${name} 삭제 임시 반영 — 승인 전까지 저장 안 됨`);
+  renderCorrectCards_report(document.getElementById("correct-tab-body"), repoCfg);
 }
 
-async function moveReportCard_report(bucket, idx) {
+function moveReportCard_report(bucket, idx) {
   const repoCfg = REPOS[activeRepoKey];
   const data = state[repoCfg.key].briefing;
   const br = data.brokerage_reports || {};
@@ -1060,16 +1298,13 @@ async function moveReportCard_report(bucket, idx) {
   const target = targetSel ? targetSel.value : null;
   if (!target) return;
   const name = br[bucket]?.[idx]?.stock_name || "";
-  if (!confirm(`"${name}"을(를) ${bucket} → ${target}로 옮길까요?`)) return;
+  if (!confirm(`"${name}"을(를) ${bucket} → ${target}로 옮길까요? (아직 저장은 안 됩니다 — 승인 전까지는 임시 반영)`)) return;
   const [card] = br[bucket].splice(idx, 1);
   br[target] = br[target] || [];
   br[target].push(card);
-  try {
-    await saveBriefingJson(repoCfg, `admin: 브리핑 교정 — 리포트 카드 이동 (${name}: ${bucket} → ${target})`);
-    await appendCorrectionLog(repoCfg, { action: "move_card", detail: `${name}: ${bucket} → ${target}` });
-    showToast(`✅ ${name} 이동 완료`);
-    renderCorrectCards_report(document.getElementById("correct-tab-body"), repoCfg);
-  } catch(e) { showToast(`오류: ${e.message}`, "error"); }
+  _markPending(repoCfg, { action: "move_card", detail: `${name}: ${bucket} → ${target}` });
+  showToast(`📝 ${name} 이동 임시 반영 — 승인 전까지 저장 안 됨`);
+  renderCorrectCards_report(document.getElementById("correct-tab-body"), repoCfg);
 }
 </script>
 </body>
