@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>머니올라 브리핑 통합 관리자</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0d1117; --surface: #161b22; --surface2: #21262d;
+  --border: #30363d; --text: #e6edf3; --muted: #8b949e;
+  --accent: #58a6ff; --green: #3fb950; --red: #f85149;
+  --orange: #d29922; --purple: #bc8cff;
+}
+body { background: var(--bg); color: var(--text);
+  font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  line-height: 1.6; padding-bottom: 4rem; }
+.header { background: var(--surface); border-bottom: 1px solid var(--border);
+  padding: 1rem 1.5rem; display: flex; align-items: center;
+  justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+.header h1 { font-size: 1.1rem; font-weight: 700; }
+.header .subtitle { font-size: .78rem; color: var(--muted); margin-top: .1rem; }
+#login-form { max-width: 380px; margin: 6rem auto; padding: 2rem;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 12px; }
+#login-form h2 { font-size: 1.1rem; margin-bottom: .6rem; text-align: center; }
+#login-form .warn { font-size: .75rem; color: var(--orange); margin-bottom: 1rem; text-align: center; }
+#login-form input { width: 100%; padding: .6rem .9rem; background: var(--surface2);
+  border: 1px solid var(--border); border-radius: 6px; color: var(--text);
+  font-size: .9rem; margin-bottom: .8rem; }
+#login-form button { width: 100%; padding: .65rem; background: var(--accent);
+  border: none; border-radius: 6px; color: #000; font-weight: 700;
+  font-size: .95rem; cursor: pointer; }
+.container { max-width: 1040px; margin: 0 auto; padding: 1.5rem 1rem; }
+
+/* 상단 저장소(V3-1/V3-2/V3) 메뉴 */
+.repo-menu { display: flex; gap: .5rem; padding: 0 1rem; max-width: 1040px; margin: 0 auto;
+  border-bottom: 1px solid var(--border); background: var(--surface); }
+.repo-tab { padding: .7rem 1.3rem; font-size: .92rem; font-weight: 700; color: var(--muted);
+  cursor: pointer; border: none; background: none; border-bottom: 3px solid transparent;
+  transition: all .15s; }
+.repo-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+.repo-tab .repo-sub { display: block; font-size: .68rem; font-weight: 400; color: var(--muted); margin-top: .1rem; }
+
+.tabs { display: flex; gap: .5rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border);
+  flex-wrap: wrap; }
+.tab { padding: .5rem 1.1rem; font-size: .88rem; font-weight: 600;
+  color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent;
+  transition: all .15s; background: none; border-top: none;
+  border-left: none; border-right: none; }
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+.subtabs-sm { display: flex; gap: .4rem; margin-bottom: 1rem; }
+.subtab-sm { padding: .35rem .8rem; font-size: .8rem; font-weight: 600; color: var(--muted);
+  cursor: pointer; border: 1px solid var(--border); background: var(--surface2); border-radius: 6px; }
+.subtab-sm.active { color: #000; background: var(--accent); border-color: var(--accent); }
+
+.section-title { font-size: 1rem; font-weight: 700; margin-bottom: 1rem;
+  display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }
+.badge { font-size: .72rem; padding: .15rem .5rem; border-radius: 20px;
+  font-weight: 700; }
+.badge-orange { background: #d2992222; color: var(--orange); border: 1px solid #d2992244; }
+.badge-green  { background: #3fb95022; color: var(--green);  border: 1px solid #3fb95044; }
+.badge-red    { background: #f8514922; color: var(--red);    border: 1px solid #f8514944; }
+.badge-blue   { background: #58a6ff22; color: var(--accent); border: 1px solid #58a6ff44; }
+.badge-purple { background: #bc8cff22; color: var(--purple); border: 1px solid #bc8cff44; }
+.card { background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; margin-bottom: .75rem; overflow: hidden; }
+.card-header { padding: .75rem 1rem; background: var(--surface2);
+  display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; }
+.card-body { padding: .75rem 1rem; }
+.card-name { font-size: 1rem; font-weight: 700; flex: 1; }
+.card-meta { font-size: .78rem; color: var(--muted); }
+.sample-list { list-style: none; padding: 0; margin: .4rem 0; }
+.sample-list li { font-size: .8rem; color: var(--muted); padding: .2rem 0;
+  border-bottom: 1px solid var(--border); }
+.sample-list li:last-child { border: none; }
+.btn-row { display: flex; gap: .5rem; margin-top: .75rem; flex-wrap: wrap; }
+.btn { padding: .4rem .9rem; border-radius: 6px; font-size: .82rem;
+  font-weight: 700; cursor: pointer; border: none; transition: opacity .15s; }
+.btn:hover { opacity: .8; }
+.btn-approve { background: var(--green); color: #000; }
+.btn-reject  { background: var(--surface2); color: var(--red);
+  border: 1px solid var(--red); }
+.btn-move    { background: var(--surface2); color: var(--accent);
+  border: 1px solid var(--accent); }
+.btn-sm { padding: .25rem .6rem; font-size: .75rem; }
+.cat-select { padding: .3rem .5rem; background: var(--surface2);
+  border: 1px solid var(--border); border-radius: 5px; color: var(--text);
+  font-size: .82rem; }
+.channel-id-input { padding: .3rem .5rem; background: var(--surface2);
+  border: 1px solid var(--border); border-radius: 5px; color: var(--text);
+  font-size: .82rem; width: 200px; }
+.registered-table { width: 100%; border-collapse: collapse; font-size: .84rem; }
+.registered-table th { background: var(--surface2); padding: .5rem .75rem;
+  text-align: left; color: var(--muted); font-weight: 600;
+  border-bottom: 1px solid var(--border); }
+.registered-table td { padding: .5rem .75rem; border-bottom: 1px solid var(--border); }
+.registered-table tr:last-child td { border: none; }
+.btn-delete { background: var(--surface2); color: var(--red);
+  border: 1px solid #f8514944; }
+.btn-delete:hover { background: #f8514922; }
+.registered-table td.action-cell { width: 110px; text-align: center; white-space: nowrap; }
+.expert-tag { display: inline-block; background: var(--purple); color: #000;
+  font-size: .7rem; padding: .1rem .4rem; border-radius: 3px;
+  font-weight: 700; margin: .1rem; }
+.count-badge { background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 20px; font-size: .72rem; padding: .1rem .45rem; color: var(--muted); }
+.toast { position: fixed; bottom: 1.5rem; right: 1.5rem;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+  padding: .75rem 1.2rem; font-size: .88rem; z-index: 999;
+  transform: translateY(100px); transition: transform .3s; max-width: 60vw; }
+.toast.show { transform: translateY(0); }
+.toast.success { border-color: var(--green); color: var(--green); }
+.toast.error   { border-color: var(--red); color: var(--red); }
+.empty { text-align: center; padding: 2.5rem; color: var(--muted); font-size: .9rem; }
+.loading { text-align: center; padding: 2rem; color: var(--muted); }
+.spinner { display: inline-block; width: 20px; height: 20px;
+  border: 2px solid var(--border); border-top-color: var(--accent);
+  border-radius: 50%; animation: spin .8s linear infinite; margin-right: .5rem; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+textarea, input[type=text] { font-family: inherit; }
+.field-block { margin-bottom: .9rem; }
+.field-label { font-size: .78rem; color: var(--muted); margin-bottom: .3rem; display: flex;
+  align-items: center; gap: .4rem; }
+.field-textarea { width: 100%; padding: .55rem .75rem; background: var(--surface2);
+  border: 1px solid var(--border); border-radius: 6px; color: var(--text);
+  font-size: .84rem; resize: vertical; line-height: 1.55; }
+details.card-acc { background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; margin-bottom: .6rem; overflow: hidden; }
+details.card-acc > summary { padding: .7rem 1rem; background: var(--surface2); cursor: pointer;
+  font-size: .9rem; font-weight: 700; list-style: none; display: flex; align-items: center; gap: .6rem; }
+details.card-acc > summary::-webkit-details-marker { display: none; }
+details.card-acc > summary::before { content: '▸'; color: var(--muted); transition: transform .15s; }
+details.card-acc[open] > summary::before { transform: rotate(90deg); }
+details.card-acc .acc-body { padding: 1rem; }
+.card-list-row { display: flex; align-items: center; gap: .75rem; padding: .6rem .8rem;
+  border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+.card-list-row:last-child { border: none; }
+.card-list-row .name { font-weight: 700; flex: 1; min-width: 140px; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
+@media (max-width: 760px) { .two-col { grid-template-columns: 1fr; } }
+.notice { font-size: .8rem; color: var(--muted); background: var(--surface2);
+  border: 1px solid var(--border); border-radius: 8px; padding: .7rem .9rem; margin-bottom: 1rem; }
+</style>
+</head>
+<body>
+
+<div id="login-screen">
+  <div id="login-form">
+    <h2>🔐 브리핑 통합 관리자</h2>
+    <p class="warn">⚠️ 이 페이지 URL과 GitHub 토큰은 반드시 비공개로 유지하세요.</p>
+    <input type="password" id="pw-input" placeholder="비밀번호" onkeydown="if(event.key==='Enter')login()">
+    <button onclick="login()">로그인</button>
+    <p id="login-err" style="color:var(--red);font-size:.8rem;margin-top:.5rem;text-align:center;"></p>
+  </div>
+</div>
+
+<div id="main-screen" style="display:none;">
+  <div class="header">
+    <div>
+      <div style="font-size:1.1rem;font-weight:700;">🛠 머니올라 브리핑 통합 관리자</div>
+      <div class="subtitle" id="header-time"></div>
+    </div>
+    <button class="btn btn-sm" style="background:var(--surface2);color:var(--muted);" onclick="logout()">로그아웃</button>
+  </div>
+
+  <div class="repo-menu" id="repo-menu"></div>
+
+  <div class="container">
+    <div id="repo-view"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── 저장소 설정 ───────────────────────────────────────────────────────
+// FIX-ADMIN-UNIFY-1: 기존엔 admin 페이지가 stock-briefing-v3 저장소 하나만
+// 대상으로 REPO 상수가 고정돼 있었다. 이제 오전(v3-1/v3-2)·오후(v3) 세
+// 저장소를 한 페이지에서 관리해야 하므로 REPO를 상수가 아니라 선택 가능한
+// 설정 객체로 바꾸고, 모든 GitHub API 호출에 repoCfg를 인자로 넘긴다.
+//
+// schema: 'stock'  → market_leaders[]/stocks[] 구조 (v3-1, v3 — v3는 아직
+//                     파이프라인이 없어 스키마를 v3-1과 동일하다고 가정)
+//         'report' → v3-2 report_update 구조 (analyst_briefing/brokerage_reports 등)
+const REPOS = {
+  v3_1: { key: "v3_1", label: "V3-1", sub: "오전 · morning_core",
+          repo: "kunil-choi/stock-briefing-v3-1", branch: "main", schema: "stock" },
+  v3_2: { key: "v3_2", label: "V3-2", sub: "오전 · report_update",
+          repo: "kunil-choi/stock-briefing-v3-2", branch: "main", schema: "report" },
+  v3:   { key: "v3",   label: "V3",   sub: "오후 · 마감 브리핑 (준비중)",
+          repo: "kunil-choi/stock-briefing-v3", branch: "main", schema: "stock" },
+};
+let activeRepoKey = "v3_1";
+let GH_TOKEN = "";
+// 저장소별 캐시: 브리핑 JSON, sha, 서브탭 상태 등을 보관
+const state = {
+  v3_1: { subtab: "registered", correctTab: "text", briefing: null, briefingSha: null },
+  v3_2: { subtab: "brokerRegistered", correctTab: "text", briefing: null, briefingSha: null },
+  v3:   { subtab: "correct", correctTab: "text", briefing: null, briefingSha: null },
+};
+
+// ── 인증 ──────────────────────────────────────────────────────────
+const PW_HASH = "stock2026!";
+function login() {
+  const pw = document.getElementById("pw-input").value;
+  if (pw !== PW_HASH) {
+    document.getElementById("login-err").textContent = "비밀번호가 틀렸습니다.";
+    return;
+  }
+  GH_TOKEN = prompt("GitHub Personal Access Token 입력 (v3-1 / v3-2 / v3 저장소 repo 권한 필요):");
+  if (!GH_TOKEN) { document.getElementById("login-err").textContent = "토큰이 필요합니다."; return; }
+  document.getElementById("login-screen").style.display = "none";
+  document.getElementById("main-screen").style.display = "block";
+  document.getElementById("header-time").textContent =
+    new Date().toLocaleString("ko-KR", {timeZone:"Asia/Seoul"}) + " KST";
+  renderRepoMenu();
+  selectRepo(activeRepoKey);
+}
+function logout() {
+  GH_TOKEN = "";
+  location.reload();
+}
+
+// ── GitHub API 공통 ──────────────────────────────────────────────
+function b64EncodeUtf8(str) { return btoa(unescape(encodeURIComponent(str))); }
+function b64DecodeUtf8(str) { return decodeURIComponent(escape(atob(str))); }
+
+async function ghGet(repoCfg, path) {
+  // cache: "no-store" 없이는 브라우저가 동일 URL GET을 캐시해서, 방금
+  // ghUpdate()로 sha가 바뀐 직후에도 이전 sha를 돌려줄 수 있다. 그 상태로
+  // 다음 저장이 그 sha로 PUT을 보내면 GitHub가 409(sha 불일치)로 거부한다.
+  const r = await fetch(`https://api.github.com/repos/${repoCfg.repo}/contents/${path}?ref=${repoCfg.branch}`, {
+    headers: { Authorization: `token ${GH_TOKEN}`, Accept: "application/vnd.github.v3+json" },
+    cache: "no-store"
+  });
+  if (!r.ok) throw new Error(`GET ${repoCfg.repo}/${path} → ${r.status}`);
+  return r.json();
+}
+async function ghUpdate(repoCfg, path, content, sha, message) {
+  const body = { message, content: b64EncodeUtf8(content), branch: repoCfg.branch };
+  if (sha) body.sha = sha;
+  const r = await fetch(`https://api.github.com/repos/${repoCfg.repo}/contents/${path}`, {
+    method: "PUT",
+    headers: { Authorization: `token ${GH_TOKEN}`, Accept: "application/vnd.github.v3+json",
+               "Content-Type": "application/json" },
+    body: JSON.stringify(body)
+  });
+  if (!r.ok) { const e = await r.json().catch(() => ({message: r.statusText})); throw new Error(e.message); }
+  return r.json();
+}
+async function readJson(repoCfg, path, fallback) {
+  try {
+    const d = await ghGet(repoCfg, path);
+    return { data: JSON.parse(b64DecodeUtf8(d.content)), sha: d.sha };
+  } catch(e) { return { data: fallback, sha: null, error: e }; }
+}
+
+// FIX-ADMIN-UNIFY-2: 옛 admin 페이지는 패널리스트 추가/삭제 시
+// `cfgContent.replace("김학균\", \"김한진,\\n]", ...)`처럼 파일 끝부분의
+// 리터럴 문자열을 그대로 찾아 바꾸는 방식이었다 — 목록이 조금만 바뀌어도
+// 아무 매치 없이 조용히 실패(무변화 커밋)할 수 있는 방식이라, 정규식으로
+// "VAR = [ ... ]" 블록 전체를 뽑아 배열로 다루고 통째로 재작성하는 방식으로
+// 교체했다. 패널리스트(config.py)와 증권사(analyst_collector.py) 양쪽에 공용.
+function extractPyStrList(content, varName) {
+  const re = new RegExp(`${varName}\\s*=\\s*\\[([\\s\\S]*?)\\]`);
+  const m = content.match(re);
+  if (!m) return null;
+  return [...m[1].matchAll(/"([^"]+)"/g)].map(x => x[1]);
+}
+function rebuildPyStrList(content, varName, names, indent = "    ") {
+  const re = new RegExp(`(${varName}\\s*=\\s*\\[)([\\s\\S]*?)(\\])`);
+  const m = content.match(re);
+  if (!m) throw new Error(`${varName} 목록을 파일에서 찾을 수 없습니다`);
+  const body = names.map(n => `${indent}"${n}",`).join("\n");
+  return content.slice(0, m.index) + m[1] + "\n" + body + "\n" + m[3] + content.slice(m.index + m[0].length);
+}
+
+// ── 공통 유틸 ─────────────────────────────────────────────────────
+function escapeHtml(s) {
+  return String(s ?? "").replace(/[&<>"']/g, c => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+  }[c]));
+}
+function showToast(msg, type = "success") {
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.className = `toast ${type} show`;
+  setTimeout(() => t.className = "toast", 2600);
+}
+function renderSampleVideo(v) {
+  const title = typeof v === "string" ? v : (v?.title || "");
+  const url   = (typeof v === "object" && v?.url) ? v.url
+    : `https://www.youtube.com/results?search_query=${encodeURIComponent(title)}`;
+  const channelName = (typeof v === "object" && v?.channel_name) ? v.channel_name : "";
+  const channelId   = (typeof v === "object" && v?.channel_id)   ? v.channel_id   : "";
+  let channelLink = "";
+  if (channelName) {
+    const channelUrl = channelId
+      ? `https://www.youtube.com/channel/${channelId}`
+      : `https://www.youtube.com/results?search_query=${encodeURIComponent(channelName)}`;
+    channelLink = ` <a href="${escapeHtml(channelUrl)}" target="_blank" rel="noopener noreferrer"
+      style="color:var(--muted);text-decoration:underline;font-size:.85em;">(${escapeHtml(channelName)})</a>`;
+  }
+  return `<li>▸ <a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer"
+    style="color:inherit;text-decoration:underline;">${escapeHtml(title)}</a>${channelLink}</li>`;
+}
+
+// ── 상단 저장소 메뉴 ──────────────────────────────────────────────
+function renderRepoMenu() {
+  const el = document.getElementById("repo-menu");
+  el.innerHTML = Object.values(REPOS).map(r => `
+    <button class="repo-tab ${r.key === activeRepoKey ? "active" : ""}" onclick="selectRepo('${r.key}')">
+      ${r.label}<span class="repo-sub">${r.sub}</span>
+    </button>`).join("");
+}
+function selectRepo(key) {
+  activeRepoKey = key;
+  renderRepoMenu();
+  renderRepoView();
+}
+
+// ── 저장소별 뷰 구성 ──────────────────────────────────────────────
+function renderRepoView() {
+  const repoCfg = REPOS[activeRepoKey];
+  const el = document.getElementById("repo-view");
+
+  let subtabDefs;
+  if (repoCfg.key === "v3_1") {
+    subtabDefs = [
+      ["registered", "✅ 등록 현황"],
+      ["channelCand", "📺 채널 후보"],
+      ["panelistCand", "👤 패널리스트 후보"],
+      ["add", "➕ 직접 추가"],
+      ["correct", "🩹 브리핑 교정"],
+    ];
+  } else if (repoCfg.key === "v3_2") {
+    subtabDefs = [
+      ["brokerRegistered", "✅ 증권사 등록 현황"],
+      ["brokerCand", "🏦 증권사 후보"],
+      ["correct", "🩹 브리핑 교정"],
+    ];
+  } else {
+    subtabDefs = [
+      ["correct", "🩹 브리핑 교정"],
+    ];
+  }
+
+  const st = state[repoCfg.key];
+  if (!subtabDefs.some(([k]) => k === st.subtab)) st.subtab = subtabDefs[0][0];
+
+  el.innerHTML = `
+    <div class="tabs">
+      ${subtabDefs.map(([k, label]) => `
+        <button class="tab ${st.subtab === k ? "active" : ""}" onclick="switchSubtab('${k}')">${label}</button>
+      `).join("")}
+    </div>
+    <div id="subtab-body"></div>
+  `;
+  renderSubtabBody();
+}
+
+function switchSubtab(name) {
+  state[activeRepoKey].subtab = name;
+  renderRepoView();
+}
+
+function renderSubtabBody() {
+  const repoCfg = REPOS[activeRepoKey];
+  const st = state[repoCfg.key];
+  const body = document.getElementById("subtab-body");
+
+  if (st.subtab === "registered") { body.innerHTML = `<div class="loading"><span class="spinner"></span>로딩 중...</div>`; loadRegisteredPanelChannel(repoCfg); return; }
+  if (st.subtab === "channelCand") { renderPlaceholder(body, "📺 채널 후보 자동 발견"); return; }
+  if (st.subtab === "panelistCand") { renderPlaceholder(body, "👤 패널리스트 후보 자동 발견"); return; }
+  if (st.subtab === "add") { renderAddDirect(body, repoCfg); return; }
+  if (st.subtab === "brokerRegistered") { body.innerHTML = `<div class="loading"><span class="spinner"></span>로딩 중...</div>`; loadRegisteredBrokers(repoCfg); return; }
+  if (st.subtab === "brokerCand") { renderPlaceholder(body, "🏦 증권사 후보 자동 발견"); return; }
+  if (st.subtab === "correct") { renderCorrect(body, repoCfg); return; }
+}
+
+function renderPlaceholder(el, title) {
+  el.innerHTML = `
+    <div class="section-title">${title} <span class="badge badge-orange">준비중</span></div>
+    <div class="empty">
+      ⏳ 이 기능은 자리만 먼저 만들어 두었습니다.<br>
+      새로운 후보를 자동으로 찾아 쌓아두는 백엔드(수집기 쪽 발견 로직)는 별도 작업으로 예정돼 있습니다.
+    </div>`;
+}
+
+// ══════════════════════════════════════════════════════════════════
+// V3-1 전용: 등록 현황 / 직접 추가 (패널리스트 + 채널)
+// ══════════════════════════════════════════════════════════════════
+async function loadRegisteredPanelChannel(repoCfg) {
+  const el = document.getElementById("subtab-body");
+  try {
+    const [cfgData, cjData] = await Promise.all([
+      ghGet(repoCfg, "config.py"), ghGet(repoCfg, "channels.json")
+    ]);
+    const cfgContent = b64DecodeUtf8(cfgData.content);
+    const channels   = JSON.parse(b64DecodeUtf8(cjData.content));
+    const panelists  = extractPyStrList(cfgContent, "POPULAR_PANELISTS") || [];
+
+    const catLabel = { broadcast: "경제방송", youtuber: "유튜버", securities: "증권사" };
+    let html = `
+      <div class="section-title">✅ 현재 등록된 패널리스트 &amp; 채널</div>
+      <div style="margin-bottom:1.5rem;">
+        <div class="section-title" style="font-size:.9rem;margin-bottom:.75rem;">
+          👤 패널리스트 (${panelists.length}명)
+        </div>
+        <table class="registered-table">
+          <thead><tr><th>이름</th><th class="action-cell">삭제</th></tr></thead>
+          <tbody>
+            ${panelists.map(p => `
+            <tr id="pr-${escapeHtml(p)}">
+              <td><span class="expert-tag" style="background:var(--surface2);color:var(--accent);border:1px solid var(--border);">${escapeHtml(p)}</span></td>
+              <td class="action-cell">
+                <button class="btn btn-delete btn-sm" onclick="deletePanelistDirect('${p.replace(/'/g, "\\'")}')">🗑</button>
+              </td>
+            </tr>`).join("")}
+          </tbody>
+        </table>
+      </div>
+      <div><div class="section-title" style="margin-bottom:.75rem;">📺 등록 채널</div>`;
+
+    for (const [cat, label] of Object.entries(catLabel)) {
+      const chs = channels[cat] || [];
+      html += `
+        <div style="margin-bottom:1.2rem;">
+          <div style="font-size:.85rem;font-weight:700;color:var(--muted);margin-bottom:.5rem;">${label} (${chs.length}개)</div>
+          <table class="registered-table">
+            <thead><tr><th>채널명</th><th>채널 ID</th><th class="action-cell">삭제</th></tr></thead>
+            <tbody>
+              ${chs.map(c => `
+              <tr id="cr-${encodeURIComponent(c.id || c)}">
+                <td>${escapeHtml(c.name || c)}</td>
+                <td style="color:var(--muted);font-size:.78rem;">${escapeHtml(c.id || "")}</td>
+                <td class="action-cell">
+                  <button class="btn btn-delete btn-sm" onclick="deleteChannelDirect('${cat}','${c.id || ""}','${(c.name || c).replace(/'/g, "\\'")}')">🗑</button>
+                </td>
+              </tr>`).join("")}
+            </tbody>
+          </table>
+        </div>`;
+    }
+    html += `</div>`;
+    el.innerHTML = html;
+  } catch(e) {
+    el.innerHTML = `<div class="empty" style="color:var(--red);">로드 실패: ${escapeHtml(e.message)}</div>`;
+  }
+}
+
+async function deletePanelistDirect(name) {
+  const repoCfg = REPOS.v3_1;
+  if (!confirm(`"${name}" 패널리스트를 삭제할까요?`)) return;
+  try {
+    const cfg = await ghGet(repoCfg, "config.py");
+    const cfgContent = b64DecodeUtf8(cfg.content);
+    const names = extractPyStrList(cfgContent, "POPULAR_PANELISTS") || [];
+    if (!names.includes(name)) { showToast(`${name} 을(를) 찾을 수 없음`, "error"); return; }
+    const updated = rebuildPyStrList(cfgContent, "POPULAR_PANELISTS", names.filter(n => n !== name));
+    await ghUpdate(repoCfg, "config.py", updated, cfg.sha, `admin: 패널리스트 삭제 — ${name}`);
+    showToast(`🗑 ${name} 패널리스트 삭제 완료`);
+    loadRegisteredPanelChannel(repoCfg);
+  } catch(e) { showToast(`오류: ${e.message}`, "error"); }
+}
+
+async function deleteChannelDirect(cat, chId, chName) {
+  const repoCfg = REPOS.v3_1;
+  if (!confirm(`"${chName}" 채널을 삭제할까요?`)) return;
+  try {
+    const cj = await ghGet(repoCfg, "channels.json");
+    let channels = JSON.parse(b64DecodeUtf8(cj.content));
+    const before = (channels[cat] || []).length;
+    channels[cat] = (channels[cat] || []).filter(c => (c.id || c) !== chId);
+    if (channels[cat].length === before) { showToast("삭제할 채널을 찾을 수 없음", "error"); return; }
+    await ghUpdate(repoCfg, "channels.json", JSON.stringify(channels, null, 2), cj.sha,
+      `admin: 채널 삭제 — ${chName} (${cat})`);
+    showToast(`🗑 ${chName} 채널 삭제 완료`);
+    loadRegisteredPanelChannel(repoCfg);
+  } catch(e) { showToast(`오류: ${e.message}`, "error"); }
+}
+
+function renderAddDirect(el, repoCfg) {
+  el.innerHTML = `
+    <div class="two-col">
+      <div class="card" style="padding:1.2rem;">
+        <div class="section-title" style="margin-bottom:1rem;">👤 패널리스트 직접 추가</div>
+        <div style="margin-bottom:.75rem;">
+          <label style="font-size:.82rem;color:var(--muted);display:block;margin-bottom:.3rem;">이름</label>
+          <input id="add-panelist-name" type="text" placeholder="예: 홍길동"
+            style="width:100%;padding:.55rem .8rem;background:var(--surface2);
+            border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:.9rem;">
+        </div>
+        <button class="btn btn-approve" style="width:100%;" onclick="addPanelistDirect()">✅ 패널리스트 추가</button>
+        <p style="font-size:.75rem;color:var(--muted);margin-top:.6rem;">POPULAR_PANELISTS 목록에 즉시 추가됩니다.</p>
+      </div>
+      <div class="card" style="padding:1.2rem;">
+        <div class="section-title" style="margin-bottom:1rem;">📺 채널 직접 추가</div>
+        <div style="margin-bottom:.6rem;">
+          <label style="font-size:.82rem;color:var(--muted);display:block;margin-bottom:.3rem;">채널명</label>
+          <input id="add-ch-name" type="text" placeholder="예: 달란트투자"
+            style="width:100%;padding:.55rem .8rem;background:var(--surface2);
+            border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:.9rem;">
+        </div>
+        <div style="margin-bottom:.6rem;">
+          <label style="font-size:.82rem;color:var(--muted);display:block;margin-bottom:.3rem;">
+            채널 ID <span style="color:var(--accent);font-weight:400;">(UC로 시작)</span>
+          </label>
+          <input id="add-ch-id" type="text" placeholder="예: UCxxxxxxxxxxxxxxxxxxxxxx"
+            style="width:100%;padding:.55rem .8rem;background:var(--surface2);
+            border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:.9rem;">
+        </div>
+        <div style="margin-bottom:.75rem;">
+          <label style="font-size:.82rem;color:var(--muted);display:block;margin-bottom:.3rem;">카테고리</label>
+          <select id="add-ch-cat"
+            style="width:100%;padding:.55rem .8rem;background:var(--surface2);
+            border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:.9rem;">
+            <option value="youtuber">유튜버</option>
+            <option value="broadcast">경제방송</option>
+            <option value="securities">증권사</option>
+          </select>
+        </div>
+        <button class="btn btn-approve" style="width:100%;" onclick="addChannelDirect()">✅ 채널 추가</button>
+        <p style="font-size:.75rem;color:var(--muted);margin-top:.6rem;">channels.json에 즉시 추가됩니다.</p>
+      </div>
+    </div>`;
+}
+
+async function addPanelistDirect() {
+  const repoCfg = REPOS.v3_1;
+  const name = document.getElementById("add-panelist-name").value.trim();
+  if (!name) { showToast("이름을 입력하세요", "error"); return; }
+  try {
+    const cfg = await ghGet(repoCfg, "config.py");
+    const cfgContent = b64DecodeUtf8(cfg.content);
+    const names = extractPyStrList(cfgContent, "POPULAR_PANELISTS") || [];
+    if (names.includes(name)) { showToast(`${name} 이미 등록됨`, "error"); return; }
+    const updated = rebuildPyStrList(cfgContent, "POPULAR_PANELISTS", [...names, name]);
+    await ghUpdate(repoCfg, "config.py", updated, cfg.sha, `admin: 패널리스트 직접 추가 — ${name}`);
+    document.getElementById("add-panelist-name").value = "";
+    showToast(`✅ ${name} 패널리스트 추가 완료`);
+  } catch(e) { showToast(`오류: ${e.message}`, "error"); }
+}
+
+async function addChannelDirect() {
+  const repoCfg = REPOS.v3_1;
+  const chName = document.getElementById("add-ch-name").value.trim();
+  const chId   = document.getElementById("add-ch-id").value.trim();
+  const cat    = document.getElementById("add-ch-cat").value;
+  if (!chName) { showToast("채널명을 입력하세요", "error"); return; }
+  if (!chId || !chId.startsWith("UC")) { showToast("채널 ID를 확인하세요 (UC로 시작)", "error"); return; }
+  try {
+    const cj = await ghGet(repoCfg, "channels.json");
+    let channels = JSON.parse(b64DecodeUtf8(cj.content));
+    for (const c of Object.values(channels).flat()) {
+      if (typeof c === "object" && c.id === chId) { showToast("이미 등록된 채널 ID", "error"); return; }
+    }
+    channels[cat] = channels[cat] || [];
+    channels[cat].push({ id: chId, name: chName });
+    await ghUpdate(repoCfg, "channels.json", JSON.stringify(channels, null, 2), cj.sha,
+      `admin: 채널 직접 추가 — ${chName} (${cat})`);
+    document.getElementById("add-ch-name").value = "";
+    document.getElementById("add-ch-id").value   = "";
+    showToast(`✅ ${chName} 채널 추가 완료 (${cat})`);
+  } catch(e) { showToast(`오류: ${e.message}`, "error"); }
+}
+
+// ══════════════════════════════════════════════════════════════════
+// V3-2 전용: 증권사 등록 현황 (collectors/analyst_collector.py의 BROKERS)
+// ══════════════════════════════════════════════════════════════════
+const ANALYST_COLLECTOR_PATH = "collectors/analyst_collector.py";
+
+async function loadRegisteredBrokers(repoCfg) {
+  const el = document.getElementById("subtab-body");
+  try {
+    const acData = await ghGet(repoCfg, ANALYST_COLLECTOR_PATH);
+    const acContent = b64DecodeUtf8(acData.content);
+    const brokers = extractPyStrList(acContent, "BROKERS") || [];
+    el.innerHTML = `
+      <div class="section-title">🏦 증권사 목록 (${brokers.length}개)
+        <span class="badge badge-blue">리포트 발행사명 인식용</span>
+      </div>
+      <div class="notice">
+        이 목록은 "이 증권사 리포트를 수집할지 말지"를 거르는 화이트리스트가 아니라,
+        네이버 리포트 목록에서 발행 증권사명이 비어 있을 때 제목에서 이름을 찾아내는 데
+        쓰이는 참고 목록입니다. 여기 없는 증권사 리포트도 이미 수집되고 있습니다 —
+        다만 여기에 등록해야 그 이름이 정확히 인식됩니다.
+      </div>
+      <div style="margin-bottom:1rem;display:flex;gap:.5rem;">
+        <input id="add-broker-name" type="text" placeholder="예: 신영증권"
+          style="flex:1;padding:.55rem .8rem;background:var(--surface2);
+          border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:.9rem;">
+        <button class="btn btn-approve" onclick="addBrokerDirect()">✅ 추가</button>
+      </div>
+      <table class="registered-table">
+        <thead><tr><th>증권사명</th><th class="action-cell">삭제</th></tr></thead>
+        <tbody>
+          ${brokers.map(b => `
+          <tr id="br-${escapeHtml(b)}">
+            <td>${escapeHtml(b)}</td>
+            <td class="action-cell">
+              <button class="btn btn-delete btn-sm" onclick="deleteBrokerDirect('${b.replace(/'/g, "\\'")}')">🗑</button>
+            </td>
+          </tr>`).join("")}
+        </tbody>
+      </table>`;
+  } catch(e) {
+    el.innerHTML = `<div class="empty" style="color:var(--red);">로드 실패: ${escapeHtml(e.message)}</div>`;
+  }
+}
+
+async function addBrokerDirect() {
+  const repoCfg = REPOS.v3_2;
+  const name = document.getElementById("add-broker-name").value.trim();
+  if (!name) { showToast("증권사명을 입력하세요", "error"); return; }
+  try {
+    const ac = await ghGet(repoCfg, ANALYST_COLLECTOR_PATH);
+    const content = b64DecodeUtf8(ac.content);
+    const brokers = extractPyStrList(content, "BROKERS") || [];
+    if (brokers.includes(name)) { showToast(`${name} 이미 등록됨`, "error"); return; }
+    const updated = rebuildPyStrList(content, "BROKERS", [...brokers, name]);
+    await ghUpdate(repoCfg, ANALYST_COLLECTOR_PATH, updated, ac.sha, `admin: 증권사 직접 추가 — ${name}`);
+    document.getElementById("add-broker-name").value = "";
+    showToast(`✅ ${name} 증권사 추가 완료`);
+    loadRegisteredBrokers(repoCfg);
+  } catch(e) { showToast(`오류: ${e.message}`, "error"); }
+}
+
+async function deleteBrokerDirect(name) {
+  const repoCfg = REPOS.v3_2;
+  if (!confirm(`"${name}" 증권사를 목록에서 삭제할까요?`)) return;
+  try {
+    const ac = await ghGet(repoCfg, ANALYST_COLLECTOR_PATH);
+    const content = b64DecodeUtf8(ac.content);
+    const brokers = extractPyStrList(content, "BROKERS") || [];
+    if (!brokers.includes(name)) { showToast(`${name} 을(를) 찾을 수 없음`, "error"); return; }
+    const updated = rebuildPyStrList(content, "BROKERS", brokers.filter(b => b !== name));
+    await ghUpdate(repoCfg, ANALYST_COLLECTOR_PATH, updated, ac.sha, `admin: 증권사 삭제 — ${name}`);
+    showToast(`🗑 ${name} 증권사 삭제 완료`);
+    loadRegisteredBrokers(repoCfg);
+  } catch(e) { showToast(`오류: ${e.message}`, "error"); }
+}
+
+// ══════════════════════════════════════════════════════════════════
+// 브리핑 교정 (공통 진입점) — schema별로 분기
+// ══════════════════════════════════════════════════════════════════
+const BRIEFING_PATH = "data/briefing_data.json";
+const CORRECTIONS_LOG_PATH = "data/corrections_log.json";
+
+function renderCorrect(el, repoCfg) {
+  const st = state[repoCfg.key];
+  el.innerHTML = `
+    <div class="section-title">🩹 브리핑 교정
+      <span class="badge badge-red">${repoCfg.repo} · ${BRIEFING_PATH}</span>
+    </div>
+    <div id="correct-status" style="font-size:.82rem;color:var(--muted);margin-bottom:1rem;"></div>
+    <div style="display:flex;gap:.75rem;margin-bottom:1.2rem;">
+      <button class="btn" style="background:var(--accent);color:#000;" onclick="loadBriefingForCorrection()">🔄 브리핑 불러오기</button>
+    </div>
+    <div id="correct-inner"></div>
+    <div class="card" style="padding:1.1rem;margin-top:1.5rem;">
+      <div class="section-title" style="font-size:.9rem;margin-bottom:.75rem;">📋 교정 이력</div>
+      <div id="correct-log"><div style="color:var(--muted);font-size:.82rem;">브리핑을 불러오면 표시됩니다.</div></div>
+    </div>`;
+  if (st.briefing) { _renderCorrectInner(repoCfg); loadCorrectionLog(repoCfg); }
+}
+
+async function loadBriefingForCorrection() {
+  const repoCfg = REPOS[activeRepoKey];
+  const st = state[repoCfg.key];
+  const statusEl = document.getElementById("correct-status");
+  statusEl.textContent = "불러오는 중...";
+  try {
+    const d = await ghGet(repoCfg, BRIEFING_PATH);
+    st.briefing = JSON.parse(b64DecodeUtf8(d.content));
+    st.briefingSha = d.sha;
+    statusEl.textContent = `✅ 로드 완료 (${new Date().toLocaleTimeString("ko-KR")})`;
+    _renderCorrectInner(repoCfg);
+    loadCorrectionLog(repoCfg);
+  } catch(e) {
+    statusEl.textContent = `❌ 로드 실패: ${e.message} (아직 브리핑이 생성되지 않았을 수 있습니다)`;
+  }
+}
+
+async function saveBriefingJson(repoCfg, message) {
+  const st = state[repoCfg.key];
+  const d = await ghUpdate(repoCfg, BRIEFING_PATH, JSON.stringify(st.briefing, null, 2), st.briefingSha, message);
+  const fresh = await ghGet(repoCfg, BRIEFING_PATH);
+  st.briefingSha = fresh.sha;
+  return d;
+}
+
+async function appendCorrectionLog(repoCfg, entry) {
+  const ts = new Date().toLocaleString("ko-KR", {timeZone: "Asia/Seoul"});
+  const newEntry = { timestamp: ts, ...entry };
+  try {
+    let entries = [];
+    let sha = null;
+    try {
+      const d = await ghGet(repoCfg, CORRECTIONS_LOG_PATH);
+      entries = JSON.parse(b64DecodeUtf8(d.content));
+      sha = d.sha;
+    } catch(e) { /* 파일 없으면 새로 생성 */ }
+    entries.push(newEntry);
+    const body = { message: `admin: 교정 이력 기록 — ${newEntry.action}`,
+                   content: b64EncodeUtf8(JSON.stringify(entries, null, 2)), branch: repoCfg.branch };
+    if (sha) body.sha = sha;
+    await fetch(`https://api.github.com/repos/${repoCfg.repo}/contents/${CORRECTIONS_LOG_PATH}`, {
+      method: "PUT",
+      headers: { Authorization: `token ${GH_TOKEN}`, Accept: "application/vnd.github.v3+json",
+                 "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    });
+    loadCorrectionLog(repoCfg);
+  } catch(e) { console.warn("교정 이력 저장 실패:", e); }
+}
+
+async function loadCorrectionLog(repoCfg) {
+  const el = document.getElementById("correct-log");
+  if (!el) return;
+  try {
+    const { data } = await readJson(repoCfg, CORRECTIONS_LOG_PATH, []);
+    const entries = Array.isArray(data) ? [...data].reverse().slice(0, 20) : [];
+    if (!entries.length) { el.innerHTML = '<div style="color:var(--muted);font-size:.82rem;">교정 이력이 없습니다.</div>'; return; }
+    el.innerHTML = entries.map(e => `
+      <div style="display:flex;gap:.75rem;padding:.4rem 0;border-bottom:1px solid var(--border);font-size:.8rem;">
+        <span style="color:var(--muted);flex-shrink:0;">${escapeHtml(e.timestamp || "")}</span>
+        <span style="color:var(--accent);">${escapeHtml(e.action || "")}</span>
+        <span>${escapeHtml(e.detail || "")}</span>
+      </div>`).join("");
+  } catch(e) {
+    el.innerHTML = `<div style="color:var(--muted);font-size:.82rem;">이력 로드 실패: ${e.message}</div>`;
+  }
+}
+
+function _renderCorrectInner(repoCfg) {
+  const el = document.getElementById("correct-inner");
+  const st = state[repoCfg.key];
+  el.innerHTML = `
+    <div class="subtabs-sm">
+      <button class="subtab-sm ${st.correctTab === "text" ? "active" : ""}" onclick="switchCorrectTab('text')">📝 텍스트 수정</button>
+      <button class="subtab-sm ${st.correctTab === "cards" ? "active" : ""}" onclick="switchCorrectTab('cards')">🗂 카드 삭제 · 이동</button>
+    </div>
+    <div id="correct-tab-body"></div>`;
+  _renderCorrectTabBody(repoCfg);
+}
+
+function switchCorrectTab(name) {
+  state[activeRepoKey].correctTab = name;
+  _renderCorrectInner(REPOS[activeRepoKey]);
+}
+
+function _renderCorrectTabBody(repoCfg) {
+  const body = document.getElementById("correct-tab-body");
+  const st = state[repoCfg.key];
+  if (repoCfg.schema === "stock") {
+    if (st.correctTab === "text") renderCorrectText_stock(body, repoCfg);
+    else renderCorrectCards_stock(body, repoCfg);
+  } else {
+    if (st.correctTab === "text") renderCorrectText_report(body, repoCfg);
+    else renderCorrectCards_report(body, repoCfg);
+  }
+}
+
+// ────────────────────────────────────────────────────────────────
+// schema = "stock" (V3-1, V3): market_leaders[] / stocks[]
+// ────────────────────────────────────────────────────────────────
+function _stockAllCards(data) {
+  // [{bucket, idx, card}] 형태로 대형 주도주 + 관심종목을 한 목록으로
+  const out = [];
+  (data.market_leaders || []).forEach((c, i) => out.push({ bucket: "market_leaders", idx: i, card: c }));
+  (data.stocks || []).forEach((c, i) => out.push({ bucket: "stocks", idx: i, card: c }));
+  return out;
+}
+
+function renderCorrectText_stock(el, repoCfg) {
+  const data = state[repoCfg.key].briefing;
+  const cards = _stockAllCards(data);
+  el.innerHTML = `
+    <div class="field-block">
+      <div class="field-label">📝 시장 요약 (market_summary)</div>
+      <textarea id="ft-market_summary" class="field-textarea" rows="8">${escapeHtml(data.market_summary || "")}</textarea>
+    </div>
+    <div class="field-block">
+      <div class="field-label">🧠 AI 전략 (ai_strategy)</div>
+      <textarea id="ft-ai_strategy" class="field-textarea" rows="8">${escapeHtml(data.ai_strategy || "")}</textarea>
+    </div>
+    <div class="section-title" style="font-size:.92rem;margin:1.2rem 0 .6rem;">📇 종목 카드별 본문</div>
+    ${cards.map(({bucket, idx, card}) => `
+      <details class="card-acc">
+        <summary>${bucket === "market_leaders" ? "🏆" : "📌"} ${escapeHtml(card.name)}
+          <span class="badge ${bucket === "market_leaders" ? "badge-orange" : "badge-blue"}" style="margin-left:auto;">
+            ${bucket === "market_leaders" ? "대형 주도주" : "관심종목"}
+          </span>
+        </summary>
+        <div class="acc-body">
+          <div class="field-block">
+            <div class="field-label">summary</div>
+            <textarea id="ft-${bucket}-${idx}-summary" class="field-textarea" rows="3">${escapeHtml(card.summary || "")}</textarea>
+          </div>
+          <div class="field-block">
+            <div class="field-label">catalyst</div>
+            <textarea id="ft-${bucket}-${idx}-catalyst" class="field-textarea" rows="3">${escapeHtml(card.catalyst || "")}</textarea>
+          </div>
+          <div class="field-block">
+            <div class="field-label">risk</div>
+            <textarea id="ft-${bucket}-${idx}-risk" class="field-textarea" rows="3">${escapeHtml(card.risk || "")}</textarea>
+          </div>
+        </div>
+      </details>
+    `).join("")}
+    <button class="btn btn-approve" style="margin-top:.5rem;" onclick="saveCorrectText_stock()">💾 텍스트 전체 저장</button>
+  `;
+}
+
+async function saveCorrectText_stock() {
+  const repoCfg = REPOS[activeRepoKey];
+  const data = state[repoCfg.key].briefing;
+  data.market_summary = document.getElementById("ft-market_summary").value;
+  data.ai_strategy    = document.getElementById("ft-ai_strategy").value;
+  const cards = _stockAllCards(data);
+  cards.forEach(({bucket, idx}) => {
+    const s = document.getElementById(`ft-${bucket}-${idx}-summary`);
+    const c = document.getElementById(`ft-${bucket}-${idx}-catalyst`);
+    const r = document.getElementById(`ft-${bucket}-${idx}-risk`);
+    if (s) data[bucket][idx].summary  = s.value;
+    if (c) data[bucket][idx].catalyst = c.value;
+    if (r) data[bucket][idx].risk     = r.value;
+  });
+  try {
+    await saveBriefingJson(repoCfg, "admin: 브리핑 교정 — 텍스트 수정");
+    await appendCorrectionLog(repoCfg, { action: "edit_text", detail: "요약/전략/카드 본문 수정" });
+    showToast("✅ 저장 완료");
+  } catch(e) { showToast(`오류: ${e.message}`, "error"); }
+}
+
+function renderCorrectCards_stock(el, repoCfg) {
+  const data = state[repoCfg.key].briefing;
+  const leaders = data.market_leaders || [];
+  const stocks  = data.stocks || [];
+  const row = (bucket, c) => `
+    <div class="card-list-row">
+      <span class="name">${escapeHtml(c.name)}</span>
+      <span class="card-meta">${escapeHtml(c.code || "")} · rank ${c.rank ?? "-"}</span>
+      <div class="btn-row" style="margin:0;">
+        <button class="btn btn-move btn-sm" onclick="moveCard_stock('${bucket}','${c.name.replace(/'/g, "\\'")}')">
+          ${bucket === "market_leaders" ? "→ 관심종목으로" : "→ 대형 주도주로"}
+        </button>
+        <button class="btn btn-delete btn-sm" onclick="deleteCard_stock('${bucket}','${c.name.replace(/'/g, "\\'")}')">🗑 삭제</button>
+      </div>
+    </div>`;
+  el.innerHTML = `
+    <div class="two-col">
+      <div class="card">
+        <div class="card-header"><span class="card-name">🏆 대형 주도주 (${leaders.length})</span></div>
+        <div>${leaders.length ? leaders.map(c => row("market_leaders", c)).join("") : '<div class="empty">없음</div>'}</div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-name">📌 관심종목 (${stocks.length})</span></div>
+        <div>${stocks.length ? stocks.map(c => row("stocks", c)).join("") : '<div class="empty">없음</div>'}</div>
+      </div>
+    </div>`;
+}
+
+function _findCardIndex(data, bucket, name) {
+  return (data[bucket] || []).findIndex(c => c.name === name);
+}
+function _renumber(list) { list.forEach((c, i) => { c.rank = i + 1; }); }
+
+async function moveCard_stock(bucket, name) {
+  const repoCfg = REPOS[activeRepoKey];
+  const data = state[repoCfg.key].briefing;
+  const from = bucket;
+  const to   = bucket === "market_leaders" ? "stocks" : "market_leaders";
+  const idx  = _findCardIndex(data, from, name);
+  if (idx === -1) { showToast("카드를 찾을 수 없습니다", "error"); return; }
+
+  if (to === "market_leaders" && (data.market_leaders || []).length >= 2) {
+    if (!confirm(`대형 주도주가 이미 ${data.market_leaders.length}개입니다. "${name}"을(를) 추가해 ${data.market_leaders.length + 1}개로 만들까요? (보통은 2개를 유지합니다)`)) return;
+  }
+  if (!confirm(`"${name}"을(를) ${to === "market_leaders" ? "대형 주도주로" : "관심종목으로"} 옮길까요?`)) return;
+
+  const [card] = data[from].splice(idx, 1);
+  data[to] = data[to] || [];
+  data[to].push(card);
+  _renumber(data.market_leaders || []);
+  _renumber(data.stocks || []);
+
+  try {
+    await saveBriefingJson(repoCfg, `admin: 브리핑 교정 — 카드 이동 (${name}: ${from} → ${to})`);
+    await appendCorrectionLog(repoCfg, { action: "move_card", detail: `${name}: ${from} → ${to}` });
+    showToast(`✅ ${name} 이동 완료`);
+    renderCorrectCards_stock(document.getElementById("correct-tab-body"), repoCfg);
+  } catch(e) { showToast(`오류: ${e.message}`, "error"); }
+}
+
+async function deleteCard_stock(bucket, name) {
+  const repoCfg = REPOS[activeRepoKey];
+  const data = state[repoCfg.key].briefing;
+  if (!confirm(`"${name}" 카드를 삭제할까요?`)) return;
+  const idx = _findCardIndex(data, bucket, name);
+  if (idx === -1) { showToast("카드를 찾을 수 없습니다", "error"); return; }
+  data[bucket].splice(idx, 1);
+  _renumber(data[bucket]);
+  try {
+    await saveBriefingJson(repoCfg, `admin: 브리핑 교정 — 카드 삭제 (${name})`);
+    await appendCorrectionLog(repoCfg, { action: "delete_card", detail: `${name} (${bucket})` });
+    showToast(`🗑 ${name} 삭제 완료`);
+    renderCorrectCards_stock(document.getElementById("correct-tab-body"), repoCfg);
+  } catch(e) { showToast(`오류: ${e.message}`, "error"); }
+}
+
+// ────────────────────────────────────────────────────────────────
+// schema = "report" (V3-2): analyst_briefing / brokerage_reports
+// ────────────────────────────────────────────────────────────────
+function renderCorrectText_report(el, repoCfg) {
+  const data = state[repoCfg.key].briefing;
+  const ab = data.analyst_briefing || { sector_themes: [], stocks: [] };
+  el.innerHTML = `
+    <div class="field-block">
+      <div class="field-label">🧠 AI 전략 업데이트 (ai_strategy_update)</div>
+      <textarea id="ft-ai_strategy_update" class="field-textarea" rows="6">${escapeHtml(data.ai_strategy_update || "")}</textarea>
+    </div>
+    <div class="section-title" style="font-size:.92rem;margin:1.2rem 0 .6rem;">🏭 섹터 테마 (analyst_briefing.sector_themes)</div>
+    ${(ab.sector_themes || []).map((s, i) => `
+      <div class="field-block">
+        <div class="field-label">${escapeHtml(s.sector || ("섹터 " + (i + 1)))}</div>
+        <textarea id="ft-sector-${i}" class="field-textarea" rows="3">${escapeHtml(s.narrative || "")}</textarea>
+      </div>
+    `).join("")}
+    <div class="section-title" style="font-size:.92rem;margin:1.2rem 0 .6rem;">📇 종목별 증권사 분석 (analyst_briefing.stocks)</div>
+    ${(ab.stocks || []).map((s, i) => `
+      <details class="card-acc">
+        <summary>${escapeHtml(s.name)} <span class="badge badge-blue" style="margin-left:auto;">${escapeHtml(s.opinion || "")}</span></summary>
+        <div class="acc-body">
+          <div class="field-block">
+            <div class="field-label">analysis</div>
+            <textarea id="ft-abstock-${i}" class="field-textarea" rows="3">${escapeHtml(s.analysis || "")}</textarea>
+          </div>
+        </div>
+      </details>
+    `).join("")}
+    <button class="btn btn-approve" style="margin-top:.5rem;" onclick="saveCorrectText_report()">💾 텍스트 전체 저장</button>
+  `;
+}
+
+async function saveCorrectText_report() {
+  const repoCfg = REPOS[activeRepoKey];
+  const data = state[repoCfg.key].briefing;
+  data.ai_strategy_update = document.getElementById("ft-ai_strategy_update").value;
+  const ab = data.analyst_briefing || { sector_themes: [], stocks: [] };
+  (ab.sector_themes || []).forEach((s, i) => {
+    const t = document.getElementById(`ft-sector-${i}`);
+    if (t) s.narrative = t.value;
+  });
+  (ab.stocks || []).forEach((s, i) => {
+    const t = document.getElementById(`ft-abstock-${i}`);
+    if (t) s.analysis = t.value;
+  });
+  try {
+    await saveBriefingJson(repoCfg, "admin: 브리핑 교정 — 텍스트 수정");
+    await appendCorrectionLog(repoCfg, { action: "edit_text", detail: "AI전략/섹터/종목 분석 수정" });
+    showToast("✅ 저장 완료");
+  } catch(e) { showToast(`오류: ${e.message}`, "error"); }
+}
+
+const REPORT_BUCKETS = [
+  ["simultaneous", "동시 발간"],
+  ["new_coverage", "신규 커버리지"],
+  ["single_significant", "단독 유의미"],
+];
+
+function renderCorrectCards_report(el, repoCfg) {
+  const data = state[repoCfg.key].briefing;
+  const ab = data.analyst_briefing || { stocks: [] };
+  const br = data.brokerage_reports || { simultaneous: [], new_coverage: [], single_significant: [] };
+
+  let html = `
+    <div class="card">
+      <div class="card-header"><span class="card-name">📇 종목별 증권사 분석 (analyst_briefing.stocks)</span></div>
+      <div>
+        ${(ab.stocks || []).length ? (ab.stocks || []).map((s, i) => `
+          <div class="card-list-row">
+            <span class="name">${escapeHtml(s.name)}</span>
+            <span class="card-meta">${escapeHtml(s.opinion || "")} · ${escapeHtml(s.target_price || "")}</span>
+            <div class="btn-row" style="margin:0;">
+              <button class="btn btn-delete btn-sm" onclick="deleteAnalystStock_report(${i})">🗑 삭제</button>
+            </div>
+          </div>
+        `).join("") : '<div class="empty">없음</div>'}
+      </div>
+    </div>
+    <div class="section-title" style="font-size:.92rem;margin:1.2rem 0 .6rem;">📑 증권사 리포트 카드 (brokerage_reports)</div>
+    <div class="two-col" style="grid-template-columns:1fr 1fr 1fr;">
+  `;
+  for (const [bucket, label] of REPORT_BUCKETS) {
+    const list = br[bucket] || [];
+    html += `
+      <div class="card">
+        <div class="card-header"><span class="card-name" style="font-size:.88rem;">${label} (${list.length})</span></div>
+        <div>
+          ${list.length ? list.map((r, i) => `
+            <div class="card-list-row" style="flex-direction:column;align-items:flex-start;">
+              <span class="name" style="font-size:.85rem;">${escapeHtml(r.stock_name || "")}</span>
+              <span class="card-meta">${escapeHtml((r.brokers || []).join(", "))}</span>
+              <div class="btn-row" style="margin:.4rem 0 0;">
+                <select class="cat-select" id="rb-target-${bucket}-${i}">
+                  ${REPORT_BUCKETS.filter(([k]) => k !== bucket).map(([k, l]) => `<option value="${k}">${l}로 이동</option>`).join("")}
+                </select>
+                <button class="btn btn-move btn-sm" onclick="moveReportCard_report('${bucket}',${i})">이동</button>
+                <button class="btn btn-delete btn-sm" onclick="deleteReportCard_report('${bucket}',${i})">🗑</button>
+              </div>
+            </div>
+          `).join("") : '<div class="empty" style="padding:1rem;">없음</div>'}
+        </div>
+      </div>`;
+  }
+  html += `</div>`;
+  el.innerHTML = html;
+}
+
+async function deleteAnalystStock_report(idx) {
+  const repoCfg = REPOS[activeRepoKey];
+  const data = state[repoCfg.key].briefing;
+  const ab = data.analyst_briefing || { stocks: [] };
+  const name = ab.stocks[idx]?.name || "";
+  if (!confirm(`"${name}" 종목 분석 카드를 삭제할까요?`)) return;
+  ab.stocks.splice(idx, 1);
+  try {
+    await saveBriefingJson(repoCfg, `admin: 브리핑 교정 — 종목 분석 카드 삭제 (${name})`);
+    await appendCorrectionLog(repoCfg, { action: "delete_card", detail: `${name} (analyst_briefing.stocks)` });
+    showToast(`🗑 ${name} 삭제 완료`);
+    renderCorrectCards_report(document.getElementById("correct-tab-body"), repoCfg);
+  } catch(e) { showToast(`오류: ${e.message}`, "error"); }
+}
+
+async function deleteReportCard_report(bucket, idx) {
+  const repoCfg = REPOS[activeRepoKey];
+  const data = state[repoCfg.key].briefing;
+  const br = data.brokerage_reports || {};
+  const name = br[bucket]?.[idx]?.stock_name || "";
+  if (!confirm(`"${name}" 리포트 카드를 삭제할까요?`)) return;
+  br[bucket].splice(idx, 1);
+  try {
+    await saveBriefingJson(repoCfg, `admin: 브리핑 교정 — 리포트 카드 삭제 (${name})`);
+    await appendCorrectionLog(repoCfg, { action: "delete_card", detail: `${name} (${bucket})` });
+    showToast(`🗑 ${name} 삭제 완료`);
+    renderCorrectCards_report(document.getElementById("correct-tab-body"), repoCfg);
+  } catch(e) { showToast(`오류: ${e.message}`, "error"); }
+}
+
+async function moveReportCard_report(bucket, idx) {
+  const repoCfg = REPOS[activeRepoKey];
+  const data = state[repoCfg.key].briefing;
+  const br = data.brokerage_reports || {};
+  const targetSel = document.getElementById(`rb-target-${bucket}-${idx}`);
+  const target = targetSel ? targetSel.value : null;
+  if (!target) return;
+  const name = br[bucket]?.[idx]?.stock_name || "";
+  if (!confirm(`"${name}"을(를) ${bucket} → ${target}로 옮길까요?`)) return;
+  const [card] = br[bucket].splice(idx, 1);
+  br[target] = br[target] || [];
+  br[target].push(card);
+  try {
+    await saveBriefingJson(repoCfg, `admin: 브리핑 교정 — 리포트 카드 이동 (${name}: ${bucket} → ${target})`);
+    await appendCorrectionLog(repoCfg, { action: "move_card", detail: `${name}: ${bucket} → ${target}` });
+    showToast(`✅ ${name} 이동 완료`);
+    renderCorrectCards_report(document.getElementById("correct-tab-body"), repoCfg);
+  } catch(e) { showToast(`오류: ${e.message}`, "error"); }
+}
+</script>
+</body>
+</html>
