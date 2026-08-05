@@ -145,7 +145,12 @@ def main():
     # 다시 돌 필요가 없다. 반대로 완료되지 않았다면 아래에서 단계별로 이미
     # 끝난 수집 단계는 건너뛰고 남은 단계만 이어서 진행한다.
     checkpoint.prune_old()
-    if checkpoint.is_done():
+
+    FORCE_RERUN = os.getenv("FORCE_RERUN", "false").lower() == "true"
+    if FORCE_RERUN:
+        print("  ⚡ FORCE_RERUN=true → 오늘자 체크포인트 초기화, 처음부터 재실행")
+        checkpoint.clear_today()
+    elif checkpoint.is_done():
         print("  ✅ 오늘 브리핑 이미 완료됨(체크포인트 DONE) → 종료")
         return
 
