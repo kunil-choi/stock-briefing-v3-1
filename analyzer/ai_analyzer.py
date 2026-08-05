@@ -341,17 +341,30 @@ def extract_mentions(all_data: list, stock_map: dict,
         sentiment_w = _get_sentiment_weight(text, opinion)
         weight      = weight * sentiment_w
 
-        for name, code in stock_map.items():
+        # FIX-SUBSTRING-1: stock_map 종목명 매칭이 단순 부분 문자열 포함
+        # (`name in text`) 검사라서, 짧은 종목명이 다른 종목명 안에 그대로
+        # 포함되는 경우("SK하이닉스" 안의 "이닉스" 등) 완전히 무관한 종목이
+        # 같은 기사에서 동시에 "언급"된 것으로 잘못 집계됐다. 그 결과 진짜
+        # 종목과 별개의 유령 종목이 독자적으로 가중점수를 쌓아 대형 주도주로
+        # 잘못 선정되는 사고가 반복됐다(2026-08-04, 2026-08-05). 같은 텍스트에서
+        # 매칭된 다른 종목명에 완전히 포함되는 이름은 최장 일치만 남기고 제외한다.
+        gemini_stock = item.get("stock_name", "")
+        if gemini_stock:
+            matched_names = [gemini_stock] if gemini_stock in stock_map else []
+        else:
+            raw_matched = [
+                n for n in stock_map
+                if _is_valid_stock_name(n) and n in text
+            ]
+            matched_names = [
+                n for n in raw_matched
+                if not any(n != m and n in m for m in raw_matched)
+            ]
+
+        for name in matched_names:
             if not _is_valid_stock_name(name):
                 continue
-
-            gemini_stock = item.get("stock_name", "")
-            if gemini_stock:
-                if name != gemini_stock:
-                    continue
-            else:
-                if name not in text:
-                    continue
+            code = stock_map[name]
 
             content_id = f"{src_name}_{link}_{name}"
 
