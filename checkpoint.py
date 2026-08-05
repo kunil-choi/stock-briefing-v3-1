@@ -67,6 +67,19 @@ def is_done() -> bool:
     return os.path.exists(f"{_checkpoint_dir()}/DONE")
 
 
+def clear_today() -> None:
+    """오늘자 체크포인트를 전부 삭제한다(강제 재실행용).
+
+    코드 수정 후 같은 날 다시 실행하고 싶을 때, DONE 마커 때문에 처음부터
+    스킵되는 것을 막기 위해 사용한다. 삭제만 로컬에서 수행하고, 새로 생성될
+    체크포인트/DONE 파일은 이후 save_stage()/mark_done()이 알아서 같은 경로에
+    커밋해 기존 커밋 내용을 덮어쓴다.
+    """
+    d = f"{_ROOT}/{_today_str()}"
+    shutil.rmtree(d, ignore_errors=True)
+    os.makedirs(d, exist_ok=True)
+
+
 def mark_done(extra_paths: list) -> None:
     """
     최종 산출물(briefing_data.json, raw_*.json, docs/index.html)과 DONE
