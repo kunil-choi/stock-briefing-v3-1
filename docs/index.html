@@ -37,6 +37,23 @@ a:hover { text-decoration: underline; }
 }
 .briefing-header h1 { font-size: 1.8rem; font-weight: 700; }
 .subtitle { color: var(--text-muted); font-size: .9rem; margin-top: .4rem; }
+.video-card {
+  display: flex; align-items: center; gap: 1rem;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+  padding: .8rem; text-decoration: none; transition: border-color .15s;
+}
+.video-card:hover { border-color: var(--accent); text-decoration: none; }
+.video-thumb { width: 160px; max-width: 40vw; border-radius: 8px; flex-shrink: 0; display: block; }
+.video-info { display: flex; flex-direction: column; gap: .4rem; min-width: 0; }
+.video-badge {
+  align-self: flex-start; font-size: .72rem; font-weight: 700; color: #000;
+  background: #ff4d4d; padding: .15rem .6rem; border-radius: 20px;
+}
+.video-title {
+  font-size: 1rem; font-weight: 700; color: var(--text);
+  overflow: hidden; text-overflow: ellipsis;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+}
 .section { margin-bottom: 2.5rem; }
 .market-leader-card {
   border-left: 3px solid #ffd43b;
@@ -197,6 +214,8 @@ a:hover { text-decoration: underline; }
   .briefing-header h1 { font-size: 1.4rem; }
   .stock-card-header  { flex-wrap: wrap; }
   .stock-name         { font-size: .95rem; }
+  .video-thumb        { width: 110px; }
+  .video-title        { font-size: .88rem; }
 }</style>
 </head>
 <body>
@@ -204,9 +223,9 @@ a:hover { text-decoration: underline; }
 
   <div class="briefing-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;text-align:left;">
     <div style="text-align:left;"><h1>📈 주식 시장 AI 프리뷰</h1>
-    <div class="subtitle">2026년 08월 07일 · 생성 시각 09:38 KST</div></div><a href="https://kunil-choi.github.io/stock-briefing-v3-2/" target="_blank" rel="noopener" style="flex-shrink:0;background:#1f2937;border:1px solid #374151;border-radius:8px;padding:8px 14px;text-align:center;font-size:12px;line-height:1.4;color:#fbbf24;text-decoration:none;font-weight:700;white-space:nowrap;">증권사 리포트 AI 분석<br>오전 10시 업데이트 예정</a>
+    <div class="subtitle">2026년 08월 07일 · 생성 시각 14:57 KST</div></div><a href="https://kunil-choi.github.io/stock-briefing-v3-2/" target="_blank" rel="noopener" style="flex-shrink:0;background:#1f2937;border:1px solid #374151;border-radius:8px;padding:8px 14px;text-align:center;font-size:12px;line-height:1.4;color:#fbbf24;text-decoration:none;font-weight:700;white-space:nowrap;">증권사 리포트 AI 분석<br>오전 10시 업데이트 예정</a>
   </div>
-
+  
   <div class="section">
     <div class="section-title">📊 시장 지표</div>
     <div class="market-indicators"><div class="indicator-badge"><span class="ind-label">코스피</span><span class="ind-value">6,388.94</span><span class="ind-pct" style="color:#ff6b6b;">▲ +1.47%</span></div><div class="indicator-badge"><span class="ind-label">코스닥</span><span class="ind-value">811.84</span><span class="ind-pct" style="color:#ff6b6b;">▲ +1.27%</span></div><div class="indicator-badge"><span class="ind-label">나스닥 <span style="font-size:.65rem;color:#adb5bd;">(새벽 마감)</span></span><span class="ind-value">26,348.35</span><span class="ind-pct" style="color:#74c0fc;">▼ -0.06%</span></div><div class="indicator-badge"><span class="ind-label">S&P500 <span style="font-size:.65rem;color:#adb5bd;">(새벽 마감)</span></span><span class="ind-value">7,709.96</span><span class="ind-pct" style="color:#74c0fc;">▼ -0.18%</span></div><div class="indicator-badge"><span class="ind-label">다우존스 <span style="font-size:.65rem;color:#adb5bd;">(새벽 마감)</span></span><span class="ind-value">53,885.10</span><span class="ind-pct" style="color:#74c0fc;">▼ -0.85%</span></div><div class="indicator-badge"><span class="ind-label">달러/원</span><span class="ind-value">1,424.88</span><span class="ind-pct" style="color:#ff6b6b;">▲ +0.26%</span></div></div>
@@ -265,23 +284,6 @@ a:hover { text-decoration: underline; }
   <div class="stock-card-header">
     <div class="stock-rank">#1</div>
     <div class="stock-name-block">
-      <a href="https://finance.naver.com/item/main.naver?code=105840" target="_blank" rel="noopener"
-         class="stock-name">우진</a>
-      <span class="signal-badge signal-neutral"
-            style="border-color:#adb5bd;color:#adb5bd;">중립</span>
-    </div>
-    <div class="overlap-badge" title="비뉴스 채널 중복 언급 수">🔥 1개</div>
-  </div>
-  <div class="stock-card-body">
-    <div class="source-tags"><span class="source-tag" style="background:#2d1a3a;color:#cc5de8;">유튜브 8</span></div>
-    <div class="price-row"><span class="price-value">14,990원</span><span style="font-size:.7rem;color:#adb5bd;margin-left:.3rem;">(현재가)</span><span style="font-size:.82rem;color:#ff6b6b;margin-left:.35rem;">▲ +1.42%</span><a href="https://finance.naver.com/item/main.naver?code=105840" target="_blank" rel="noopener" class="chart-btn">🔗 Naver 차트</a></div>
-    <div class="stock-section"><span class="stock-section-label">📋 종목 요약</span><p class="stock-section-text">우진은 삼프로TV에서 집중적으로 언급되며 가중점수 22.6으로 관심종목 후보 중 최상위를 기록했다. 구체적인 종목 단독 분석보다는 삼프로TV의 다수 콘텐츠에 출연진(장우진 금시공 대표 등)의 이름이 포함된 형태로 언급 빈도가 높아졌다.</p></div><div class="stock-section"><span class="stock-section-label">🚀 상승 촉매</span><p class="stock-section-text">삼프로TV 여의도 인사이트 등 다수 프로그램에서 장우진 금시공 대표가 출연해 &#x27;많이 오른 코스닥조차 여전히 마이너스라면 본전만 찾고 팔겠다는 심리를 경계하라&#x27;고 조언하며, 중소형 가치주 발굴 관점에서 관심이 환기됐다. 삼프로TV 구독 서비스 출연진으로 꾸준히 노출되며 브랜드 언급이 누적됐다.</p></div><div class="stock-section"><span class="stock-section-label">⚠️ 리스크</span><p class="stock-section-text">종목 펀더멘털에 대한 구체적 애널리스트 분석 없이 출연자 이름 중복 언급에 따른 가중점수 집계가 주된 언급 배경인 만큼, 실제 모멘텀 확인이 필요하다. 변동성 장세에서 개별 중소형주는 대형주 대비 수급 이탈 위험이 더 크다.</p></div><div class="stock-section"><span class="stock-section-label">📢 채널별 언급 내용</span><ul class="reasons-list"><li><span style="color:#cc5de8;font-weight:600;">삼프로TV</span> <a href="https://www.youtube.com/watch?v=8H20N3eXxRg" target="_blank" rel="noopener" style="color:#adb5bd;text-decoration:none;">많이 오른 코스닥조차 여전히 마이너스인 투자자들에게 &#x27;본전만 찾고 팔겠다&#x27;는 심리를 경계하라고 조언하며, 8월은 수익 극대화보다 손실 최소화로 방어력을 다질 때라고 강조했다.</a></li><li><span style="color:#cc5de8;font-weight:600;">삼프로TV</span> <a href="https://www.youtube.com/watch?v=LJ6Bc8obUVc" target="_blank" rel="noopener" style="color:#adb5bd;text-decoration:none;">삼전닉스 반등만 기다리는 동안 다른 상승 기회를 놓친다는 주제로 이재규 SK증권 PB차장이 출연해 코스닥 개별 종목 트레이딩 기회를 분석했다.</a></li><li><span style="color:#cc5de8;font-weight:600;">삼프로TV</span> <a href="https://www.youtube.com/watch?v=6lasWzdJFKk" target="_blank" rel="noopener" style="color:#adb5bd;text-decoration:none;">8월은 방어력을 다질 때라며 수익 극대화보다 손실 최소화 전략을 강조하고, 변동성 장세에서 포트폴리오 리밸런싱의 중요성을 짚었다.</a></li></ul></div>
-  </div>
-</div>
-<div class="stock-card">
-  <div class="stock-card-header">
-    <div class="stock-rank">#2</div>
-    <div class="stock-name-block">
       <a href="https://finance.naver.com/item/main.naver?code=452400" target="_blank" rel="noopener"
          class="stock-name">이닉스</a>
       <span class="signal-badge signal-neutral"
@@ -297,7 +299,7 @@ a:hover { text-decoration: underline; }
 </div>
 <div class="stock-card">
   <div class="stock-card-header">
-    <div class="stock-rank">#3</div>
+    <div class="stock-rank">#2</div>
     <div class="stock-name-block">
       <a href="https://finance.naver.com/item/main.naver?code=228670" target="_blank" rel="noopener"
          class="stock-name">레이</a>
@@ -314,7 +316,7 @@ a:hover { text-decoration: underline; }
 </div>
 <div class="stock-card">
   <div class="stock-card-header">
-    <div class="stock-rank">#4</div>
+    <div class="stock-rank">#3</div>
     <div class="stock-name-block">
       <a href="https://finance.naver.com/item/main.naver?code=009150" target="_blank" rel="noopener"
          class="stock-name">삼성전기</a>
@@ -331,7 +333,7 @@ a:hover { text-decoration: underline; }
 </div>
 <div class="stock-card">
   <div class="stock-card-header">
-    <div class="stock-rank">#5</div>
+    <div class="stock-rank">#4</div>
     <div class="stock-name-block">
       <a href="https://finance.naver.com/item/main.naver?code=035720" target="_blank" rel="noopener"
          class="stock-name">카카오</a>
@@ -348,7 +350,7 @@ a:hover { text-decoration: underline; }
 </div>
 <div class="stock-card">
   <div class="stock-card-header">
-    <div class="stock-rank">#6</div>
+    <div class="stock-rank">#5</div>
     <div class="stock-name-block">
       <a href="https://finance.naver.com/item/main.naver?code=001510" target="_blank" rel="noopener"
          class="stock-name">SK증권</a>
@@ -365,7 +367,7 @@ a:hover { text-decoration: underline; }
 </div>
 <div class="stock-card">
   <div class="stock-card-header">
-    <div class="stock-rank">#7</div>
+    <div class="stock-rank">#6</div>
     <div class="stock-name-block">
       <a href="https://finance.naver.com/item/main.naver?code=095610" target="_blank" rel="noopener"
          class="stock-name">테스</a>
@@ -382,7 +384,7 @@ a:hover { text-decoration: underline; }
 </div>
 <div class="stock-card">
   <div class="stock-card-header">
-    <div class="stock-rank">#8</div>
+    <div class="stock-rank">#7</div>
     <div class="stock-name-block">
       <a href="https://finance.naver.com/item/main.naver?code=001290" target="_blank" rel="noopener"
          class="stock-name">상상인증권</a>
