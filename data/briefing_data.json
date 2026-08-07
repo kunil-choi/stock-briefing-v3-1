@@ -251,49 +251,6 @@
   "stocks": [
     {
       "rank": 1,
-      "name": "우진",
-      "code": "105840",
-      "signal": "중립",
-      "summary": "우진은 삼프로TV에서 집중적으로 언급되며 가중점수 22.6으로 관심종목 후보 중 최상위를 기록했다. 구체적인 종목 단독 분석보다는 삼프로TV의 다수 콘텐츠에 출연진(장우진 금시공 대표 등)의 이름이 포함된 형태로 언급 빈도가 높아졌다.",
-      "catalyst": "삼프로TV 여의도 인사이트 등 다수 프로그램에서 장우진 금시공 대표가 출연해 '많이 오른 코스닥조차 여전히 마이너스라면 본전만 찾고 팔겠다는 심리를 경계하라'고 조언하며, 중소형 가치주 발굴 관점에서 관심이 환기됐다. 삼프로TV 구독 서비스 출연진으로 꾸준히 노출되며 브랜드 언급이 누적됐다.",
-      "risk": "종목 펀더멘털에 대한 구체적 애널리스트 분석 없이 출연자 이름 중복 언급에 따른 가중점수 집계가 주된 언급 배경인 만큼, 실제 모멘텀 확인이 필요하다. 변동성 장세에서 개별 중소형주는 대형주 대비 수급 이탈 위험이 더 크다.",
-      "channel_mentions": [
-        {
-          "source_type": "유튜브",
-          "source_name": "삼프로TV",
-          "speaker_name": "장우진 금시공 대표",
-          "content": "많이 오른 코스닥조차 여전히 마이너스인 투자자들에게 '본전만 찾고 팔겠다'는 심리를 경계하라고 조언하며, 8월은 수익 극대화보다 손실 최소화로 방어력을 다질 때라고 강조했다.",
-          "url": "https://www.youtube.com/watch?v=8H20N3eXxRg"
-        },
-        {
-          "source_type": "유튜브",
-          "source_name": "삼프로TV",
-          "speaker_name": "",
-          "content": "삼전닉스 반등만 기다리는 동안 다른 상승 기회를 놓친다는 주제로 이재규 SK증권 PB차장이 출연해 코스닥 개별 종목 트레이딩 기회를 분석했다.",
-          "url": "https://www.youtube.com/watch?v=LJ6Bc8obUVc"
-        },
-        {
-          "source_type": "유튜브",
-          "source_name": "삼프로TV",
-          "speaker_name": "명민준, 박보경, 신얼 상상인증권 투자전략팀장",
-          "content": "8월은 방어력을 다질 때라며 수익 극대화보다 손실 최소화 전략을 강조하고, 변동성 장세에서 포트폴리오 리밸런싱의 중요성을 짚었다.",
-          "url": "https://www.youtube.com/watch?v=6lasWzdJFKk"
-        }
-      ],
-      "channel_counts": {
-        "유튜브": 8
-      },
-      "total_count": 8,
-      "weighted_score": 22.61,
-      "overlap_count": 1,
-      "reasons": [],
-      "price": 14990,
-      "change_pct": 1.42,
-      "price_label": "현재가",
-      "panelist_quotes": []
-    },
-    {
-      "rank": 2,
       "name": "이닉스",
       "code": "452400",
       "signal": "중립",
@@ -363,7 +320,7 @@
       ]
     },
     {
-      "rank": 3,
+      "rank": 2,
       "name": "레이",
       "code": "228670",
       "signal": "중립",
@@ -415,7 +372,7 @@
       "panelist_quotes": []
     },
     {
-      "rank": 4,
+      "rank": 3,
       "name": "삼성전기",
       "code": "009150",
       "signal": "긍정",
@@ -476,7 +433,7 @@
       ]
     },
     {
-      "rank": 5,
+      "rank": 4,
       "name": "카카오",
       "code": "035720",
       "signal": "중립",
@@ -539,7 +496,7 @@
       ]
     },
     {
-      "rank": 6,
+      "rank": 5,
       "name": "SK증권",
       "code": "001510",
       "signal": "중립",
@@ -583,7 +540,7 @@
       "panelist_quotes": []
     },
     {
-      "rank": 7,
+      "rank": 6,
       "name": "테스",
       "code": "095610",
       "signal": "중립",
@@ -627,7 +584,7 @@
       "panelist_quotes": []
     },
     {
-      "rank": 8,
+      "rank": 7,
       "name": "상상인증권",
       "code": "001290",
       "signal": "긍정",
