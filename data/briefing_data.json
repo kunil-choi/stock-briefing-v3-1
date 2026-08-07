@@ -251,76 +251,6 @@
   "stocks": [
     {
       "rank": 1,
-      "name": "이닉스",
-      "code": "452400",
-      "signal": "중립",
-      "summary": "이닉스는 유튜브 및 경제방송 채널에서 10회 언급, 가중점수 19.8을 기록하며 반도체·AI 관련 주도주로 주목받고 있다. 반도체 대형주 흐름에 연동되는 특성상 삼성전자·SK하이닉스 반등 여부에 따라 변동성이 클 것으로 보인다.",
-      "catalyst": "이데일리TV에서 AI 데이터센터 수혜 및 반도체 공급망 재편 맥락에서 언급됐으며, 이비덴·유니마이크론 등 글로벌 반도체 패키징 밸류체인 내 포지셔닝이 부각됐다. 증시 반등 시 낙폭 과대 반도체 관련주로서 트레이딩 기회가 거론됐다.",
-      "risk": "반도체 섹터 전반의 외국인 매도 압력이 지속되고 있으며, 레버리지 ETF 청산 여파가 완전히 해소되지 않은 상황에서 변동성 확대 가능성이 남아 있다. 8월 중순 신용물량 추가 유입 여부도 점검이 필요하다.",
-      "channel_mentions": [
-        {
-          "source_type": "경제방송",
-          "source_name": "이데일리TV",
-          "speaker_name": "이재일 연구원, 이승웅 연구원",
-          "content": "AI 데이터센터 수혜 맥락에서 SK텔레콤과 함께 이비덴·유니마이크론 등 반도체 패키징 밸류체인 내 관련주로 삼성전기·LG이노텍과 함께 언급됐다.",
-          "url": "https://www.youtube.com/watch?v=0bbqK1uPbvg"
-        },
-        {
-          "source_type": "유튜브",
-          "source_name": "달란트투자",
-          "speaker_name": "",
-          "content": "외인들 장난질에 속지 말라며 삼성전자·하이닉스 결국 특정 가격대까지 간다고 분석하고, 반도체 분위기 심상치 않다며 삼전닉스에 곧 벌어질 일을 경고했다.",
-          "url": "https://www.youtube.com/watch?v=HSulbZR4FNY"
-        },
-        {
-          "source_type": "유튜브",
-          "source_name": "웅달 책방",
-          "speaker_name": "이창대 대표",
-          "content": "삼성전자·하이닉스·반도체·코스피·주식 주제로 출연해 현 반도체 시장 흐름과 개인투자자 대응 전략을 논의했다.",
-          "url": "https://www.youtube.com/watch?v=uq2islmcBHM"
-        },
-        {
-          "source_type": "유튜브",
-          "source_name": "웅달 책방",
-          "speaker_name": "이화진",
-          "content": "삼성전자·코스닥·코스피·반도체·하이닉스 흐름을 점검하며 반도체 관련 코스닥 종목군의 단기 트레이딩 기회를 분석했다.",
-          "url": "https://www.youtube.com/watch?v=4RnCLV3_0l8"
-        }
-      ],
-      "channel_counts": {
-        "경제방송": 1,
-        "유튜브": 9
-      },
-      "total_count": 10,
-      "weighted_score": 19.76,
-      "overlap_count": 2,
-      "reasons": [],
-      "price": 6020,
-      "change_pct": 0.84,
-      "price_label": "현재가",
-      "panelist_quotes": [
-        {
-          "speaker_name": "신종호 LS증권 리서치센터장",
-          "source_name": "815머니톡",
-          "fact": "메모리 쇼티지 해결을 위해 마이크론처럼 삼성전자와 SK하이닉스도 설비투자(CAPEX)를 서둘러야 할 시점이며, ADR 효과와 함께 PBR 장세에서 긍정적인 요인이 될 수 있습니다.",
-          "quote": "",
-          "sentiment": "긍정",
-          "confidence": "높음",
-          "source_url": "https://www.youtube.com/watch?v=IxnU7v4CrS0&t=03:39"
-        },
-        {
-          "speaker_name": "이권희 대표 (위즈웨이브)",
-          "source_name": "815머니톡",
-          "fact": "SK하이닉스는 현재 약 4% 하락 중이지만, 미국 시장의 상황에 따라 낙폭을 일부 회복할 것으로 예상됩니다.",
-          "quote": "",
-          "sentiment": "중립",
-          "confidence": "높음",
-          "source_url": "https://www.youtube.com/watch?v=6rP7EeyHCQc&t=00:30"
-        }
-      ]
-    },
-    {
-      "rank": 2,
       "name": "레이",
       "code": "228670",
       "signal": "중립",
@@ -372,7 +302,7 @@
       "panelist_quotes": []
     },
     {
-      "rank": 3,
+      "rank": 2,
       "name": "삼성전기",
       "code": "009150",
       "signal": "긍정",
@@ -433,7 +363,7 @@
       ]
     },
     {
-      "rank": 4,
+      "rank": 3,
       "name": "카카오",
       "code": "035720",
       "signal": "중립",
@@ -496,7 +426,7 @@
       ]
     },
     {
-      "rank": 5,
+      "rank": 4,
       "name": "SK증권",
       "code": "001510",
       "signal": "중립",
@@ -540,7 +470,7 @@
       "panelist_quotes": []
     },
     {
-      "rank": 6,
+      "rank": 5,
       "name": "테스",
       "code": "095610",
       "signal": "중립",
@@ -584,7 +514,7 @@
       "panelist_quotes": []
     },
     {
-      "rank": 7,
+      "rank": 6,
       "name": "상상인증권",
       "code": "001290",
       "signal": "긍정",
