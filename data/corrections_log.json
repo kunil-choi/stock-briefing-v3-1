@@ -13,5 +13,10 @@
     "timestamp": "2026. 8. 7. 오후 2:57:35",
     "action": "approve_batch",
     "detail": "우진 (stocks)"
+  },
+  {
+    "timestamp": "2026. 8. 7. 오후 3:05:56",
+    "action": "approve_batch",
+    "detail": "이닉스 (stocks)"
   }
 ]
