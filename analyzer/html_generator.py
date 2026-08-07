@@ -628,9 +628,36 @@ def generate_html(
         naver_code   = leader.get("naver_code") or leader.get("code", "")
         naver_url    = leader.get("naver_url", "")
 
+        # FIX-LEADER-CHART-1: stocks 루프에는 있던 naver_url 폴백 구성과
+        # 차트 버튼 렌더링이 market_leaders 루프에는 빠져 있어, 대형 주도주
+        # 카드에만 "Naver 차트" 버튼이 아예 표시되지 않는 문제가 있었다.
+        if not naver_url:
+            if naver_code:
+                naver_url = (f"https://finance.naver.com/item/main.naver"
+                             f"?code={naver_code}")
+            elif name:
+                naver_url = (f"https://finance.naver.com/search/searchResult.naver"
+                             f"?query={name.replace(' ', '+')}")
+
         sig_class, sig_color, signal_label = _resolve_signal(signal)
         price_html   = _render_price_html(leader)
-        chart_btn_html = ""
+        leader_chart_b64 = leader.get("chart_base64", "")
+        if leader_chart_b64:
+            chart_key      = _safe_chart_key("chart", name)
+            safe_name_js   = _safe_js_str(name)
+            chart_data_dict[chart_key] = f"data:image/png;base64,{leader_chart_b64}"
+            chart_btn_html = (
+                f"<button class=\"chart-btn\" "
+                f"onclick=\"showChart('{chart_key}','{safe_name_js}')\">"
+                f"📈 차트 보기</button>"
+            )
+        elif naver_url:
+            chart_btn_html = (
+                f'<a href="{naver_url}" target="_blank" rel="noopener" '
+                f'class="chart-btn">🔗 Naver 차트</a>'
+            )
+        else:
+            chart_btn_html = ""
         source_tags_html = "".join(
             f'<span class="source-tag" style="background:{_TAG_META.get(ct, {}).get("bg","#2d3a4a")};'
             f'color:{_TAG_META.get(ct, {}).get("color","#74c0fc")};">'
