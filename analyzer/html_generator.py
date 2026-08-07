@@ -548,6 +548,29 @@ def _render_price_html(item: dict) -> str:
     return '<span class="price-value" style="color:#666;">-</span>'
 
 
+# ── STEP-1 영상 섹션 ─────────────────────────────────────────────────────
+# 관리자 페이지에서 유튜브 링크를 등록하기 전에는 data.video가 없으므로
+# 섹션 자체가 렌더링되지 않는다 (기본 숨김). STEP-1 영상은 브리핑 생성
+# *이후*에 업로드되는 인과관계상, 생성 시점에는 항상 비어 있다가 관리자가
+# 나중에 링크를 채워 넣으면 그때부터 표출된다.
+def _render_video_section(video: dict) -> str:
+    if not video or not video.get("video_id"):
+        return ""
+    url       = video.get("url", "")
+    title     = video.get("title", "")
+    thumbnail = video.get("thumbnail") or f'https://i.ytimg.com/vi/{video["video_id"]}/hqdefault.jpg'
+    return f"""
+  <div class="section">
+    <a href="{_he.escape(url)}" target="_blank" rel="noopener" class="video-card">
+      <img src="{_he.escape(thumbnail)}" alt="영상 썸네일" class="video-thumb" loading="lazy">
+      <div class="video-info">
+        <span class="video-badge">▶ 오늘의 영상</span>
+        <span class="video-title">{_he.escape(title)}</span>
+      </div>
+    </a>
+  </div>"""
+
+
 # ── 메인 HTML 생성 ───────────────────────────────────────────────────────
 
 def generate_html(
@@ -723,6 +746,7 @@ def generate_html(
 
     analyst_html  = _build_analyst_html(all_data)
     strategy_html = _render_ai_strategy(ai_strategy)
+    video_html    = _render_video_section(data.get("video"))
 
     css = """
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -757,6 +781,23 @@ a:hover { text-decoration: underline; }
 }
 .briefing-header h1 { font-size: 1.8rem; font-weight: 700; }
 .subtitle { color: var(--text-muted); font-size: .9rem; margin-top: .4rem; }
+.video-card {
+  display: flex; align-items: center; gap: 1rem;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+  padding: .8rem; text-decoration: none; transition: border-color .15s;
+}
+.video-card:hover { border-color: var(--accent); text-decoration: none; }
+.video-thumb { width: 160px; max-width: 40vw; border-radius: 8px; flex-shrink: 0; display: block; }
+.video-info { display: flex; flex-direction: column; gap: .4rem; min-width: 0; }
+.video-badge {
+  align-self: flex-start; font-size: .72rem; font-weight: 700; color: #000;
+  background: #ff4d4d; padding: .15rem .6rem; border-radius: 20px;
+}
+.video-title {
+  font-size: 1rem; font-weight: 700; color: var(--text);
+  overflow: hidden; text-overflow: ellipsis;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+}
 .section { margin-bottom: 2.5rem; }
 .market-leader-card {
   border-left: 3px solid #ffd43b;
@@ -917,6 +958,8 @@ a:hover { text-decoration: underline; }
   .briefing-header h1 { font-size: 1.4rem; }
   .stock-card-header  { flex-wrap: wrap; }
   .stock-name         { font-size: .95rem; }
+  .video-thumb        { width: 110px; }
+  .video-title        { font-size: .88rem; }
 }"""
 
     return f"""<!DOCTYPE html>
@@ -934,7 +977,7 @@ a:hover { text-decoration: underline; }
     <h1>📈 AI 주식 브리핑</h1>
     <div class="subtitle">{briefing_date} · 생성 시각 {briefing_time} KST</div>
   </div>
-
+  {video_html}
   <div class="section">
     <div class="section-title">📊 시장 지표</div>
     {market_indicators_html}
