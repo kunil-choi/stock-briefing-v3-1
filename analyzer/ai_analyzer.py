@@ -130,6 +130,41 @@ def _is_valid_stock_name(name: str) -> bool:
     return True
 
 
+# FIX-NAME-BOUNDARY-1: `name in text` 단순 부분 문자열 검사는 종목명이 사람
+# 이름 등 다른 한글 단어의 뒷부분에 우연히 포함되는 경우까지 종목 언급으로
+# 잘못 집계했다 — 2026-08-07, 종목 "우진"(2글자)이 삼프로TV 출연자
+# "장우진" 대표의 이름 뒷부분에 포함돼 있다는 이유만으로 8개 영상에서
+# "우진" 관련 콘텐츠로 집계되며 가중점수 22.6으로 관심종목 1위까지 올라간
+# 사고가 있었다. 매칭된 문자열 바로 앞이 한글 음절이면(예: "장" + "우진")
+# 더 큰 단어의 일부로 보고 제외한다.
+#
+# 뒤쪽은 검사하지 않는다 — 한국어는 교착어라 명사 뒤에 조사(은/는/이/가/을/를
+# 등)가 공백 없이 그대로 붙는 게 정상이라("이닉스는", "우진이") 뒤쪽까지
+# 한글이면 무조건 제외할 경우 정상적인 단독 언급까지 대부분 걸러져 버린다.
+# "SK하이닉스" 안의 "이닉스"처럼 다른 종목명 뒷부분에 포함되는 경우는
+# 앞쪽 검사로 이미 걸러지고, 남은 동일 텍스트 내 종목명 간 겹침은 기존
+# FIX-SUBSTRING-1(최장 일치 우선) 로직이 2차로 처리한다.
+_HANGUL_SYLLABLE_RE = re.compile(r'[가-힣]')
+
+
+def _find_stock_matches(text: str, stock_map: dict) -> list:
+    matched = []
+    for n in stock_map:
+        if not _is_valid_stock_name(n):
+            continue
+        start = 0
+        while True:
+            idx = text.find(n, start)
+            if idx == -1:
+                break
+            before = text[idx - 1] if idx > 0 else ""
+            if not _HANGUL_SYLLABLE_RE.match(before):
+                matched.append(n)
+                break
+            start = idx + 1
+    return matched
+
+
 # ── 채널 가중치 계산 ──────────────────────────────────────────────────────
 
 def _channel_weight(subscribers: int) -> float:
@@ -352,10 +387,7 @@ def extract_mentions(all_data: list, stock_map: dict,
         if gemini_stock:
             matched_names = [gemini_stock] if gemini_stock in stock_map else []
         else:
-            raw_matched = [
-                n for n in stock_map
-                if _is_valid_stock_name(n) and n in text
-            ]
+            raw_matched = _find_stock_matches(text, stock_map)
             matched_names = [
                 n for n in raw_matched
                 if not any(n != m and n in m for m in raw_matched)
