@@ -2,7 +2,9 @@ name: V3_1 morning_core 데이터 생성
 
 on:
   schedule:
-    - cron: '0 22 * * 0-4'    # KST 월~금 07:00 (UTC 전날 22:00)
+    # 정각(0분)은 GitHub Actions 스케줄 실행이 몰려 지연되거나 드물게 아예
+    # 스킵되는 시간대라 7분 오프셋을 둔다 (2026-08-07 07:00 KST 실행 누락 재발 방지).
+    - cron: '7 22 * * 0-4'    # KST 월~금 07:07 (UTC 전날 22:07)
   workflow_dispatch:
     inputs:
       skip_youtube:
