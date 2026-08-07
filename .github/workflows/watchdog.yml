@@ -1,0 +1,69 @@
+name: 브리핑 워치독 (스케줄 누락 감지 & 자동 재실행)
+
+# main.yml의 정기 스케줄(KST 07:07)이 GitHub Actions 부하 등으로 아예
+# 발동하지 않는 경우(2026-08-07 사례)를 감지해 자동으로 재실행하고
+# 이슈로 기록한다. 정기 실행이 끝났어야 할 시간대(KST 08:15)에 오늘자
+# raw 데이터 파일 존재 여부만 확인하므로, main.yml 실행 자체가
+# 실패한 경우(API 키 누락 등)는 감지 대상이 아니다 — 그 경우는
+# main.yml 자체가 실패 상태로 남아 Actions 탭에 붉게 표시된다.
+
+on:
+  schedule:
+    - cron: '15 23 * * 0-4'   # KST 월~금 08:15 (UTC 전날 23:15)
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: write
+  issues: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 저장소 체크아웃
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: 🔍 오늘자 브리핑 데이터 존재 확인
+        id: check
+        run: |
+          TODAY=$(TZ='Asia/Seoul' date +'%Y%m%d')
+          echo "today=${TODAY}" >> "$GITHUB_OUTPUT"
+          if [ -f "data/raw_${TODAY}.json" ]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "✅ data/raw_${TODAY}.json 존재 — 정상 실행됨"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "⚠️  data/raw_${TODAY}.json 없음 — 오늘 스케줄 누락 의심"
+          fi
+
+      - name: 🚀 누락 시 main.yml 재트리거
+        if: steps.check.outputs.exists == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          CLEAN_TOKEN="$(printf '%s' "${GH_TOKEN}" | tr -d '\n\r ')"
+          response=$(curl -sS -o /tmp/dispatch_main.txt -w "%{http_code}" -X POST \
+            -H "Authorization: token ${CLEAN_TOKEN}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            -H "Content-Type: application/json" \
+            https://api.github.com/repos/${{ github.repository }}/actions/workflows/main.yml/dispatches \
+            -d '{"ref":"main"}')
+          if [ "$response" != "204" ]; then
+            echo "❌ main.yml 재트리거 실패 (HTTP ${response})"
+            cat /tmp/dispatch_main.txt
+            exit 1
+          fi
+          echo "✅ 스케줄 누락 감지 → main.yml 재트리거 완료"
+
+      - name: 📣 누락 사실을 이슈로 기록
+        if: steps.check.outputs.exists == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          gh issue create \
+            --repo "${{ github.repository }}" \
+            --title "⚠️ ${{ steps.check.outputs.today }} 브리핑 스케줄 누락 감지 → 자동 재실행됨" \
+            --body "정기 스케줄(KST 07:07)이 08:15까지 실행되지 않아 워치독이 main.yml을 자동으로 재실행했습니다. Actions 탭에서 결과를 확인해주세요."
