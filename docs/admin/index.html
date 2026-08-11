@@ -205,9 +205,14 @@ details.card-acc .acc-body { padding: 1rem; }
 // 저장소를 한 페이지에서 관리해야 하므로 REPO를 상수가 아니라 선택 가능한
 // 설정 객체로 바꾸고, 모든 GitHub API 호출에 repoCfg를 인자로 넘긴다.
 //
-// schema: 'stock'  → market_leaders[]/stocks[] 구조 (v3-1, v3 — v3는 아직
-//                     파이프라인이 없어 스키마를 v3-1과 동일하다고 가정)
-//         'report' → v3-2 report_update 구조 (analyst_briefing/brokerage_reports 등)
+// schema: 'stock'     → market_leaders[]/stocks[] 구조 (v3-1, v3 — v3는 아직
+//                        파이프라인이 없어 스키마를 v3-1과 동일하다고 가정)
+//         'report'    → v3-2 report_update 구조 (analyst_briefing/brokerage_reports 등)
+//         'thumbnail' → ADMIN-THUMBNAIL-EDIT-1: stock-briefing-step1의 YouTube
+//                        썸네일(발언형/뉴스형) 문구만 수정하는 전용 스키마.
+//                        briefing_data.json이 아니라 docs/thumbnails/latest_meta.json을
+//                        다루고, "변경 승인" 배치가 아니라 카드별 버튼이 그 자리에서
+//                        바로 경량 워크플로우를 트리거한다(아래 renderThumbnailTab 참고).
 const REPOS = {
   v3_1: { key: "v3_1", label: "V3-1", sub: "오전 · morning_core",
           repo: "kunil-choi/stock-briefing-v3-1", branch: "main", schema: "stock" },
@@ -215,6 +220,8 @@ const REPOS = {
           repo: "kunil-choi/stock-briefing-v3-2", branch: "main", schema: "report" },
   v3:   { key: "v3",   label: "V3",   sub: "오후 · 마감 브리핑 (준비중)",
           repo: "kunil-choi/stock-briefing-v3", branch: "main", schema: "stock" },
+  step1: { key: "step1", label: "STEP-1", sub: "오전 · 썸네일",
+          repo: "kunil-choi/stock-briefing-step1", branch: "main", schema: "thumbnail" },
 };
 let activeRepoKey = "v3_1";
 let GH_TOKEN = "";
@@ -229,6 +236,7 @@ const state = {
           pending: false, pendingLog: [] },
   v3:   { subtab: "correct", correctTab: "text", briefing: null, briefingSha: null,
           pending: false, pendingLog: [] },
+  step1: { subtab: "thumbnail" },
 };
 
 // ── 인증 ──────────────────────────────────────────────────────────
@@ -372,6 +380,10 @@ function renderRepoView() {
       ["correct", "🩹 브리핑 교정"],
       ["video", "🎬 오늘의 영상"],
     ];
+  } else if (repoCfg.key === "step1") {
+    subtabDefs = [
+      ["thumbnail", "🖼️ 썸네일 수정"],
+    ];
   } else {
     subtabDefs = [
       ["correct", "🩹 브리핑 교정"],
@@ -410,6 +422,7 @@ function renderSubtabBody() {
   if (st.subtab === "brokerCand") { renderPlaceholder(body, "🏦 증권사 후보 자동 발견"); return; }
   if (st.subtab === "correct") { renderCorrect(body, repoCfg); return; }
   if (st.subtab === "video") { renderVideoTab(body, repoCfg); return; }
+  if (st.subtab === "thumbnail") { renderThumbnailTab(body, repoCfg); return; }
 }
 
 function renderPlaceholder(el, title) {
@@ -1488,6 +1501,142 @@ function _refreshVideoPendingBar(repoCfg) {
       </div>
       <div id="workflow-status" class="workflow-status"></div>
     </div>`;
+}
+
+// ══════════════════════════════════════════════════════════════════
+// ADMIN-THUMBNAIL-EDIT-1: STEP-1 전용 — 🖼️ 썸네일 수정
+// stock-briefing-step1의 morning_core.yml이 매 실행마다 docs/thumbnails/
+// latest_{1,2}.png + latest_meta.json(선정된 발언/종목 candidate 원본 + 현재
+// 문구)을 커밋해둔다. 이 탭은 그 두 이미지를 raw.githubusercontent.com으로
+// 그대로 보여주고, 문구를 고쳐 카드별 "재생성" 버튼을 누르면 step1의
+// regenerate_thumbnail.yml(workflow_dispatch, 입력 which/title)을 트리거한다.
+// 다른 탭들과 달리 "변경 승인" 배치 큐를 쓰지 않는다 — 카드 하나당 즉시
+// 트리거 → 폴링 → 이미지 교체가 자연스러운 단위 작업이라 그대로 두는 편이
+// 더 단순하다. 후보(어떤 발언/종목을 쓸지) 자체를 바꾸는 기능은 없다 —
+// morning_core.yml을 다시 돌려야 한다(문구만 다듬는 용도).
+const THUMB_META_PATH = "docs/thumbnails/latest_meta.json";
+const THUMB_WORKFLOW_FILE = "regenerate_thumbnail.yml";
+
+function thumbRawUrl(repoCfg, name) {
+  return `https://raw.githubusercontent.com/${repoCfg.repo}/${repoCfg.branch}/docs/thumbnails/${name}?t=${Date.now()}`;
+}
+
+async function renderThumbnailTab(el, repoCfg) {
+  el.innerHTML = `<div class="loading"><span class="spinner"></span>불러오는 중...</div>`;
+  try {
+    const { data, error } = await readJson(repoCfg, THUMB_META_PATH, null);
+    if (!data) {
+      el.innerHTML = `<div class="empty">아직 생성된 썸네일이 없습니다 — stock-briefing-step1의 morning_core 워크플로우를 먼저 실행하세요.${error ? `<br><span style="font-size:.75rem;">(${escapeHtml(error.message)})</span>` : ""}</div>`;
+      return;
+    }
+    _renderThumbnailCards(el, repoCfg, data);
+  } catch(e) {
+    el.innerHTML = `<div class="empty" style="color:var(--red);">로드 실패: ${escapeHtml(e.message)}</div>`;
+  }
+}
+
+function _renderThumbnailCards(el, repoCfg, meta) {
+  const card = (which, label, imgName) => {
+    const entry = meta[which];
+    if (!entry) {
+      return `
+        <div class="card" style="padding:1.1rem;margin-bottom:1rem;">
+          <div class="section-title" style="font-size:.95rem;">${label}</div>
+          <div class="empty">오늘은 이 유형의 후보가 없었습니다.</div>
+        </div>`;
+    }
+    return `
+      <div class="card" style="padding:1.1rem;margin-bottom:1rem;">
+        <div class="section-title" style="font-size:.95rem;">${label}
+          <span class="card-meta">${escapeHtml(entry.candidate?.stock_name || "")}</span>
+        </div>
+        <img src="${thumbRawUrl(repoCfg, imgName)}" id="thumb-img-${which}"
+          style="width:100%;max-width:480px;border-radius:8px;border:1px solid var(--border);margin-bottom:.8rem;display:block;">
+        <div class="field-block">
+          <div class="field-label">문구 (줄바꿈은 그 자리에서 그냥 줄을 바꿔 입력하면 됩니다)</div>
+          <textarea id="thumb-title-${which}" class="field-textarea" rows="3">${escapeHtml(entry.title || "")}</textarea>
+        </div>
+        <button class="btn btn-approve" onclick="submitThumbnailEdit('${which}')">🔄 이 문구로 재생성</button>
+        <div id="thumb-status-${which}" class="workflow-status"></div>
+      </div>`;
+  };
+  el.innerHTML = `
+    <div class="section-title">🖼️ 오늘의 썸네일 수정
+      <span class="badge badge-blue">${escapeHtml(meta.date || "")}</span>
+    </div>
+    <div class="notice">
+      문구를 고치고 "재생성"을 누르면 별도 워크플로우가 1~2분 안에 새 썸네일을
+      만듭니다(OpenAI/TTS 재호출 없음, 무료). 후보 종목·발언 자체를 바꾸려면
+      stock-briefing-step1의 morning_core 워크플로우를 다시 돌려야 합니다.
+    </div>
+    ${card("quote", "🗣️ 발언형", "latest_1.png")}
+    ${card("news", "📰 뉴스형", "latest_2.png")}
+  `;
+}
+
+async function submitThumbnailEdit(which) {
+  const repoCfg = REPOS.step1;
+  const titleEl = document.getElementById(`thumb-title-${which}`);
+  const statusEl = document.getElementById(`thumb-status-${which}`);
+  const title = titleEl ? titleEl.value : "";
+  if (!title.trim()) { showToast("문구를 입력하세요", "error"); return; }
+  if (!GH_TOKEN) { showToast("GitHub 토큰이 필요합니다", "error"); return; }
+  if (statusEl) statusEl.textContent = "🚀 재생성 워크플로우 트리거 중...";
+  const dispatchedAt = new Date();
+  try {
+    const r = await fetch(
+      `https://api.github.com/repos/${repoCfg.repo}/actions/workflows/${THUMB_WORKFLOW_FILE}/dispatches`,
+      {
+        method: "POST",
+        headers: { Authorization: `token ${GH_TOKEN}`, Accept: "application/vnd.github.v3+json",
+                   "Content-Type": "application/json" },
+        body: JSON.stringify({ ref: repoCfg.branch, inputs: { which, title } })
+      }
+    );
+    if (!r.ok) {
+      const t = await r.text().catch(() => "");
+      throw new Error(`트리거 실패 (${r.status}): ${t.slice(0, 200)}`);
+    }
+    pollThumbnailWorkflow(repoCfg, which, dispatchedAt, 0);
+  } catch(e) {
+    if (statusEl) statusEl.textContent = `❌ ${e.message}`;
+    else showToast(e.message, "error");
+  }
+}
+
+async function pollThumbnailWorkflow(repoCfg, which, dispatchedAt, attempts) {
+  const statusEl = document.getElementById(`thumb-status-${which}`);
+  if (!statusEl) return;
+  try {
+    const r = await fetch(
+      `https://api.github.com/repos/${repoCfg.repo}/actions/workflows/${THUMB_WORKFLOW_FILE}/runs?per_page=5`,
+      { headers: { Authorization: `token ${GH_TOKEN}`, Accept: "application/vnd.github.v3+json" }, cache: "no-store" }
+    );
+    const j = await r.json();
+    const run = (j.workflow_runs || []).find(x => new Date(x.created_at) >= dispatchedAt);
+    if (run) {
+      if (run.status !== "completed") {
+        statusEl.textContent = `⏳ 재생성 중... (${run.status})`;
+      } else if (run.conclusion === "success") {
+        statusEl.textContent = "✅ 재생성 완료";
+        const img = document.getElementById(`thumb-img-${which}`);
+        if (img) img.src = thumbRawUrl(repoCfg, which === "quote" ? "latest_1.png" : "latest_2.png");
+        return;
+      } else {
+        statusEl.textContent = `❌ 실패 (${run.conclusion}) — step1 저장소 Actions 탭에서 확인하세요.`;
+        return;
+      }
+    } else {
+      statusEl.textContent = "⏳ 워크플로우 시작 대기 중...";
+    }
+  } catch(e) {
+    statusEl.textContent = `⚠️ 상태 확인 중 오류: ${e.message}`;
+  }
+  if (attempts < 30) {
+    setTimeout(() => pollThumbnailWorkflow(repoCfg, which, dispatchedAt, attempts + 1), 4000);
+  } else {
+    statusEl.textContent = "⚠️ 상태 확인 시간 초과 — Actions 탭에서 직접 확인하세요.";
+  }
 }
 </script>
 </body>
