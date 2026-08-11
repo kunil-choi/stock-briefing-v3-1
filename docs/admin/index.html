@@ -1022,10 +1022,17 @@ async function pollWorkflowStatus(repoCfg, dispatchedAt, attempts) {
 function _renderCorrectInner(repoCfg) {
   const el = document.getElementById("correct-inner");
   const st = state[repoCfg.key];
+  // PANELIST-CORRECT-1: 패널 발언(panelist_quotes) 교정은 schema "stock"
+  // (V3-1/V3)에만 있는 데이터라 그 스키마에서만 세 번째 서브탭을 보여준다.
+  // V3-2(schema "report")는 애초에 이 필드 자체가 없다.
+  const panelistTabHtml = repoCfg.schema === "stock"
+    ? `<button class="subtab-sm ${st.correctTab === "panelist" ? "active" : ""}" onclick="switchCorrectTab('panelist')">🎤 패널 발언 교정</button>`
+    : "";
   el.innerHTML = `
     <div class="subtabs-sm">
       <button class="subtab-sm ${st.correctTab === "text" ? "active" : ""}" onclick="switchCorrectTab('text')">📝 텍스트 수정</button>
       <button class="subtab-sm ${st.correctTab === "cards" ? "active" : ""}" onclick="switchCorrectTab('cards')">🗂 카드 삭제 · 이동</button>
+      ${panelistTabHtml}
     </div>
     <div id="correct-tab-body"></div>`;
   _renderCorrectTabBody(repoCfg);
@@ -1041,8 +1048,11 @@ function _renderCorrectTabBody(repoCfg) {
   const st = state[repoCfg.key];
   if (repoCfg.schema === "stock") {
     if (st.correctTab === "text") renderCorrectText_stock(body, repoCfg);
+    else if (st.correctTab === "panelist") renderCorrectPanelist_stock(body, repoCfg);
     else renderCorrectCards_stock(body, repoCfg);
   } else {
+    // report 스키마엔 panelist 탭이 없으니 혹시 남아있던 상태여도 텍스트로 되돌린다.
+    if (st.correctTab === "panelist") st.correctTab = "text";
     if (st.correctTab === "text") renderCorrectText_report(body, repoCfg);
     else renderCorrectCards_report(body, repoCfg);
   }
@@ -1185,6 +1195,108 @@ function deleteCard_stock(bucket, name) {
   _markPending(repoCfg, { action: "delete_card", detail: `${name} (${bucket})` });
   showToast(`📝 ${name} 삭제 임시 반영 — 승인 전까지 저장 안 됨`);
   renderCorrectCards_stock(document.getElementById("correct-tab-body"), repoCfg);
+}
+
+// ────────────────────────────────────────────────────────────────
+// PANELIST-CORRECT-1: 패널 발언(panelist_quotes) 교정 — Gemini가 유튜브
+// 영상을 분석해 화자(speaker_name)/채널(source_name)을 자동 식별하는데,
+// "확인 안 되면 빈 문자열로 두라"는 프롬프트 지시에도 불구하고 화면 자막을
+// 잘못 읽거나 이름을 지어내는 사례가 있다(예: "체슬리TV" 영상인데 화자를
+// "김영익 첼시 투자자문 대표"로 잘못 식별 — 채널명(source_name)은 채널
+// 등록 정보에서 오는 값이라 신뢰할 수 있지만, 화자명은 순수 AI 추정값이라
+// 틀릴 수 있다). 이 탭은 그런 항목을 사람이 직접 고치거나 지울 수 있게 한다.
+// ────────────────────────────────────────────────────────────────
+function renderCorrectPanelist_stock(el, repoCfg) {
+  const data = state[repoCfg.key].briefing;
+  const cards = _stockAllCards(data).filter(({ card }) => (card.panelist_quotes || []).length > 0);
+  if (!cards.length) {
+    el.innerHTML = `<div class="empty">panelist_quotes가 있는 종목 카드가 없습니다.</div>`;
+    return;
+  }
+  el.innerHTML = `
+    <div class="notice">
+      🎤 Gemini가 유튜브 영상에서 화자를 자동 식별하는 과정에서 화면 자막을
+      잘못 읽거나 이름을 지어내는 경우가 있습니다. 채널명(오른쪽)은 채널 등록
+      정보라 신뢰할 수 있지만, 발언자명(왼쪽)은 AI 추정값이라 틀릴 수 있습니다
+      — "원본 영상 확인" 링크로 실제 화자를 확인한 뒤 고치거나 삭제하세요.
+    </div>
+    ${cards.map(({ bucket, idx, card }) => `
+      <details class="card-acc">
+        <summary>${bucket === "market_leaders" ? "🏆" : "📌"} ${escapeHtml(card.name)}
+          <span class="count-badge">${(card.panelist_quotes || []).length}건</span>
+        </summary>
+        <div class="acc-body">
+          ${(card.panelist_quotes || []).map((q, qi) => `
+            <div class="preview-card" id="pq-${bucket}-${idx}-${qi}" style="margin-bottom:.75rem;">
+              <div style="display:flex;gap:.6rem;margin-bottom:.6rem;flex-wrap:wrap;">
+                <div style="flex:1;min-width:180px;">
+                  <label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.2rem;">발언자·소속 (AI 추정 — 틀릴 수 있음)</label>
+                  <input type="text" id="pq-${bucket}-${idx}-${qi}-speaker" value="${escapeHtml(q.speaker_name || "")}"
+                    style="width:100%;padding:.4rem .6rem;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:.85rem;">
+                </div>
+                <div style="flex:1;min-width:140px;">
+                  <label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.2rem;">채널(source_name)</label>
+                  <input type="text" id="pq-${bucket}-${idx}-${qi}-source" value="${escapeHtml(q.source_name || "")}"
+                    style="width:100%;padding:.4rem .6rem;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:.85rem;">
+                </div>
+              </div>
+              <label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.2rem;">발언 내용(fact)</label>
+              <textarea id="pq-${bucket}-${idx}-${qi}-fact" class="field-textarea" rows="2">${escapeHtml(q.fact || "")}</textarea>
+              <div class="btn-row" style="margin-top:.5rem;">
+                <button class="btn btn-delete btn-sm" onclick="deletePanelistQuote_stock('${bucket}',${idx},${qi})">🗑 이 발언 삭제</button>
+                ${q.source_url ? `<a href="${escapeHtml(q.source_url)}" target="_blank" rel="noopener noreferrer"
+                  style="font-size:.78rem;color:var(--accent);align-self:center;">원본 영상 확인 →</a>` : ""}
+              </div>
+            </div>
+          `).join("")}
+        </div>
+      </details>
+    `).join("")}
+    <button class="btn btn-approve" style="margin-top:.5rem;" onclick="applyCorrectPanelist_stock()">📝 이 내용 반영 (미리보기용, 승인 전)</button>
+  `;
+}
+
+function applyCorrectPanelist_stock() {
+  const repoCfg = REPOS[activeRepoKey];
+  const data = state[repoCfg.key].briefing;
+  const cards = _stockAllCards(data);
+  let changed = 0;
+  cards.forEach(({ bucket, idx, card }) => {
+    (card.panelist_quotes || []).forEach((q, qi) => {
+      const speakerEl = document.getElementById(`pq-${bucket}-${idx}-${qi}-speaker`);
+      const sourceEl  = document.getElementById(`pq-${bucket}-${idx}-${qi}-source`);
+      const factEl    = document.getElementById(`pq-${bucket}-${idx}-${qi}-fact`);
+      if (!speakerEl || !sourceEl || !factEl) return; // 이 렌더에 없는 항목(다른 탭 등)
+      const newSpeaker = speakerEl.value.trim();
+      const newSource  = sourceEl.value.trim();
+      const newFact    = factEl.value.trim();
+      if (newSpeaker !== (q.speaker_name || "") || newSource !== (q.source_name || "") || newFact !== (q.fact || "")) {
+        q.speaker_name = newSpeaker;
+        q.source_name  = newSource;
+        q.fact         = newFact;
+        changed++;
+      }
+    });
+  });
+  if (!changed) { showToast("변경된 내용이 없습니다"); return; }
+  _markPending(repoCfg, { action: "edit_panelist_quote", detail: `패널 발언 ${changed}건 수정` });
+  showToast(`📝 패널 발언 ${changed}건 임시 반영 — 승인 전까지 저장 안 됨`);
+}
+
+function deletePanelistQuote_stock(bucket, cardIdx, quoteIdx) {
+  const repoCfg = REPOS[activeRepoKey];
+  const data = state[repoCfg.key].briefing;
+  const card = (data[bucket] || [])[cardIdx];
+  if (!card || !card.panelist_quotes || !card.panelist_quotes[quoteIdx]) {
+    showToast("발언을 찾을 수 없습니다", "error");
+    return;
+  }
+  const q = card.panelist_quotes[quoteIdx];
+  if (!confirm(`"${q.speaker_name || "화자 미상"}"(${q.source_name || "채널 미상"}) 발언을 삭제할까요? (아직 저장은 안 됩니다 — 승인 전까지는 임시 반영)`)) return;
+  card.panelist_quotes.splice(quoteIdx, 1);
+  _markPending(repoCfg, { action: "delete_panelist_quote", detail: `${q.speaker_name || "화자 미상"} (${card.name})` });
+  showToast(`🗑 패널 발언 삭제 임시 반영 — 승인 전까지 저장 안 됨`);
+  renderCorrectPanelist_stock(document.getElementById("correct-tab-body"), repoCfg);
 }
 
 // ────────────────────────────────────────────────────────────────
