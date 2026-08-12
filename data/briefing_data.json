@@ -76,7 +76,7 @@
       "overlap_count": 2,
       "reasons": [],
       "price": 239500,
-      "change_pct": 0.0,
+      "change_pct": 0,
       "price_label": "전일종가",
       "panelist_quotes": [
         {
@@ -183,7 +183,7 @@
       "overlap_count": 2,
       "reasons": [],
       "price": 1425000,
-      "change_pct": 0.0,
+      "change_pct": 0,
       "price_label": "전일종가",
       "panelist_quotes": [
         {
@@ -282,7 +282,7 @@
       "overlap_count": 2,
       "reasons": [],
       "price": 327500,
-      "change_pct": 0.0,
+      "change_pct": 0,
       "price_label": "전일종가",
       "panelist_quotes": [
         {
@@ -362,7 +362,7 @@
       "overlap_count": 2,
       "reasons": [],
       "price": 40700,
-      "change_pct": 0.0,
+      "change_pct": 0,
       "price_label": "전일종가",
       "panelist_quotes": []
     },
@@ -413,7 +413,7 @@
       "overlap_count": 2,
       "reasons": [],
       "price": 403000,
-      "change_pct": 0.0,
+      "change_pct": 0,
       "price_label": "전일종가",
       "panelist_quotes": []
     },
@@ -464,7 +464,7 @@
       "overlap_count": 2,
       "reasons": [],
       "price": 109400,
-      "change_pct": 0.0,
+      "change_pct": 0,
       "price_label": "전일종가",
       "panelist_quotes": [
         {
@@ -525,7 +525,7 @@
       "overlap_count": 2,
       "reasons": [],
       "price": 1262000,
-      "change_pct": 0.0,
+      "change_pct": 0,
       "price_label": "전일종가",
       "panelist_quotes": [
         {
@@ -545,146 +545,6 @@
           "sentiment": "부정",
           "confidence": "높음",
           "source_url": "https://www.youtube.com/watch?v=f1ZX0-ph_04&t=01:40"
-        }
-      ]
-    },
-    {
-      "rank": 6,
-      "name": "일양약품",
-      "code": "007570",
-      "signal": "중립",
-      "summary": "삼프로TV에서 다수 방송 회차에 걸쳐 '일양약품 눈에 좋은 루테인A' 제품 광고·협찬 형태로 반복 언급됐으며, 투자 분석 차원의 종목 추천과는 구분이 필요하다. 가중점수가 높은 것은 삼프로TV 방송에서의 반복 노출에 기인하며, 실제 주가 모멘텀 관련 분석 콘텐츠는 확인되지 않았다.",
-      "catalyst": "삼프로TV 다수 방송에서 '눈에 좋은 루테인A 2개월' 제품이 협찬 형태로 반복 노출되며 브랜드 인지도 측면의 간접 효과가 있을 수 있다. 건강기능식품 수요가 폭염 등 계절적 요인으로 증가하는 시기적 배경이 존재한다.",
-      "risk": "언급의 대부분이 투자 분석이 아닌 제품 협찬·광고 형태로, 실질적 주가 상승 촉매로 보기 어렵다. 제약·건강기능식품 업종 특성상 신약 파이프라인 및 실적 모멘텀 부재 시 주가 동력이 제한적이다.",
-      "channel_mentions": [
-        {
-          "source_type": "유튜브",
-          "source_name": "삼프로TV",
-          "speaker_name": "",
-          "content": "방송 협찬 형태로 '일양약품 눈에 좋은 루테인A 2개월' 제품이 주린이구조대 코너 링크와 함께 다수 회차에 걸쳐 반복 노출됐다.",
-          "url": "https://www.youtube.com/watch?v=dZzICbpzsuI"
-        },
-        {
-          "source_type": "유튜브",
-          "source_name": "삼프로TV",
-          "speaker_name": "",
-          "content": "삼프로TV 방송에서 슬립앤슬립 아이스넷 냉감패드 협찬과 함께 일양약품 루테인A 2개월 제품이 주린이구조대 코너에서 반복 언급됐다.",
-          "url": "https://www.youtube.com/watch?v=xlSqV_hx5VU"
-        },
-        {
-          "source_type": "유튜브",
-          "source_name": "삼프로TV",
-          "speaker_name": "",
-          "content": "복수의 삼프로TV 에피소드에서 일관되게 '일양약품 눈에 좋은 루테인A' 제품이 방송 협찬 형태로 노출되며 총 5회 이상 반복 언급됐다.",
-          "url": "https://www.youtube.com/watch?v=siy4fC06JyY"
-        }
-      ],
-      "channel_counts": {
-        "유튜브": 7
-      },
-      "total_count": 7,
-      "weighted_score": 22.61,
-      "overlap_count": 1,
-      "reasons": [],
-      "price": 8990,
-      "change_pct": 0.0,
-      "price_label": "전일종가",
-      "panelist_quotes": []
-    },
-    {
-      "rank": 7,
-      "name": "예스24",
-      "code": "053280",
-      "signal": "중립",
-      "summary": "다수 유튜브 채널에서 경제·투자 도서 구매 링크로 반복 언급됐으나, 이는 온라인 서점 플랫폼으로서의 도서 유통 역할에 따른 것으로 직접적인 투자 분석 콘텐츠와는 구분된다. 전인구경제연구소·달란트투자·경제 읽어주는 남자 김광석TV·김작가TV 등 다수 채널에서 도서 구매 경로로 활용됐다.",
-      "catalyst": "경제·투자 콘텐츠 유튜버들의 도서 출간 및 판매 활성화로 온라인 서점 채널로서 예스24의 플랫폼 활용도가 지속적으로 유지되고 있다. ISA 가입 급증, 증시 호황에 따른 주식 투자 관심 증가가 재테크·투자 도서 수요를 자극할 수 있는 간접 배경이 된다.",
-      "risk": "언급 대부분이 도서 구매 링크 형태의 간접 노출로, 실질적인 주가 상승 촉매로 보기 어렵다. 이커머스 경쟁 심화 및 디지털 콘텐츠 소비 확대로 오프라인·온라인 서점 업황이 구조적 도전에 직면해 있다.",
-      "channel_mentions": [
-        {
-          "source_type": "유튜브",
-          "source_name": "김작가TV",
-          "speaker_name": "",
-          "content": "『인플레이션은 누구를 부자로 만드는가』 도서 구매 링크로 교보문고와 함께 예스24가 제시됐으며, 김작가 단독 저서 『럭키』 구매 링크도 함께 안내됐다.",
-          "url": "https://www.youtube.com/watch?v=p-K-41XUUnw"
-        },
-        {
-          "source_type": "유튜브",
-          "source_name": "전인구경제연구소",
-          "speaker_name": "",
-          "content": "『ETF 투자 5일 완성』 도서의 예스24·교보문고 구매 링크가 안내됐으며, 2026년 8월 6일 촬영 기준 코스닥·S&P500 투자 전략 콘텐츠와 함께 제시됐다.",
-          "url": "https://www.youtube.com/watch?v=HYZVyfkK5a4"
-        },
-        {
-          "source_type": "유튜브",
-          "source_name": "달란트투자",
-          "speaker_name": "",
-          "content": "현대차·2차전지 관련 방송에서 온라인 서점 구매 링크 4개(교보문고·예스24·알라딘·카톡 선물하기)가 함께 안내됐다.",
-          "url": "https://www.youtube.com/watch?v=1LWzsJRISK4"
-        },
-        {
-          "source_type": "유튜브",
-          "source_name": "경제 읽어주는 남자 김광석TV",
-          "speaker_name": "",
-          "content": "문현철 작가의 『나는 오로지 국장으로 승부한다』 도서 구매 링크로 교보문고와 함께 예스24가 안내됐다.",
-          "url": "https://www.youtube.com/watch?v=fF3EwBmeppo"
-        }
-      ],
-      "channel_counts": {
-        "유튜브": 6
-      },
-      "total_count": 6,
-      "weighted_score": 12.7,
-      "overlap_count": 1,
-      "reasons": [],
-      "price": 3265,
-      "change_pct": 0.0,
-      "price_label": "전일종가",
-      "panelist_quotes": []
-    },
-    {
-      "rank": 8,
-      "name": "태양",
-      "code": "053620",
-      "signal": "중립",
-      "summary": "아시아경제 뉴스 관련 기사의 '함께 보면 좋은 기사' 섹션에서 '12일 유럽에서 개기일식이 관측된다'는 천문 현상 관련 기사 제목('태양이 사라지는 2분')으로 반복 노출됐으나, 이는 코스닥 상장사 태양(053620)과 직접 관련이 없다. TomatoTV 방송에서 신재생주 태양광에너지 순환매 언급이 포함됐다.",
-      "catalyst": "TomatoTV 방송에서 코스피 상승 탑5 종목 분석 중 신재생주·태양광에너지로의 순환매가 발생했다고 언급됐다. 정부의 호남 반도체 클러스터 전력 공급 협약 추진과 재생에너지·ESS 확충 가시화가 태양광 관련 업종에 간접 호재로 작용할 수 있다.",
-      "risk": "뉴스 언급의 대부분이 천문 현상(개기일식) 관련 기사 제목으로, 상장사 태양(053620)에 대한 직접적 투자 분석이 아니다. 신재생에너지 순환매는 단기적 현상에 그칠 수 있으며, 전력 기기 대형주 중심의 수혜가 더 두드러질 수 있다.",
-      "channel_mentions": [
-        {
-          "source_type": "경제방송",
-          "source_name": "TomatoTV",
-          "speaker_name": "",
-          "content": "코스피 상승 탑5 분석에서 신재생주가 태양광에너지로의 순환매 흐름을 보였다고 언급됐으며, NHN 역대 분기 최대 실적·비에이치 삼성 로봇 사업 참여 기대와 함께 주요 테마로 소개됐다.",
-          "url": "https://www.youtube.com/watch?v=f1ZX0-ph_04"
-        },
-        {
-          "source_type": "뉴스",
-          "source_name": "아시아경제",
-          "speaker_name": "",
-          "content": "'태양이 사라지는 2분…12일, 유럽 하늘에 뜨는 검은 태양'이라는 개기일식 천문 현상 관련 기사가 관련 기사 섹션에서 반복 노출됐다(상장사 태양과 직접 관련 없음).",
-          "url": "https://view.asiae.co.kr/article/2026081207554095529"
-        }
-      ],
-      "channel_counts": {
-        "뉴스": 5,
-        "경제방송": 1
-      },
-      "total_count": 6,
-      "weighted_score": 11.36,
-      "overlap_count": 1,
-      "reasons": [],
-      "price": 6550,
-      "change_pct": 0.0,
-      "price_label": "전일종가",
-      "panelist_quotes": [
-        {
-          "speaker_name": "김형일 토마토투자클럽 전문가",
-          "source_name": "TomatoTV",
-          "fact": "오늘 오전 초반 한화솔루션, SDN, SK이노베이션 등 태양광 관련 종목들이 강력하게 움직였다.",
-          "quote": "",
-          "sentiment": "긍정",
-          "confidence": "높음",
-          "source_url": "https://www.youtube.com/watch?v=f1ZX0-ph_04&t=07:32"
         }
       ]
     }
