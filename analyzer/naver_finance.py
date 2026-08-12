@@ -20,6 +20,7 @@
 
 import re
 import json
+import time
 import urllib.request
 import urllib.parse
 
@@ -308,6 +309,10 @@ def fetch_naver_stock_price(stock_name: str, code_override: str = "") -> dict:
                         if sise_change != 0.0:
                             change_pct = sise_change
                             change = daily[0]["close"] - daily[1]["close"]
+                        else:
+                            print(f"[naver_finance] {stock_name}: sise_day 재계산 결과도 0.00% (실제 보합)")
+                    else:
+                        print(f"[naver_finance] {stock_name}: sise_day 재계산 실패 → 등락률 0.00%로 유지됨")
                 print(
                     f"[naver_finance] {stock_name}({code}): "
                     f"{price:,}원 ({change_pct:+.2f}%) [전일종가]"
@@ -376,7 +381,46 @@ _NUM_RE        = re.compile(r'(\d[\d,]*)')
 _DATE_RE       = re.compile(r'(\d{4}\.\d{2}\.\d{2})')
 
 
-def fetch_naver_daily_prices(code: str, days: int = 14) -> list:
+def _parse_sise_day_html(html: str, days: int) -> list:
+    """html 문자열에서 sise_day 일별 OHLCV 행을 파싱한다."""
+    rows = []
+    for row_match in _ROW_RE.finditer(html):
+        if len(rows) >= days:
+            break
+        row_html = row_match.group(1)
+        cells = _CELL_RE.findall(row_html)
+        if len(cells) < 7:
+            continue
+
+        date_m = _DATE_RE.search(_TAG_RE.sub("", cells[0]))
+        if not date_m:
+            continue
+
+        # 컬럼: [0]날짜 [1]종가 [2]전일비 [3]시가 [4]고가 [5]저가 [6]거래량
+        # 태그를 먼저 제거한 뒤 숫자를 찾는다 — class="tah p11" 같은 속성에도
+        # 숫자가 섞여 있어 태그를 남긴 채로 찾으면 엉뚱한 값을 집을 수 있다.
+        nums = []
+        for cell in cells[1:7]:
+            num_m = _NUM_RE.search(_TAG_RE.sub("", cell))
+            if not num_m:
+                nums = None
+                break
+            nums.append(int(num_m.group(1).replace(",", "")))
+        if nums is None:
+            continue
+
+        rows.append({
+            "date":   date_m.group(1),
+            "close":  nums[0],
+            "open":   nums[2],
+            "high":   nums[3],
+            "low":    nums[4],
+            "volume": nums[5],
+        })
+    return rows
+
+
+def fetch_naver_daily_prices(code: str, days: int = 14, retries: int = 1) -> list:
     """
     sise_day에서 일별 OHLCV 데이터 반환 (최신순).
 
@@ -390,46 +434,33 @@ def fetch_naver_daily_prices(code: str, days: int = 14) -> list:
     등락률이 계속 0.0%로 표시되는 문제가 있었다.
     <tr> 단위로 행을 분리한 뒤, 각 <td>...</td> 셀 내부에서(중첩 태그와
     무관하게) 첫 숫자 토큰만 추출하는 방식으로 견고하게 재작성한다.
+
+    FIX-SISE-3: 2026-08-11 실행에서 관심종목 10개 전부 sise_day 재계산이
+    빈 리스트를 반환해 등락률이 하루 종일 0.00%로 노출된 사고가 있었다.
+    원인 진단을 위해 실패 시 (html 길이 / 매칭된 행 수)를 로그로 남기고,
+    빈 응답(네이버 측 일시적 차단·타임아웃 추정)에 대해 짧은 대기 후
+    1회 재시도한다.
     """
-    url  = f"https://finance.naver.com/item/sise_day.naver?code={code}&page=1"
-    html = _get(url)
-    rows = []
-    try:
-        for row_match in _ROW_RE.finditer(html):
-            if len(rows) >= days:
-                break
-            row_html = row_match.group(1)
-            cells = _CELL_RE.findall(row_html)
-            if len(cells) < 7:
-                continue
+    url = f"https://finance.naver.com/item/sise_day.naver?code={code}&page=1"
 
-            date_m = _DATE_RE.search(_TAG_RE.sub("", cells[0]))
-            if not date_m:
-                continue
+    for attempt in range(retries + 1):
+        html = _get(url)
+        rows = []
+        try:
+            rows = _parse_sise_day_html(html, days)
+        except Exception as e:
+            print(f"[naver_finance] sise_day 파싱 오류 ({code}): {e}")
 
-            # 컬럼: [0]날짜 [1]종가 [2]전일비 [3]시가 [4]고가 [5]저가 [6]거래량
-            # 태그를 먼저 제거한 뒤 숫자를 찾는다 — class="tah p11" 같은 속성에도
-            # 숫자가 섞여 있어 태그를 남긴 채로 찾으면 엉뚱한 값을 집을 수 있다.
-            nums = []
-            for cell in cells[1:7]:
-                num_m = _NUM_RE.search(_TAG_RE.sub("", cell))
-                if not num_m:
-                    nums = None
-                    break
-                nums.append(int(num_m.group(1).replace(",", "")))
-            if nums is None:
-                continue
+        if len(rows) >= 2:
+            return rows
 
-            rows.append({
-                "date":   date_m.group(1),
-                "close":  nums[0],
-                "open":   nums[2],
-                "high":   nums[3],
-                "low":    nums[4],
-                "volume": nums[5],
-            })
-    except Exception as e:
-        print(f"[naver_finance] sise_day 파싱 오류 ({code}): {e}")
+        print(
+            f"[naver_finance] sise_day 데이터 부족 ({code}, 시도 {attempt + 1}/{retries + 1}): "
+            f"html {len(html)}자, 파싱된 행 {len(rows)}개"
+        )
+        if attempt < retries:
+            time.sleep(1.5)
+
     return rows
 
 
