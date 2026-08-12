@@ -33,11 +33,17 @@ Gemini를 활용한 유튜브 영상 직접 분석 모듈
                  불필요해져 제거했고, 심층분석 대상 선정(패널리스트 제목/스캔
                  통과 우선순위)도 호출부(ai_analyzer.py)의 종목별 캡으로
                  대체되어 이 모듈에서는 더 이상 다루지 않는다.
+- GEMINI-YT-7  : 타겟 영상 심층분석을 순차(for-loop) → 스레드풀 병렬 처리로
+                 변경. 영상 9~10개를 순차로 돌리면 전체 파이프라인 소요시간의
+                 60%대(15~19분)를 이 단계 하나가 차지했음(2026-08-09,
+                 2026-08-11 실행 로그로 확인). 영상별 호출이 서로 독립적인
+                 네트워크 요청이라 _DEEP_ANALYSIS_CONCURRENCY개씩 동시 처리로
+                 바꿔 가장 느린 영상 하나의 소요시간 수준까지 단축한다.
 """
 
+import concurrent.futures
 import json
 import re
-import time
 from typing import Optional
 
 # ── Gemini SDK 임포트 (GEMINI-YT-5: 신규 통합 SDK google-genai) ──────────────
@@ -56,8 +62,12 @@ except ImportError:
 # 의 deprecation 페이지에서 현재 상태 확인 권장.
 GEMINI_MODEL = "gemini-2.5-flash"
 
-# 영상 1개 분석 후 다음 호출까지 대기 (레이트리밋 여유)
-_DEEP_SLEEP_SEC = 2.0
+# GEMINI-YT-7: 영상 1개당 Gemini 응답이 1.5~4.5분 걸려 순차 처리 시 영상
+# 9~10개에 15~19분이 소요됐음(전체 파이프라인 소요시간의 60%대 비중).
+# 각 호출은 서로 독립적인 네트워크 요청이라 동시에 처리해도 무방하므로,
+# 이 값만큼 스레드풀로 병렬 처리한다 (레이트리밋 여유를 위해 동시 실행
+# 개수 자체를 제한 — 무제한 동시 요청 대신).
+_DEEP_ANALYSIS_CONCURRENCY = 4
 
 # ── 심층 분석 프롬프트 (영상 직접분석) ────────────────────────────────────────
 # SELECT-CRITERIA-1: 패널 발언은 아래 5가지 기준에 해당하는 것만 뽑는다.
@@ -190,27 +200,35 @@ def analyze_target_videos(video_urls: list, api_key: str) -> dict:
     done    = 0
     fail    = 0
 
-    print(f"[GeminiYT] 타겟 심층분석 대상: {len(video_urls)}개")
-    for video_url in video_urls:
-        result = None
-        try:
-            result = _analyze_via_video_url(client, video_url)
-        except Exception as e:
-            print(f"  ❌ [{video_url}] 심층분석 예외: {e}")
+    print(f"[GeminiYT] 타겟 심층분석 대상: {len(video_urls)}개 "
+          f"(동시 {_DEEP_ANALYSIS_CONCURRENCY}개씩 병렬 처리)")
 
-        if result:
-            mentions = result.get("mentions", [])
-            results[video_url] = {
-                "speakers": result.get("speakers", []),
-                "mentions": mentions,
-            }
-            done += 1
-            print(f"  ✅ [{video_url}] → 종목 언급 {len(mentions)}개")
-        else:
-            fail += 1
-            print(f"  ❌ [{video_url}] → 심층분석 실패")
+    with concurrent.futures.ThreadPoolExecutor(
+        max_workers=_DEEP_ANALYSIS_CONCURRENCY
+    ) as executor:
+        future_to_url = {
+            executor.submit(_analyze_via_video_url, client, video_url): video_url
+            for video_url in video_urls
+        }
+        for future in concurrent.futures.as_completed(future_to_url):
+            video_url = future_to_url[future]
+            try:
+                result = future.result()
+            except Exception as e:
+                print(f"  ❌ [{video_url}] 심층분석 예외: {e}")
+                result = None
 
-        time.sleep(_DEEP_SLEEP_SEC)
+            if result:
+                mentions = result.get("mentions", [])
+                results[video_url] = {
+                    "speakers": result.get("speakers", []),
+                    "mentions": mentions,
+                }
+                done += 1
+                print(f"  ✅ [{video_url}] → 종목 언급 {len(mentions)}개")
+            else:
+                fail += 1
+                print(f"  ❌ [{video_url}] → 심층분석 실패")
 
     print(f"[GeminiYT] 타겟 심층분석 완료 — 성공:{done} / 실패:{fail}")
     return results
