@@ -18,5 +18,10 @@
     "timestamp": "2026. 8. 7. 오후 3:05:56",
     "action": "approve_batch",
     "detail": "이닉스 (stocks)"
+  },
+  {
+    "timestamp": "2026. 8. 12. 오전 9:09:10",
+    "action": "approve_batch",
+    "detail": "예스24 (stocks) / 태양 (stocks) / 일양약품 (stocks)"
   }
 ]
