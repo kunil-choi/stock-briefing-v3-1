@@ -115,6 +115,43 @@ _NEGATIVE_SENTIMENT = {
     "우려", "불확실", "약세", "매도", "하향", "감소", "위험", "부정",
 }
 
+# FIX-CONTEXT-1: 비-투자 맥락(광고/협찬/도서구매 링크, 동음이의어 기사 등)
+# 오탐 방지. 2026-08-12, 예스24(도서 구매 링크로 다수 채널에 반복 노출),
+# 일양약품(눈 영양제 방송 협찬), 태양(개기일식 관련 "태양이 사라지는 2분"
+# 기사 제목 — 상장사 태양(053620)과 무관한 동음이의어)이 실제 투자 분석과
+# 무관한 문맥에서 언급됐을 뿐인데 관심종목으로 잘못 선정된 사고가 있었다.
+# 상장사와 이름이 같은 도서 유통 플랫폼·제품·흔한 명사거나 광고성 언급인
+# 콘텐츠를, 같은 텍스트에 금융 맥락 키워드가 전혀 없을 때만 노이즈로 간주해
+# 언급 집계에서 제외한다. 금융 맥락 키워드가 하나라도 있으면(예: 도서 구매
+# 링크 기사여도 "실적", "목표가"가 함께 언급되면) 정상 집계한다 — 오탐
+# 방지가 목적이지 정당한 언급까지 걸러내는 게 목적이 아니므로, 두 신호가
+# 동시에 성립할 때만 제외한다.
+_NON_INVESTMENT_TRIGGERS = {
+    "구매링크", "구매 링크", "구매처", "협찬", "PPL", "간접광고",
+    "도서 구매", "책 구매", "교보문고", "알라딘", "선물하기",
+    "개기일식", "일식", "월식", "천문 현상", "천문현상",
+}
+
+_FINANCE_CONTEXT_KEYWORDS = {
+    "주가", "주식", "종목", "투자", "실적", "매수", "매도", "목표가",
+    "코스피", "코스닥", "증시", "상장사", "밸류", "리포트", "애널리스트",
+    "영업이익", "매출", "순매수", "순매도", "시가총액", "배당", "수급",
+    "외국인", "기관", "IPO", "공모", "PER", "컨센서스", "전망", "주주환원",
+    "ETF", "채권",
+}
+
+
+def _is_non_investment_context(text: str) -> bool:
+    """
+    텍스트에 광고·협찬·도서구매·동음이의어 등 비-투자 맥락 신호가 있고,
+    금융 맥락 키워드가 전혀 없으면 True를 반환한다. 두 조건이 동시에
+    성립할 때만 노이즈로 판단한다.
+    """
+    if not any(k in text for k in _NON_INVESTMENT_TRIGGERS):
+        return False
+    return not any(k in text for k in _FINANCE_CONTEXT_KEYWORDS)
+
+
 _NEWS_TYPES = {"뉴스"}
 
 
@@ -367,6 +404,11 @@ def extract_mentions(all_data: list, stock_map: dict,
         opinion  = item.get("opinion", "")
         text     = f"{title} {summary}"
         weight   = weight_map.get(src_name, default_weights.get(ch_type, 1.0))
+
+        # FIX-CONTEXT-1: 광고/협찬/도서구매 링크·동음이의어 기사 등 비-투자
+        # 맥락 콘텐츠는 종목 언급 집계 자체에서 제외한다 (아래 상세 주석 참고)
+        if _is_non_investment_context(text):
+            continue
 
         # GEMINI-VAL-1: confidence 낮음이면 가중치 절반
         if item.get("_from_gemini") and item.get("gemini_confidence") == "낮음":
