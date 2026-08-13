@@ -74,9 +74,16 @@ def _label_preview_html(html: str) -> str:
         "📑 주요 증권사 리포트 AI 분석 브리핑 보기<br>(오전 9시 업데이트 예정)"
         "</a>"
     )
+    # FIX-BADGE-2: 제목 위에 "장전 필독" 이어브로우 태그를 얹어 긴박감을 더한다.
+    eyebrow = (
+        '<span style="display:inline-block;background:rgba(255,107,107,.14);'
+        'color:#ff6b6b;border:1px solid rgba(255,107,107,.4);font-size:13px;'
+        'font-weight:800;padding:4px 10px;border-radius:20px;'
+        'letter-spacing:.3px;margin-bottom:8px;">🔥 장전 필독</span>'
+    )
     html = re.sub(
         r'(<h1>📈 주식 시장 AI 프리뷰</h1>\s*<div class="subtitle">.*?</div>)',
-        r'<div style="text-align:left;">\1</div>' + badge,
+        r'<div style="text-align:left;">' + eyebrow + r'\1</div>' + badge,
         html,
         count=1,
         flags=re.DOTALL,
