@@ -17,12 +17,26 @@
 #              data.krx.co.kr 직접 조회가 막힌 것을 대체하기 위해
 #              fetch_naver_stock_list()/fetch_naver_full_stock_map() 추가
 #              (전체 상장 종목명→코드 매핑을 네이버 시가총액 페이지에서 조회)
+# FIX-SISE-4 : 이 파이프라인은 항상 장 시작(09:00 KST) 전에 실행되는데,
+#              네이버 sise_day가 가끔 "오늘(아직 미체결)" 행을 전일 종가와
+#              동일한 값으로 미리 얹어 최상단(daily[0])에 내려준다. 이 행이
+#              그대로 daily[0]으로 잡히면 "오늘(미확정, 전일과 동일값)" vs
+#              "전일 종가"를 비교하게 되어 등락률이 0.00%로 고정된다
+#              (2026-08-11/08-12 실행에서 관심종목 10개 전부 등락률이
+#              0.00%로 노출된 사고 — 대형·고변동성 종목까지 전부 동시에
+#              정확히 0.00%인 건 실제 시황일 수 없어 이 파싱 문제로 진단됨).
+#              최상단 행의 날짜가 오늘(KST)이면 그 행을 버리고 다음 행부터
+#              쓰도록 fetch_naver_daily_prices()에 가드를 추가했다. 그래도
+#              0.00%가 나오는 경우를 대비해 원인 추적용 raw 행 로그도 남긴다.
 
 import re
 import json
 import time
 import urllib.request
 import urllib.parse
+from datetime import datetime, timezone, timedelta
+
+KST = timezone(timedelta(hours=9))
 
 HEADERS = {
     "User-Agent": (
@@ -310,7 +324,13 @@ def fetch_naver_stock_price(stock_name: str, code_override: str = "") -> dict:
                             change_pct = sise_change
                             change = daily[0]["close"] - daily[1]["close"]
                         else:
-                            print(f"[naver_finance] {stock_name}: sise_day 재계산 결과도 0.00% (실제 보합)")
+                            # FIX-SISE-4: 정말 보합인지, 아직 원인 불명인 파싱
+                            # 문제인지 다음에도 판단할 수 있게 사용된 행을 남긴다.
+                            print(
+                                f"[naver_finance] {stock_name}: sise_day 재계산 결과도 0.00% "
+                                f"(daily[0]={daily[0]['date']} {daily[0]['close']:,}원 / "
+                                f"daily[1]={daily[1]['date']} {daily[1]['close']:,}원)"
+                            )
                     else:
                         print(f"[naver_finance] {stock_name}: sise_day 재계산 실패 → 등락률 0.00%로 유지됨")
                 print(
@@ -440,8 +460,17 @@ def fetch_naver_daily_prices(code: str, days: int = 14, retries: int = 1) -> lis
     원인 진단을 위해 실패 시 (html 길이 / 매칭된 행 수)를 로그로 남기고,
     빈 응답(네이버 측 일시적 차단·타임아웃 추정)에 대해 짧은 대기 후
     1회 재시도한다.
+
+    FIX-SISE-4: 위 재시도로도 행 개수 자체는 정상(2개 이상)인데 등락률이
+    여전히 0.00%로 고정되는 새로운 사고가 있었다(2026-08-11/08-12 —
+    관심종목 전부, 대형·고변동성 종목까지 동시에 정확히 0.00%). 이 파이프라인은
+    항상 장 시작(09:00 KST) 전에 실행되므로, 네이버가 아직 미체결인
+    "오늘" 행을 전일 종가와 동일한 값으로 최상단에 미리 얹어 보내면
+    daily[0](오늘, 미확정) vs daily[1](전일 종가) 비교가 항상 0이 된다.
+    최상단 행의 날짜가 오늘(KST)이면 그 행을 버리고 다음 행부터 쓴다.
     """
     url = f"https://finance.naver.com/item/sise_day.naver?code={code}&page=1"
+    today_str = datetime.now(KST).strftime("%Y.%m.%d")
 
     for attempt in range(retries + 1):
         html = _get(url)
@@ -450,6 +479,13 @@ def fetch_naver_daily_prices(code: str, days: int = 14, retries: int = 1) -> lis
             rows = _parse_sise_day_html(html, days)
         except Exception as e:
             print(f"[naver_finance] sise_day 파싱 오류 ({code}): {e}")
+
+        if rows and rows[0]["date"] == today_str:
+            print(
+                f"[naver_finance] sise_day 오늘({today_str}) 미확정 행 제외 "
+                f"({code}): {rows[0]['close']:,}원"
+            )
+            rows = rows[1:]
 
         if len(rows) >= 2:
             return rows
