@@ -674,17 +674,32 @@ _VIDEO_SOURCE_TYPES = {"경제방송", "경제방송TV", "유튜브", "증권사
 _LEADER_VIDEO_CAP   = 3   # 대형 주도주 1종목당 최대 심층분석 영상 수
 _STOCK_VIDEO_CAP    = 1   # 관심종목 1종목당 최대 심층분석 영상 수
 
+# DIVERSITY-1: 여러 종목을 한 영상에서 동시에 다루는 "시황 정리" 포맷
+# 채널(예: 이데일리TV, 815머니톡)이 매 종목의 weight 1위를 반복해서 차지해
+# 패널 발언/채널별 언급이 하루치 브리핑 전체에서 같은 2~3개 채널로
+# 도배되는 문제가 있었다. 이미 다른 종목에서 뽑힌 채널은 다시 뽑힐 때마다
+# 실효 weight를 이 비율만큼 깎아, 반복 채널을 완전히 배제하지 않으면서도
+# 점진적으로 후순위 채널에 기회를 준다.
+_CHANNEL_REPEAT_PENALTY = 0.75
 
-def _top_video_entries(data: dict, cap: int) -> list:
+
+def _top_video_entries(data: dict, cap: int, channel_use_count: dict) -> list:
     """종목 하나의 channels 딕셔너리에서 영상 채널(뉴스 제외) 항목만 모아
-    weight 내림차순 상위 cap개를 반환 (link/source_name 등 원본 dict 그대로,
-    링크 기준 중복 제거)."""
+    실효 weight(원본 weight × 채널 반복 페널티) 내림차순 상위 cap개를
+    반환한다(link/source_name 등 원본 dict 그대로, 링크 기준 중복 제거).
+    channel_use_count는 gather_target_videos()가 종목 순회 내내 공유하는
+    누적 카운터로, 뽑힐 때마다 여기에 갱신된다(DIVERSITY-1)."""
     entries = []
     for ch_type, items in (data.get("channels") or {}).items():
         if ch_type not in _VIDEO_SOURCE_TYPES:
             continue
         entries.extend(items)
-    entries.sort(key=lambda e: e.get("weight", 0.0), reverse=True)
+
+    def _effective_weight(e: dict) -> float:
+        used = channel_use_count.get(e.get("source_name", ""), 0)
+        return e.get("weight", 0.0) * (_CHANNEL_REPEAT_PENALTY ** used)
+
+    entries.sort(key=_effective_weight, reverse=True)
 
     result, seen = [], set()
     for e in entries:
@@ -693,6 +708,9 @@ def _top_video_entries(data: dict, cap: int) -> list:
             continue
         seen.add(link)
         result.append(e)
+        source_name = e.get("source_name", "")
+        if source_name:
+            channel_use_count[source_name] = channel_use_count.get(source_name, 0) + 1
         if len(result) >= cap:
             break
     return result
@@ -705,6 +723,7 @@ def gather_target_videos(market_leaders_raw: list, filtered: list) -> tuple:
       - video_source_names: {video_url: 채널명}"""
     video_to_stocks: dict    = {}
     video_source_names: dict = {}
+    channel_use_count: dict  = {}  # DIVERSITY-1: 종목 순회 전체에 걸쳐 공유
 
     def _add(name: str, entries: list):
         for e in entries:
@@ -714,9 +733,9 @@ def gather_target_videos(market_leaders_raw: list, filtered: list) -> tuple:
                 video_source_names[link] = e.get("source_name", "")
 
     for name, data in market_leaders_raw:
-        _add(name, _top_video_entries(data, _LEADER_VIDEO_CAP))
+        _add(name, _top_video_entries(data, _LEADER_VIDEO_CAP, channel_use_count))
     for name, data in filtered:
-        _add(name, _top_video_entries(data, _STOCK_VIDEO_CAP))
+        _add(name, _top_video_entries(data, _STOCK_VIDEO_CAP, channel_use_count))
 
     return video_to_stocks, video_source_names
 
