@@ -55,6 +55,11 @@ AI 주식 브리핑 분석 엔진
                      value" 파싱 오류)해 31개짜리 fallback 리스트로만 동작
                      하던 문제 수정. 네이버 금융 시가총액 페이지 기반 조회
                      (naver_finance.fetch_naver_full_stock_map)로 교체.
+- FIX-NAME-BOUNDARY-2: _find_stock_matches()가 매칭 이름 뒤쪽 한글을 전부
+                     조사로 간주해 통과시키던 문제 수정. 종목 "캐리"가 협찬
+                     상품명 "파일럿 캐리어"(여행가방)에 포함돼 투자 분석 없는
+                     광고 콘텐츠가 관심종목으로 반복 노출되던 사고를 조사
+                     화이트리스트 기반 뒤쪽 경계 검사로 차단.
 """
 
 import json
@@ -175,13 +180,39 @@ def _is_valid_stock_name(name: str) -> bool:
 # 사고가 있었다. 매칭된 문자열 바로 앞이 한글 음절이면(예: "장" + "우진")
 # 더 큰 단어의 일부로 보고 제외한다.
 #
-# 뒤쪽은 검사하지 않는다 — 한국어는 교착어라 명사 뒤에 조사(은/는/이/가/을/를
-# 등)가 공백 없이 그대로 붙는 게 정상이라("이닉스는", "우진이") 뒤쪽까지
-# 한글이면 무조건 제외할 경우 정상적인 단독 언급까지 대부분 걸러져 버린다.
-# "SK하이닉스" 안의 "이닉스"처럼 다른 종목명 뒷부분에 포함되는 경우는
+# 뒤쪽은 조사 여부만 가려서 검사한다 — 한국어는 교착어라 명사 뒤에 조사(은/는/
+# 이/가/을/를 등)가 공백 없이 그대로 붙는 게 정상이라("이닉스는", "우진이")
+# 뒤쪽까지 한글이면 무조건 제외할 경우 정상적인 단독 언급까지 대부분 걸러져
+# 버린다. "SK하이닉스" 안의 "이닉스"처럼 다른 종목명 뒷부분에 포함되는 경우는
 # 앞쪽 검사로 이미 걸러지고, 남은 동일 텍스트 내 종목명 간 겹침은 기존
 # FIX-SUBSTRING-1(최장 일치 우선) 로직이 2차로 처리한다.
 _HANGUL_SYLLABLE_RE = re.compile(r'[가-힣]')
+
+
+# FIX-NAME-BOUNDARY-2: 위 FIX-NAME-BOUNDARY-1은 앞쪽만 검사하고 뒤쪽은 "한글이
+# 이어지면 대부분 조사"라고 가정해 통과시켰는데, 이 가정이 깨지는 경우가 있었다
+# — 2026-07-23~08-14 반복, 종목 "캐리"(캐리소프트, 313760)가 삼프로TV "주린이
+# 구조대" 코너의 협찬 상품명 "파일럿 캐리어"(여행가방)에 포함돼 있다는 이유만
+# 으로 투자 분석이 전혀 없는 광고성 콘텐츠가 관심종목 8위까지 오르는 사고가
+# 반복됐다. "캐리어"의 "어"는 조사가 아니라 명사 자체를 확장하는 음절이라
+# 뒤쪽 한글을 전부 조사로 취급하면 걸러지지 않는다. 매칭된 이름 바로 뒤가
+# 한글이면, 흔히 쓰이는 조사로 시작할 때만 유효한 경계로 인정하고 그 외에는
+# 더 큰 단어의 일부로 보고 제외한다.
+_TRAILING_PARTICLES = (
+    "에서", "부터", "까지", "이나", "라도", "밖에", "조차", "마저",
+    "처럼", "같이", "보다", "이라", "라서", "라면",
+    "은", "는", "이", "가", "을", "를", "의", "도", "만", "과", "와",
+    "로", "에", "고", "나", "야", "여", "아", "면", "뿐",
+)
+
+
+def _has_valid_trailing_boundary(text: str, end_idx: int) -> bool:
+    after = text[end_idx:end_idx + 2]
+    if not after:
+        return True
+    if not _HANGUL_SYLLABLE_RE.match(after[0]):
+        return True
+    return any(after.startswith(p) for p in _TRAILING_PARTICLES)
 
 
 def _find_stock_matches(text: str, stock_map: dict) -> list:
@@ -195,7 +226,9 @@ def _find_stock_matches(text: str, stock_map: dict) -> list:
             if idx == -1:
                 break
             before = text[idx - 1] if idx > 0 else ""
-            if not _HANGUL_SYLLABLE_RE.match(before):
+            end_idx = idx + len(n)
+            if (not _HANGUL_SYLLABLE_RE.match(before)
+                    and _has_valid_trailing_boundary(text, end_idx)):
                 matched.append(n)
                 break
             start = idx + 1
