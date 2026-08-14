@@ -71,7 +71,7 @@ def _label_preview_html(html: str) -> str:
         'border:1px solid #374151;border-radius:8px;padding:8px 14px;'
         'text-align:center;font-size:12px;line-height:1.4;color:#fbbf24;'
         'text-decoration:none;font-weight:700;white-space:nowrap;">'
-        "📑 주요 증권사 리포트 AI 분석 브리핑 보기<br>(오전 9시 업데이트 예정)"
+        "📑 주요 증권사 리포트<br>AI 분석 브리핑 보기"
         "</a>"
     )
     # FIX-BADGE-2: 제목 위에 "장전 필독" 이어브로우 태그를 얹어 긴박감을 더한다.
