@@ -333,8 +333,8 @@ def _render_stock_detail(stock: dict) -> str:
             body    = f'"{quote}"' if quote else fact
             speaker_label = f"{speaker} · {source}" if source else speaker
             body_html = (
-                f'<a href="{url}" target="_blank" rel="noopener" '
-                f'style="color:#adb5bd;text-decoration:none;">{_he.escape(body)}</a>'
+                f'<a href="{url}" target="_blank" rel="noopener" class="mention-link">'
+                f'{_he.escape(body)}<span class="mention-play-icon">▶</span></a>'
                 if url and url.startswith(("http://", "https://"))
                 else f'<span style="color:#8b949e;">{_he.escape(body)}</span>'
             )
@@ -368,9 +368,8 @@ def _render_stock_detail(stock: dict) -> str:
                 f'{_he.escape(sname)}</span>'
             )
             text_html = (
-                f'<a href="{url}" target="_blank" rel="noopener" '
-                f'style="color:#adb5bd;text-decoration:none;">'
-                f'{_he.escape(content)}</a>'
+                f'<a href="{url}" target="_blank" rel="noopener" class="mention-link">'
+                f'{_he.escape(content)}<span class="mention-play-icon">▶</span></a>'
                 if url and url.startswith(("http://", "https://"))
                 else f'<span style="color:#8b949e;">{_he.escape(content)}</span>'
             )
@@ -893,6 +892,9 @@ a:hover { text-decoration: underline; }
 .stock-section-text  { font-size: .88rem; color: var(--text-muted); line-height: 1.6; }
 .reasons-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: .4rem; }
 .reasons-list li { font-size: .85rem; line-height: 1.55; }
+.mention-link { color: var(--accent); text-decoration: none; border-bottom: 1px dotted var(--accent); }
+.mention-link:hover { border-bottom-style: solid; }
+.mention-play-icon { display: inline-block; margin-left: .3rem; font-size: .7em; color: #ff4d4d; vertical-align: middle; }
 .reason-source { font-size: .72rem; padding: .1rem .4rem; border-radius: 3px; font-weight: 600; margin-right: .3rem; }
 .hidden-pick-card {
   background: linear-gradient(135deg, var(--surface) 0%, #1a1f2e 100%);
