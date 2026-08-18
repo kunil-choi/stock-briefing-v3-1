@@ -50,7 +50,7 @@
       "reasons": [],
       "price": 274500,
       "change_pct": 2.43,
-      "price_label": "전일종가",
+      "price_label": "전일종가(8/14)",
       "panelist_quotes": [
         {
           "speaker_name": "정재호 부자아빠",
@@ -137,7 +137,7 @@
       "reasons": [],
       "price": 1645000,
       "change_pct": 3.26,
-      "price_label": "전일종가",
+      "price_label": "전일종가(8/14)",
       "panelist_quotes": [
         {
           "speaker_name": "정재호 부자아빠",
@@ -205,7 +205,7 @@
       "reasons": [],
       "price": 1548000,
       "change_pct": -1.02,
-      "price_label": "전일종가",
+      "price_label": "전일종가(8/14)",
       "panelist_quotes": []
     },
     {
@@ -234,7 +234,7 @@
       "reasons": [],
       "price": 201000,
       "change_pct": -0.5,
-      "price_label": "전일종가",
+      "price_label": "전일종가(8/14)",
       "panelist_quotes": []
     }
   ],
@@ -278,14 +278,14 @@
       "change_pct": 2.42,
       "direction": "up",
       "is_premarket": true,
-      "close_label": "전일 종가"
+      "close_label": "전일 종가(8/14)"
     },
     "kosdaq": {
       "value": 864.65,
       "change_pct": 0.38,
       "direction": "up",
       "is_premarket": true,
-      "close_label": "전일 종가"
+      "close_label": "전일 종가(8/14)"
     },
     "nasdaq": {
       "value": 26644.91015625,
