@@ -153,43 +153,6 @@
   "stocks": [
     {
       "rank": 1,
-      "name": "남성",
-      "code": "004270",
-      "signal": "중립",
-      "summary": "남성(004270)은 뉴스 및 유튜브 채널에서 13회 언급되며 가중점수 29.4로 관심종목 후보 1위에 올랐으나, 언급 내용 대부분은 사회면 뉴스나 광고성 콘텐츠 내 단순 '남성' 단어 노출로 실질적 종목 재료와의 연관성이 낮다. 현재가는 4,875원(-0.81%)으로 소폭 하락 마감했다.",
-      "catalyst": "삼프로TV 다수 채널에서 반복 언급됐으나, 구체적 종목 투자 재료(실적 발표·신규 계약·업황 개선 등)는 수집 데이터에서 확인되지 않는다.",
-      "risk": "언급의 대부분이 종목과 무관한 일반 뉴스 내 '남성' 단어 노출로, 실제 주가 촉매 부재 시 관심 소멸 가능성이 있다.",
-      "channel_mentions": [
-        {
-          "source_type": "유튜브",
-          "source_name": "삼프로TV",
-          "speaker_name": "",
-          "content": "삼프로TV 다수 영상에서 '빌리버스 남성 보부상 멀티 숄더백' 광고 문구와 함께 반복 노출됐으나 종목 관련 투자 내용은 확인되지 않는다.",
-          "url": "https://www.youtube.com/watch?v=Zj-eQirPEAU"
-        },
-        {
-          "source_type": "뉴스",
-          "source_name": "머니투데이",
-          "speaker_name": "",
-          "content": "전국체육대회 참가 선수단 관련 기사에서 '남성 선수는 1만 2435명'으로 일반 뉴스 내 단어로 등장했으며 종목 투자 재료와는 무관하다.",
-          "url": "https://www.mt.co.kr/culture/2026/08/18/2026081809260223629"
-        }
-      ],
-      "channel_counts": {
-        "뉴스": 8,
-        "유튜브": 5
-      },
-      "total_count": 13,
-      "weighted_score": 29.41,
-      "overlap_count": 1,
-      "reasons": [],
-      "price": 4875,
-      "change_pct": -0.81,
-      "price_label": "현재가",
-      "panelist_quotes": []
-    },
-    {
-      "rank": 2,
       "name": "로보티즈",
       "code": "108490",
       "signal": "긍정",
@@ -244,7 +207,7 @@
       ]
     },
     {
-      "rank": 3,
+      "rank": 2,
       "name": "삼성SDI",
       "code": "006400",
       "signal": "긍정",
@@ -299,7 +262,7 @@
       ]
     },
     {
-      "rank": 4,
+      "rank": 3,
       "name": "SK텔레콤",
       "code": "017670",
       "signal": "중립",
@@ -331,7 +294,7 @@
       "overlap_count": 1,
       "reasons": [],
       "price": 99500,
-      "change_pct": -1.0,
+      "change_pct": -1,
       "price_label": "현재가",
       "panelist_quotes": [
         {
@@ -355,7 +318,7 @@
       ]
     },
     {
-      "rank": 5,
+      "rank": 4,
       "name": "LG전자",
       "code": "066570",
       "signal": "긍정",
@@ -402,7 +365,7 @@
       ]
     },
     {
-      "rank": 6,
+      "rank": 5,
       "name": "LG이노텍",
       "code": "011070",
       "signal": "중립",
@@ -431,7 +394,7 @@
       "panelist_quotes": []
     },
     {
-      "rank": 7,
+      "rank": 6,
       "name": "서부T&D",
       "code": "006730",
       "signal": "긍정",
@@ -470,7 +433,7 @@
       ]
     },
     {
-      "rank": 8,
+      "rank": 7,
       "name": "두산에너빌리티",
       "code": "034020",
       "signal": "중립",
