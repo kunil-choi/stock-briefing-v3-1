@@ -1378,7 +1378,7 @@ p   {{ color:#8b949e; font-size:.9rem; }}
 
 # ── FIX-PRICE-LABEL-1: 주가 라벨 결정 함수 ─────────────────────────────
 
-def _get_price_label(now: datetime) -> str:
+def _get_price_label(now: datetime, reference_date: str = "") -> str:
     """
     한국 주식시장 시간대별 가격 라벨 반환.
       - 09:00 이전          → "전일종가" (장 미개장)
@@ -1389,15 +1389,31 @@ def _get_price_label(now: datetime) -> str:
     FIX-PRICE-LABEL-2: 08:00~08:59 구간을 "현재가"로 표시하던 버그 수정.
       개별 주식 시세는 09:00 개장 전에 없으므로, 09:00 이전은 모두 "전일종가".
       (기존: 08:00 이후 → "현재가" → 브리핑 08:34 생성 시 "현재가" 오표시)
+
+    FIX-PRICE-LABEL-3: reference_date(market_collector가 KOSPI 조회로 확인한
+    실제 최근 거래일, "YYYY-MM-DD")가 주어지면 "전일종가(8/14)"처럼 실제
+    날짜를 덧붙인다. 개별 종목은 전부 같은 KRX 달력을 따르므로 이 값 하나를
+    모든 종목에 재사용할 수 있다 — 휴장일 다음날 "전일"이 실제로는 며칠 전
+    데이터인지 라벨만 보고도 알 수 있게 한다.
     """
     if now.weekday() >= 5:
-        return "전일종가"
-    h, m = now.hour, now.minute
-    if h < 9:
-        return "전일종가"
-    if h < 15 or (h == 15 and m < 30):
-        return "현재가"
-    return "종가"
+        label = "전일종가"
+    else:
+        h, m = now.hour, now.minute
+        if h < 9:
+            label = "전일종가"
+        elif h < 15 or (h == 15 and m < 30):
+            return "현재가"
+        else:
+            return "종가"
+
+    if label == "전일종가" and reference_date:
+        try:
+            d = datetime.strptime(reference_date, "%Y-%m-%d")
+            return f"전일종가({d.month}/{d.day})"
+        except ValueError:
+            pass
+    return label
 
 
 # ── 메인 워크플로우 ─────────────────────────────────────────────────────
@@ -1464,8 +1480,9 @@ def analyze_and_generate_html(
     if not filtered:
         print("[분석] 관심종목 0개 — 히든픽 및 시장 요약만 생성")
 
-    # ── FIX-PRICE-LABEL-1: 시각 기반 가격 라벨 결정 ──────────────────────
-    price_label_default = _get_price_label(now_kst)
+    # ── FIX-PRICE-LABEL-1/3: 시각 기반 가격 라벨 결정 (+ 실제 거래일 표시) ──
+    krx_reference_date = (market_overview or {}).get("krx_reference_date", "")
+    price_label_default = _get_price_label(now_kst, krx_reference_date)
     print(f"[주가조회] 현재 시각 {now_kst_str} KST — 가격 라벨: {price_label_default}")
 
     # ── 관심종목 주가 조회 ─────────────────────────────────────────────────

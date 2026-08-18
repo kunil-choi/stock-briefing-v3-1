@@ -520,7 +520,9 @@ def _render_price_html(item: dict) -> str:
             f'({price_label})</span>'
         )
         # FIX-PRICE-8: 전일종가 표시 시(장 전) → "전전일 대비" 부연
-        if price_label == "전일종가":
+        # FIX-PRICE-LABEL-3: price_label이 "전일종가(8/14)"처럼 실제 날짜가
+        # 붙는 경우도 있으므로 정확 일치 대신 접두어로 판정한다.
+        if price_label.startswith("전일종가"):
             pct_suffix = (
                 f'<span style="font-size:.7rem;color:#adb5bd;margin-left:.2rem;">'
                 f'(전전일 대비)</span>'
