@@ -28,5 +28,10 @@
     "timestamp": "2026. 8. 14. 오전 10:22:12",
     "action": "approve_batch",
     "detail": "캐리 (stocks)"
+  },
+  {
+    "timestamp": "2026. 8. 18. 오후 2:00:28",
+    "action": "approve_batch",
+    "detail": "남성 (stocks)"
   }
 ]
