@@ -131,18 +131,60 @@ _NEGATIVE_SENTIMENT = {
 # 링크 기사여도 "실적", "목표가"가 함께 언급되면) 정상 집계한다 — 오탐
 # 방지가 목적이지 정당한 언급까지 걸러내는 게 목적이 아니므로, 두 신호가
 # 동시에 성립할 때만 제외한다.
+#
+# FIX-CONTEXT-2: 위 판정을 아이템 전체 텍스트(제목+요약) 단위로 한 번만
+# 수행하던 방식은, 유튜브 채널 설명란 하단에 매 영상마다 똑같이 붙는
+# 고정 홍보 푸터(구독 링크, 도서 구매 링크, 유료 서비스 안내 등) 안에
+# 종목명이 섞여 있어도, 같은 설명란 다른 곳에 "투자"·"주식" 같은 일반적인
+# 금융 키워드가 있으면 전체가 통과돼버렸다. 2026-08-18, 체슬리TV의 모든
+# 영상 설명란에 고정으로 붙는 "[예스24] 바로가기" 문구가 "퀀트", "실전투자"
+# 등 채널 전반의 투자 키워드 때문에 필터를 통과해 예스24가 다시 관심종목에
+# 오르는 재발 사고가 있었다 — 같은 설명란에 있는 "연금 자문계약" 안내(삼성
+# 증권 MTS 앱 홍보)도 동일한 구조로 통과됐다. 판정을 종목명 매칭 지점 주변
+# 지역 문맥(local context)으로 좁혀, "이 종목이 언급된 바로 그 자리"가
+# 광고/협찬 문맥인지를 보고, 그 자리 근처에 금융 키워드가 있을 때만 예외
+# 처리한다(_NON_INVESTMENT_WINDOW 참고).
+_NON_INVESTMENT_WINDOW = 70  # 매칭 지점 앞뒤로 살펴볼 문자 수
+
+# FIX-CONTEXT-3: 예스24는 "(교보) (예스24)" 처럼 도서 제목 뒤에 서점 이름만
+# 괄호로 나열되는 관용적 패턴으로도 반복 노출된다 — 이런 표기에는 "구매",
+# "바로가기" 같은 트리거 단어 자체가 아예 없어 트리거 기반 판정으로는
+# 잡히지 않는다(2026-08-12, 2026-08-18 두 차례 재발). 트리거 단어 유무로
+# 판정하는 대신, 반대로 "주변에 실질적 투자 맥락 키워드가 있을 때만 정상
+# 언급으로 인정"하도록 기준을 뒤집는다 — 이 이름이 실제 투자 분석 대상으로
+# 다뤄질 때(예: "예스24 실적", "예스24 목표가")만 통과시키고, 그 외에는
+# 기본적으로 도서 유통 플랫폼 언급으로 간주해 제외한다.
+_ALWAYS_REQUIRE_FINANCE_CONTEXT = {"예스24"}
+
 _NON_INVESTMENT_TRIGGERS = {
     "구매링크", "구매 링크", "구매처", "협찬", "PPL", "간접광고",
     "도서 구매", "책 구매", "교보문고", "알라딘", "선물하기",
+    "바로가기", "구독하기", "구경하기", "수강하기", "공식카페", "공식 카페",
+    "자문계약", "MTS 앱", "안내영상", "멤버십", "멤버스",
     "개기일식", "일식", "월식", "천문 현상", "천문현상",
 }
 
 _FINANCE_CONTEXT_KEYWORDS = {
-    "주가", "주식", "종목", "투자", "실적", "매수", "매도", "목표가",
+    # FIX-CONTEXT-2: "투자"는 "OO투자증권"/"OO투자자문"처럼 회사 이름 자체에
+    # 흔히 들어가는 음절이라, 광고성 언급 바로 옆에 그 회사 풀네임이 있기만
+    # 해도 예외 처리가 발동해버렸다(2026-08-18 "삼성증권"이 "체슬리투자자문"
+    # 홍보 문구 옆에서 걸러지지 못한 사고). 실질적 투자 정보를 가리키는
+    # 아래 구체적인 용어들만으로도 충분하므로 "투자" 단독 키워드는 제외한다.
+    "주가", "주식", "종목", "실적", "매수", "매도", "목표가",
     "코스피", "코스닥", "증시", "상장사", "밸류", "리포트", "애널리스트",
     "영업이익", "매출", "순매수", "순매도", "시가총액", "배당", "수급",
     "외국인", "기관", "IPO", "공모", "PER", "컨센서스", "전망", "주주환원",
     "ETF", "채권",
+}
+
+# FIX-CONTEXT-3: _ALWAYS_REQUIRE_FINANCE_CONTEXT 판정용으로는
+# _FINANCE_CONTEXT_KEYWORDS 중에서도 "전망"·"증시"·"코스피"·"코스닥"처럼
+# 경제 뉴스 전반에 흔히 등장하는(=해당 종목 자체와 무관해도 근처에 있을
+# 수 있는) 범용 단어는 제외한, 특정 종목을 실제로 다루고 있다는 확실한
+# 신호만 남긴 부분집합을 쓴다. ("2026년 하반기 대전망" 같은 일반적인 경제
+# 전망 문구 옆에 "(예스24)" 도서 링크가 있다는 이유만으로 통과되는 사고 방지)
+_STRICT_FINANCE_KEYWORDS = _FINANCE_CONTEXT_KEYWORDS - {
+    "전망", "증시", "코스피", "코스닥", "수급", "기관", "외국인",
 }
 
 
@@ -210,9 +252,20 @@ def _has_valid_trailing_boundary(text: str, end_idx: int) -> bool:
     after = text[end_idx:end_idx + 2]
     if not after:
         return True
-    if not _HANGUL_SYLLABLE_RE.match(after[0]):
-        return True
-    return any(after.startswith(p) for p in _TRAILING_PARTICLES)
+    first = after[0]
+    if _HANGUL_SYLLABLE_RE.match(first):
+        return any(after.startswith(p) for p in _TRAILING_PARTICLES)
+    # FIX-NAME-BOUNDARY-3: 뒤쪽이 한글은 아니지만 영문/숫자로 바로 이어지는
+    # 경우("RQNfE8i" 안의 "E8" 등, URL 축약주소 슬러그에 종목명이 우연히
+    # 포함되는 사고 — 2026-08-18 "E8"(418620)이 vo.la 단축주소 문자열
+    # "RQNfE8i"에 우연히 포함돼 관심종목으로 잘못 선정됨)는 더 큰 토큰의
+    # 일부로 보고 제외한다.
+    if re.match(r'[A-Za-z0-9]', first):
+        return False
+    return True
+
+
+_URL_RE = re.compile(r'https?://\S+')
 
 
 def _find_stock_matches(text: str, stock_map: dict) -> list:
@@ -227,8 +280,10 @@ def _find_stock_matches(text: str, stock_map: dict) -> list:
                 break
             before = text[idx - 1] if idx > 0 else ""
             end_idx = idx + len(n)
-            if (not _HANGUL_SYLLABLE_RE.match(before)
-                    and _has_valid_trailing_boundary(text, end_idx)):
+            # FIX-NAME-BOUNDARY-3: 앞쪽도 한글뿐 아니라 영문/숫자로 바로
+            # 이어지면(=더 큰 토큰의 일부일 가능성) 제외한다.
+            valid_leading = not before or not re.match(r'[가-힣A-Za-z0-9]', before)
+            if valid_leading and _has_valid_trailing_boundary(text, end_idx):
                 matched.append(n)
                 break
             start = idx + 1
@@ -436,12 +491,11 @@ def extract_mentions(all_data: list, stock_map: dict,
         link     = item.get("link", "") or item.get("url", "")
         opinion  = item.get("opinion", "")
         text     = f"{title} {summary}"
+        # FIX-NAME-BOUNDARY-3: URL(특히 vo.la/bit.ly 등 단축주소 슬러그)
+        # 안에 종목명이 우연히 포함돼("RQNfE8i" 안의 "E8" 등) 매칭되는
+        # 사고를 막기 위해, 매칭·분석에 쓰는 텍스트에서는 URL을 제거한다.
+        text     = _URL_RE.sub(" ", text)
         weight   = weight_map.get(src_name, default_weights.get(ch_type, 1.0))
-
-        # FIX-CONTEXT-1: 광고/협찬/도서구매 링크·동음이의어 기사 등 비-투자
-        # 맥락 콘텐츠는 종목 언급 집계 자체에서 제외한다 (아래 상세 주석 참고)
-        if _is_non_investment_context(text):
-            continue
 
         # GEMINI-VAL-1: confidence 낮음이면 가중치 절반
         if item.get("_from_gemini") and item.get("gemini_confidence") == "낮음":
@@ -471,6 +525,26 @@ def extract_mentions(all_data: list, stock_map: dict,
         for name in matched_names:
             if not _is_valid_stock_name(name):
                 continue
+
+            # FIX-CONTEXT-2: 종목명이 매칭된 바로 그 지점 주변(지역 문맥)만
+            # 잘라 광고/협찬/도서구매 링크 등 비-투자 맥락인지 판정한다.
+            # 아이템 전체 텍스트를 기준으로 판정하면, 채널 설명란 하단에
+            # 고정으로 붙는 홍보 푸터 안의 종목명이 같은 설명란 다른 곳의
+            # 일반적인 투자 키워드(예: "실전투자", "퀀트") 때문에 걸러지지
+            # 않는 문제가 있었다 (자세한 사고 사례는 _NON_INVESTMENT_TRIGGERS
+            # 위 주석 참고).
+            name_idx = text.find(name)
+            if name_idx != -1:
+                local_ctx = text[
+                    max(0, name_idx - _NON_INVESTMENT_WINDOW):
+                    name_idx + len(name) + _NON_INVESTMENT_WINDOW
+                ]
+                if name in _ALWAYS_REQUIRE_FINANCE_CONTEXT:
+                    if not any(k in local_ctx for k in _STRICT_FINANCE_KEYWORDS):
+                        continue
+                elif _is_non_investment_context(local_ctx):
+                    continue
+
             code = stock_map[name]
 
             content_id = f"{src_name}_{link}_{name}"
@@ -1026,6 +1100,11 @@ def build_analysis_prompt(
         "   \"구체적으로 어떤 내용이었는가\"를 써야 합니다(예: 나쁜 예 \"개별 종목 투자\n"
         "   전략이 논의됐다\" → 좋은 예 \"단일 종목 레버리지 ETF 출시 직후 급등해 개인\n"
         "   투자자 자금이 빠르게 유입됐다고 분석했다\").\n"
+        "   영상 제목·소제목의 미끼문구(예: \"이 섹터\", \"여기\", \"이때\")를 실제 답인\n"
+        "   것처럼 그대로 옮기지 마세요 — 소스 데이터(요약/스니펫)에 실제 답(구체적\n"
+        "   섹터명·종목명·수치 등)이 나와 있지 않다면, 그 언급은 channel_mentions에서\n"
+        "   아예 제외하세요. 답을 모른 채 제목을 재진술하는 것보다, 확인된 다른 언급만\n"
+        "   싣되 개수를 4개보다 적게 쓰는 편이 낫습니다.\n"
         "5. market_summary: 4단락(\\n\\n 구분), 각 단락 3~4문장, 400자 이상. 순서: 1)최근흐름개요(수집 데이터 기준 최근 24시간 내 흐름 서술, '오늘' 표현 지양) 2)주요이슈(최근 이슈 서술, '오늘' 표현 지양) 3)핵심포인트(긍정·부정 균형 서술, 리스크와 기회 모두 포함, '오늘' 표현 지양) 4)전망(오늘 개장 전망이 수집 데이터에 명시된 경우에만 '오늘' 사용, 없으면 '단기' 또는 '향후' 표현 사용).\n"
         "6. ai_strategy: 수집 데이터 기반으로만 작성. 임의 수치 생성 금지.\n"
         "7. URL은 출처 데이터에 있는 것만 사용. 없으면 빈 문자열.\n"
