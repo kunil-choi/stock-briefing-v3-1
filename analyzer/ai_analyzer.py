@@ -199,6 +199,30 @@ def _is_non_investment_context(text: str) -> bool:
     return not any(k in text for k in _FINANCE_CONTEXT_KEYWORDS)
 
 
+# FIX-BROKER-AFFIL-1: 증권사·자산운용사 등 금융기관명은 그 자체가 상장사라서
+# stock_map에 종목으로 존재하지만, 실제 텍스트에서는 대부분 "정의훈 유진투자
+# 증권 연구원이 출연해 삼성전자를 분석했다"처럼 애널리스트의 소속을 밝히는
+# 용도로만 쓰인다 — 이 경우 그 증권사 자체가 투자 대상으로 논의된 게 아니다.
+# 2026-08-18, "유진투자증권"이 정확히 이 패턴("OO증권 연구원")으로만 2개
+# 영상에 등장했는데도(가중점수 3.34, 총 언급 2회) 비뉴스 채널 2종에 걸쳐
+# 언급됐다는 이유로 대형 주도주 1위 카드를 차지한 사고가 있었다. 금융기관명
+# 매칭 바로 뒤에 "연구원"/"애널리스트" 같은 직함이 곧바로 따라오면, 그
+# 자리는 소속 표기일 뿐 그 금융기관 자체에 대한 언급이 아니라고 보고
+# 집계에서 제외한다.
+_BROKER_NAME_SUFFIXES = ("증권", "자산운용", "투자자문", "인베스트먼트")
+_ANALYST_TITLE_WORDS = (
+    "연구원", "연구위원", "애널리스트", "센터장", "전무", "상무", "이사",
+    "부장", "대표", "소장", "지점장", "팀장", "위원",
+)
+
+
+def _is_broker_affiliation_mention(text: str, name: str, idx: int) -> bool:
+    if not name.endswith(_BROKER_NAME_SUFFIXES):
+        return False
+    after = text[idx + len(name): idx + len(name) + 8].lstrip()
+    return any(after.startswith(t) for t in _ANALYST_TITLE_WORDS)
+
+
 _NEWS_TYPES = {"뉴스"}
 
 
@@ -535,6 +559,11 @@ def extract_mentions(all_data: list, stock_map: dict,
             # 위 주석 참고).
             name_idx = text.find(name)
             if name_idx != -1:
+                # FIX-BROKER-AFFIL-1: 증권사·자산운용사명 바로 뒤에 직함이
+                # 붙어 있으면 애널리스트 소속 표기일 뿐이므로 제외한다.
+                if _is_broker_affiliation_mention(text, name, name_idx):
+                    continue
+
                 local_ctx = text[
                     max(0, name_idx - _NON_INVESTMENT_WINDOW):
                     name_idx + len(name) + _NON_INVESTMENT_WINDOW
@@ -1345,6 +1374,21 @@ def analyze_and_generate_html(
         return _fallback_html("수집된 종목 언급이 없습니다.", briefing_date)
 
     filtered       = filter_mentions(mentions)
+
+    # FIX-LEADER-ORDER-1: filter_mentions()가 반환하는 순서는 "가중점수 순"이
+    # 아니라 "티어 통과 순서"다(1차 티어는 비뉴스 채널 2종 이상이면 가중점수와
+    # 무관하게 먼저 통과되고, 2차 이후 티어에서 더 높은 점수의 종목이 뒤늦게
+    # 추가될 수 있음). 그런데 바로 아래 market_leaders_raw = filtered[:2]는
+    # "맨 앞 2개 = 가중점수 최상위 2개"라고 암묵적으로 가정하고 있었다.
+    # 2026-08-18, "유진투자증권"(비뉴스 채널 2종 언급이지만 가중점수 3.34,
+    # 총 언급 2회 — 애널리스트가 다른 종목을 다루며 소속으로만 잠깐 언급된
+    # 수준)이 1차 티어에서 먼저 통과돼 리스트 맨 앞에 놓이는 바람에, 가중점수
+    # 24.22(총 언급 12회)로 압도적으로 높은 "삼성전자"를 제치고 대형 주도주
+    # 1위 카드를 차지한 사고가 있었다. market_leaders 선정과 관심종목
+    # rank 순서(프롬프트에도 "가중점수 순"이라고 명시돼 있음, 아래
+    # build_analysis_prompt 참고) 둘 다 실제 가중점수 내림차순이어야 하므로
+    # 여기서 명시적으로 재정렬한다.
+    filtered.sort(key=lambda x: x[1]["weighted_score"], reverse=True)
     filtered_names = {name for name, _ in filtered}
 
     # ── 대형 주도주 분리: 가중점수 상위 2개를 market_leaders로 별도 처리 ──
