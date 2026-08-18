@@ -952,6 +952,45 @@ def _build_analyst_summary_map(all_data: list) -> dict:
 
 # ── Claude 프롬프트 생성 ─────────────────────────────────────────────────
 
+def _format_market_overview_block(market_overview: dict) -> str:
+    """
+    FIX-GROUNDING-1: market_collector.py가 수집한 실제 코스피/코스닥/미국지수
+    수치를 사람이 읽을 수 있는 텍스트 블록으로 만든다. 이 블록을 프롬프트에
+    포함시켜, Claude가 market_summary/ai_strategy를 쓸 때 뉴스·유튜브 원문
+    속 발언(추측성 질문, 과거 회고, 클릭베이트성 프레이밍 등)에 섞여 나오는
+    지수 숫자가 아니라 실제 수집된 값을 기준으로 삼도록 한다.
+    """
+    if not market_overview:
+        return ""
+    labels = {
+        "kospi": "코스피", "kosdaq": "코스닥", "nasdaq": "나스닥",
+        "sp500": "S&P500", "dow": "다우존스", "usd_krw": "USD/KRW",
+    }
+    lines = []
+    for key, label in labels.items():
+        info = market_overview.get(key) or {}
+        value = info.get("value")
+        if value is None:
+            continue
+        pct = info.get("change_pct", 0.0)
+        close_label = info.get("close_label", "")
+        suffix = f" [{close_label}]" if close_label else ""
+        lines.append(f"- {label}: {value:,.2f} ({pct:+.2f}%){suffix}")
+    if not lines:
+        return ""
+    return (
+        "[실제 수집된 시장 지표 — 이 수치가 유일한 사실 기준]\n"
+        + "\n".join(lines) + "\n"
+        "※ 위 지표가 코스피/코스닥/미국 지수의 실제 값이다. 아래 헤드라인·"
+        "영상 발언 속에 이 값과 다른 지수 레벨(예: 폭락/폭등 관련 특정 숫자,"
+        " 과거 시나리오 질문, 가정형 질문 등)이 언급되더라도 그것을 실제"
+        " 시황으로 서술하지 마세요 — 발언자 개인의 프레이밍/질문/회고일 수"
+        " 있습니다. market_summary·ai_strategy에서 지수 수준을 언급할 때는"
+        " 반드시 위 실제 수치를 기준으로 쓰고, 위 수치와 명백히 모순되는"
+        " 지수 숫자는 그대로 인용하지 마세요.\n\n"
+    )
+
+
 def build_analysis_prompt(
     filtered_mentions: list,
     all_data: list,
@@ -961,6 +1000,7 @@ def build_analysis_prompt(
     yesterday_date: str = "",
     day_before_date: str = "",
     market_leaders_raw: list = None,
+    market_overview: dict = None,
 ) -> str:
 
     analyst_summary_map = _build_analyst_summary_map(all_data)
@@ -1145,15 +1185,25 @@ def build_analysis_prompt(
         "   아예 제외하세요. 답을 모른 채 제목을 재진술하는 것보다, 확인된 다른 언급만\n"
         "   싣되 개수를 4개보다 적게 쓰는 편이 낫습니다.\n"
         "5. market_summary: 4단락(\\n\\n 구분), 각 단락 3~4문장, 400자 이상. 순서: 1)최근흐름개요(수집 데이터 기준 최근 24시간 내 흐름 서술, '오늘' 표현 지양) 2)주요이슈(최근 이슈 서술, '오늘' 표현 지양) 3)핵심포인트(긍정·부정 균형 서술, 리스크와 기회 모두 포함, '오늘' 표현 지양) 4)전망(오늘 개장 전망이 수집 데이터에 명시된 경우에만 '오늘' 사용, 없으면 '단기' 또는 '향후' 표현 사용).\n"
+        "   코스피/코스닥 등 지수 레벨을 언급할 때는 반드시 [실제 수집된 시장\n"
+        "   지표] 블록의 수치를 기준으로 쓰세요 — 헤드라인이나 영상 발언 속\n"
+        "   질문·가정·회고에 등장하는 지수 숫자(예: 'OO에서 XX까지 폭락한\n"
+        "   상황, 어떻게 보나' 같은 진행자의 질문 프레이밍)를 실제 시황으로\n"
+        "   옮겨적지 마세요.\n"
         "6. ai_strategy: 수집 데이터 기반으로만 작성. 임의 수치 생성 금지.\n"
+        "   지수 레벨 언급 시에도 5번과 동일하게 [실제 수집된 시장 지표]\n"
+        "   수치만 사실로 취급하세요.\n"
         "7. URL은 출처 데이터에 있는 것만 사용. 없으면 빈 문자열.\n"
         "8. 순수 JSON만 출력. 설명문·마크다운 코드블록 제거.\n"
     )
+
+    market_overview_block = _format_market_overview_block(market_overview)
 
     return (
         f"오늘 날짜: {today_date} ({now_kst} KST)\n"
         f"어제(전일): {yesterday_date} / 그제(전전일): {day_before_date}\n"
         f"※ market_summary는 '최근 시장 흐름' 관점으로 작성. 수집 데이터의 대부분이 24시간 이내 과거 데이터이므로 '오늘' 표현은 4)전망 단락에서 오늘 전망이 수집 데이터에 명시된 경우에만 사용. 날짜 표현('전일', '전전일' 등)은 오늘 날짜 기준으로 정확히 사용할 것.\n\n"
+        f"{market_overview_block}"
         f"[최근 주요 헤드라인]\n{headlines_text}\n\n"
         f"[관심종목 후보 (가중점수 순)]\n{stocks_text}\n\n"
         "위 데이터를 바탕으로 아래 JSON 형식으로 오늘의 AI 주식 브리핑을 작성하세요.\n\n"
@@ -1461,6 +1511,7 @@ def analyze_and_generate_html(
         yesterday_date=yesterday_date,
         day_before_date=day_before_date,
         market_leaders_raw=market_leaders_raw,
+        market_overview=market_overview,
     )
     print(f"[Claude] 프롬프트 길이: {len(prompt)}자")
 
