@@ -161,6 +161,7 @@ _NON_INVESTMENT_TRIGGERS = {
     "도서 구매", "책 구매", "교보문고", "알라딘", "선물하기",
     "바로가기", "구독하기", "구경하기", "수강하기", "공식카페", "공식 카페",
     "자문계약", "MTS 앱", "안내영상", "멤버십", "멤버스",
+    "실전투자대회", "수상 경력", "약력",
     "개기일식", "일식", "월식", "천문 현상", "천문현상",
 }
 
@@ -177,14 +178,17 @@ _FINANCE_CONTEXT_KEYWORDS = {
     "ETF", "채권",
 }
 
-# FIX-CONTEXT-3: _ALWAYS_REQUIRE_FINANCE_CONTEXT 판정용으로는
-# _FINANCE_CONTEXT_KEYWORDS 중에서도 "전망"·"증시"·"코스피"·"코스닥"처럼
-# 경제 뉴스 전반에 흔히 등장하는(=해당 종목 자체와 무관해도 근처에 있을
-# 수 있는) 범용 단어는 제외한, 특정 종목을 실제로 다루고 있다는 확실한
-# 신호만 남긴 부분집합을 쓴다. ("2026년 하반기 대전망" 같은 일반적인 경제
-# 전망 문구 옆에 "(예스24)" 도서 링크가 있다는 이유만으로 통과되는 사고 방지)
+# FIX-CONTEXT-3/4: _FINANCE_CONTEXT_KEYWORDS 중에서도 "전망"·"증시"·
+# "코스피"·"코스닥"·"주식"처럼 경제 콘텐츠 전반에 흔히 등장하는(=해당
+# 종목 자체와 무관해도 근처에 있을 수 있는) 범용 단어는 제외한, 특정
+# 종목을 실제로 다루고 있다는 확실한 신호만 남긴 부분집합. 지역 문맥
+# 판정(_is_non_investment_context)의 예외 처리 기준으로 이 좁은 집합을
+# 쓴다 — "2026년 하반기 대전망" 옆의 "(예스24)" 도서 링크(FIX-CONTEXT-3),
+# "[허영만의 주식 타짜] 자문위원" 같은 채널 소개 문구 옆의 "키움증권
+# 실전투자대회" 언급(FIX-CONTEXT-4, 2026-08-18)이 각각 "전망"/"주식"이라는
+# 범용 단어 때문에 통과되던 사고를 막는다.
 _STRICT_FINANCE_KEYWORDS = _FINANCE_CONTEXT_KEYWORDS - {
-    "전망", "증시", "코스피", "코스닥", "수급", "기관", "외국인",
+    "전망", "증시", "코스피", "코스닥", "수급", "기관", "외국인", "주식",
 }
 
 
@@ -193,10 +197,13 @@ def _is_non_investment_context(text: str) -> bool:
     텍스트에 광고·협찬·도서구매·동음이의어 등 비-투자 맥락 신호가 있고,
     금융 맥락 키워드가 전혀 없으면 True를 반환한다. 두 조건이 동시에
     성립할 때만 노이즈로 판단한다.
+
+    FIX-CONTEXT-4: 예외 처리 기준으로 _FINANCE_CONTEXT_KEYWORDS 전체가
+    아니라 _STRICT_FINANCE_KEYWORDS(범용 단어 제외)를 쓴다.
     """
     if not any(k in text for k in _NON_INVESTMENT_TRIGGERS):
         return False
-    return not any(k in text for k in _FINANCE_CONTEXT_KEYWORDS)
+    return not any(k in text for k in _STRICT_FINANCE_KEYWORDS)
 
 
 # FIX-BROKER-AFFIL-1: 증권사·자산운용사 등 금융기관명은 그 자체가 상장사라서
@@ -208,7 +215,10 @@ def _is_non_investment_context(text: str) -> bool:
 # 언급됐다는 이유로 대형 주도주 1위 카드를 차지한 사고가 있었다. 금융기관명
 # 매칭 바로 뒤에 "연구원"/"애널리스트" 같은 직함이 곧바로 따라오면, 그
 # 자리는 소속 표기일 뿐 그 금융기관 자체에 대한 언급이 아니라고 보고
-# 집계에서 제외한다.
+# 집계에서 제외한다. 회사명과 직함 사이에 "투자전략팀"/"리서치센터"처럼
+# 부서명이 끼는 경우도 흔해("한지영 키움증권 투자전략팀 연구위원") 직함이
+# 바로 다음 토큰이 아닐 수 있으므로, 좁은 접두 일치 대신 좀 더 넓은 창
+# 안에 직함 단어가 등장하는지로 판정한다.
 _BROKER_NAME_SUFFIXES = ("증권", "자산운용", "투자자문", "인베스트먼트")
 _ANALYST_TITLE_WORDS = (
     "연구원", "연구위원", "애널리스트", "센터장", "전무", "상무", "이사",
@@ -219,8 +229,8 @@ _ANALYST_TITLE_WORDS = (
 def _is_broker_affiliation_mention(text: str, name: str, idx: int) -> bool:
     if not name.endswith(_BROKER_NAME_SUFFIXES):
         return False
-    after = text[idx + len(name): idx + len(name) + 8].lstrip()
-    return any(after.startswith(t) for t in _ANALYST_TITLE_WORDS)
+    after = text[idx + len(name): idx + len(name) + 16]
+    return any(t in after for t in _ANALYST_TITLE_WORDS)
 
 
 _NEWS_TYPES = {"뉴스"}
