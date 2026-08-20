@@ -1253,15 +1253,21 @@ function renderCorrectAIReview_stock(el, repoCfg) {
 
   const issues = review.issues || [];
   const openIssues = issues.filter(i => i.status === "open");
+  // AI-REVIEW-1: hidden_picks 등 "브리핑 교정" 화면에 편집 UI 자체가 없는
+  // 항목을 issue.stock_name만 보고 "카드로 이동/제안 적용" 가능하다고
+  // 표시하면 클릭해도 아무 카드도 못 찾는 죽은 버튼이 된다 — 실제
+  // market_leaders/stocks 카드로 존재하는 경우에만 두 버튼을 보여준다.
+  const existingCardNames = new Set(_stockAllCards(data).map(({card}) => card.name));
 
   const issueCardHtml = (issue, idx) => {
     const sevBadge = AI_REVIEW_SEVERITY_BADGE[issue.severity] || "badge-blue";
     const sevLabel = AI_REVIEW_SEVERITY_LABEL[issue.severity] || issue.severity;
     const typeLabel = AI_REVIEW_TYPE_LABEL[issue.type] || issue.type;
-    const isDiff = issue.type === "fact_check_diff" && issue.suggested_text;
+    const cardExists = !!issue.stock_name && existingCardNames.has(issue.stock_name);
+    const isDiff = issue.type === "fact_check_diff" && issue.suggested_text && cardExists;
     const isOpen = issue.status === "open";
 
-    const diffHtml = isDiff ? `
+    const diffHtml = issue.type === "fact_check_diff" && issue.suggested_text ? `
       <div class="field-block" style="margin-top:.6rem;">
         <div class="field-label">원본</div>
         <div class="preview-card" style="margin:0;background:var(--bg);">${escapeHtml(issue.original_text || "")}</div>
@@ -1271,7 +1277,7 @@ function renderCorrectAIReview_stock(el, repoCfg) {
         <div class="preview-card" style="margin:0;border-color:var(--accent);">${escapeHtml(issue.suggested_text)}</div>
       </div>` : "";
 
-    const canJump = !!issue.stock_name;
+    const canJump = cardExists;
     const statusNote = !isOpen
       ? `<span class="badge badge-blue" style="margin-left:auto;">${issue.status === "resolved" ? "✅ 적용됨" : "☑️ 확인함"}</span>`
       : "";

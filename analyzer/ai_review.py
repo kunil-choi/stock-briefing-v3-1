@@ -20,7 +20,7 @@ from datetime import datetime, timezone, timedelta
 from typing import Optional
 
 from .api_client import call_claude_with_retry
-from .gemini_validator import run_full_validation
+from .gemini_validator import _issue, run_full_validation
 
 CB   = "```"
 _KST = timezone(timedelta(hours=9))
@@ -28,6 +28,32 @@ _KST = timezone(timedelta(hours=9))
 # fact_check_diff 대상 필드. name/signal/code 등은 여기서 다루지 않는다
 # (name·signal은 gemini_validator의 룰 검수가 이미 담당).
 _DIFF_FIELDS = ["summary", "catalyst", "risk"]
+
+_SOURCE_TEXT_FIELDS = ["title", "summary", "content", "transcript"]
+_MAX_SOURCES_PER_STOCK = 3
+_MAX_SOURCE_CHARS = 300
+
+
+def _collect_source_excerpts(stock_name: str, all_data: list) -> list:
+    """
+    all_data(수집된 원문 목록)에서 종목명이 실제로 언급된 항목만 골라
+    짧게 잘라 반환한다. Claude 팩트체크가 브리핑 문구를 "원문과" 대조할 수
+    있도록, 원문 근거가 있는 종목만 대상으로 삼기 위함이다.
+    """
+    name = (stock_name or "").strip()
+    if not name:
+        return []
+    name_compact = name.replace(" ", "")
+    excerpts = []
+    for item in all_data:
+        if len(excerpts) >= _MAX_SOURCES_PER_STOCK:
+            break
+        text = " ".join(filter(None, (item.get(f, "") for f in _SOURCE_TEXT_FIELDS))).strip()
+        if not text:
+            continue
+        if name in text or name_compact in text.replace(" ", ""):
+            excerpts.append(text[:_MAX_SOURCE_CHARS])
+    return excerpts
 
 
 def _now_iso() -> str:
@@ -59,64 +85,51 @@ def _try_parse_json(text: str) -> Optional[dict]:
             return None
 
 
-def _issue(
-    type_: str,
-    message: str,
-    *,
-    severity: str = "medium",
-    stock_name: str = None,
-    field: str = None,
-    source: str = "rule",
-    original_text: str = None,
-    suggested_text: str = None,
-) -> dict:
-    return {
-        "type": type_,
-        "severity": severity,
-        "stock_name": stock_name,
-        "field": field,
-        "message": message,
-        "original_text": original_text,
-        "suggested_text": suggested_text,
-        "source": source,
-        "status": "open",
-    }
-
-
 def check_facts_against_sources(stocks: list, all_data: list, api_key: str) -> list:
     """
-    각 종목의 summary/catalyst/risk를 Claude에게 팩트체크시켜, 원본과
-    다른 정정 제안이 나온 경우에만 diff issue로 반환한다.
+    각 종목의 summary/catalyst/risk를, 그 종목이 실제로 언급된 원문
+    (all_data) 발췌와 대조해 Claude에게 팩트체크시킨다. 원문에서 해당
+    종목 언급을 전혀 찾을 수 없는 경우에는 대조할 근거가 없으므로
+    검토 대상에서 제외한다(근거 없는 종목 자체는 gemini_validator의
+    hallucinated_stock 룰 검사가 이미 별도로 잡아낸다).
 
     stocks/all_data는 읽기 전용으로만 쓰이며 이 함수 안에서 변경되지 않는다.
     """
     if not stocks or not api_key:
         return []
 
-    check_target = [
-        {
-            "name":     s.get("name", ""),
+    check_target = []
+    for s in stocks:
+        name = s.get("name", "")
+        if not name:
+            continue
+        sources = _collect_source_excerpts(name, all_data)
+        if not sources:
+            continue
+        check_target.append({
+            "name":     name,
             "signal":   s.get("signal", ""),
             "summary":  s.get("summary", ""),
             "catalyst": s.get("catalyst", ""),
             "risk":     s.get("risk", ""),
-        }
-        for s in stocks if s.get("name")
-    ]
+            "sources":  sources,
+        })
     if not check_target:
         return []
 
     prompt = (
         "당신은 한국 주식시장 전문 팩트체커입니다.\n"
-        "아래는 AI가 생성한 주식 브리핑의 종목별 요약입니다.\n"
-        "각 종목의 summary/catalyst/risk 문구에 사실 오류"
-        "(잘못된 수치·날짜·사건·업종 설명 등)가 있는지 검토하세요.\n\n"
-        "## 검토 대상:\n"
+        "아래는 AI가 생성한 주식 브리핑의 종목별 요약(summary/catalyst/risk)과,\n"
+        "그 판단의 근거가 됐어야 할 원문 발췌(sources)입니다.\n"
+        "각 종목의 summary/catalyst/risk 문구가 sources 원문과 실제로 부합하는지,\n"
+        "원문에 없는 수치·날짜·사건·업종 설명을 지어내지는 않았는지 검토하세요.\n\n"
+        "## 검토 대상 (종목별 sources = 실제 수집된 원문 발췌):\n"
         + CB + "json\n"
         + json.dumps(check_target, ensure_ascii=False, indent=2) + "\n"
         + CB + "\n\n"
         "## 응답 규칙:\n"
-        "- 사실 오류가 확실한 필드만 골라 정정된 문장을 제시하세요\n"
+        "- sources 원문과 명백히 어긋나거나 원문에 없는 내용을 지어낸 경우만 지적하세요\n"
+        "- sources가 짧게 발췌된 것이라 판단이 애매하면 지적하지 마세요 (확실한 경우만)\n"
         "- 표현 스타일 취향 차이는 지적하지 마세요 (사실 오류만)\n"
         "- 오류가 없으면 issues를 빈 배열로 반환하세요\n"
         "- 종목명(name)이나 signal 값은 절대 바꾸지 마세요\n"
@@ -125,7 +138,7 @@ def check_facts_against_sources(stocks: list, all_data: list, api_key: str) -> l
         "{\n"
         '  "issues": [\n'
         '    {"name": "종목명", "field": "summary|catalyst|risk", '
-        '"problem": "무엇이 왜 잘못됐는지 설명", "corrected_text": "정정된 문장 전체"}\n'
+        '"problem": "원문 sources의 어떤 부분과 왜 어긋나는지 설명", "corrected_text": "정정된 문장 전체"}\n'
         "  ]\n"
         "}"
     )
@@ -214,8 +227,13 @@ def build_ai_review(
     else:
         print("[AI검토] GEMINI_API_KEY 없음 → 룰/내용/애널리스트 검수 스킵")
 
-    all_stocks = result.get("stocks", []) + result.get("hidden_picks", [])
-    factcheck_issues = check_facts_against_sources(all_stocks, all_data, claude_api_key)
+    # NOTE: hidden_picks는 admin 페이지의 "브리핑 교정"에 편집 화면 자체가
+    # 없어(카드 목록/텍스트 탭 모두 market_leaders/stocks만 다룸) 여기서
+    # issue를 만들어도 관리자가 "제안 적용"·"카드로 이동"을 할 수 없다.
+    # 따라서 fact-check 대상은 stocks로 한정한다.
+    factcheck_issues = check_facts_against_sources(
+        result.get("stocks", []), all_data, claude_api_key
+    )
 
     issues  = gemini_issues + factcheck_issues
     overall = _compute_overall(issues)
