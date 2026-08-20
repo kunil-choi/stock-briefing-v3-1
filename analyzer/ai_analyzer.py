@@ -1595,15 +1595,16 @@ def analyze_and_generate_html(
         dup_names = [s.get("name") for s in stocks_before if s.get("name") in leader_names]
         print(f"[중복제거] market_leaders와 중복된 stocks {removed}개 제거: {dup_names}")
 
-    # ── GEMINI-VAL-1: 검수 파이프라인 ───────────────────────────────────
-    if GEMINI_API_KEY:
-        try:
-            from .gemini_validator import run_full_validation
-            result = run_full_validation(result, filtered, all_data, GEMINI_API_KEY)
-        except Exception as e:
-            print(f"[검수] 파이프라인 오류 (브리핑은 계속 진행): {e}")
-    else:
-        print("[검수] GEMINI_API_KEY 없음 → Gemini 검수 스킵")
+    # ── GEMINI-VAL-1 / AI-REVIEW-1: 검수 파이프라인 + 관리자 페이지용
+    # AI 검토(ai_review) 조립. 실패해도 브리핑 생성 자체는 계속 진행한다.
+    ai_review = None
+    try:
+        from .ai_review import build_ai_review
+        result, ai_review = build_ai_review(
+            result, filtered, all_data, GEMINI_API_KEY, ANTHROPIC_API_KEY
+        )
+    except Exception as e:
+        print(f"[검수] 파이프라인 오류 (브리핑은 계속 진행): {e}")
 
     # ── ai_strategy dict → 문자열 변환 ───────────────────────────────────
     # 문자열 변환 전에 구조화된 원본을 ai_strategy_detail로 따로 보존한다 —
@@ -1687,6 +1688,8 @@ def analyze_and_generate_html(
     if market_overview:
         result["market_data"] = market_overview
     result["brokerage_reports"] = build_brokerage_reports(all_data)
+    if ai_review is not None:
+        result["ai_review"] = ai_review
     os.makedirs("data", exist_ok=True)
     try:
         with open(OUTPUT_FILE, "w", encoding="utf-8") as f:

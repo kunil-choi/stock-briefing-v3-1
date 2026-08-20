@@ -1029,6 +1029,7 @@ function _renderCorrectInner(repoCfg) {
   const stockOnlyTabsHtml = repoCfg.schema === "stock" ? `
     <button class="subtab-sm ${st.correctTab === "panelist" ? "active" : ""}" onclick="switchCorrectTab('panelist')">🎤 패널 발언 교정</button>
     <button class="subtab-sm ${st.correctTab === "mentions" ? "active" : ""}" onclick="switchCorrectTab('mentions')">📡 채널 언급 교정</button>
+    <button class="subtab-sm ${st.correctTab === "aiReview" ? "active" : ""}" onclick="switchCorrectTab('aiReview')">🧪 AI 검토${_aiReviewOpenCountBadge(st.briefing)}</button>
   ` : "";
   el.innerHTML = `
     <div class="subtabs-sm">
@@ -1038,6 +1039,14 @@ function _renderCorrectInner(repoCfg) {
     </div>
     <div id="correct-tab-body"></div>`;
   _renderCorrectTabBody(repoCfg);
+}
+
+// AI-REVIEW-1: 서브탭 버튼에 미확인(open) 이슈 개수를 붙여 관리자가 탭을
+// 열지 않아도 바로 알아볼 수 있게 한다.
+function _aiReviewOpenCountBadge(data) {
+  const openCount = ((data && data.ai_review && data.ai_review.issues) || [])
+    .filter(i => i.status === "open").length;
+  return openCount ? ` (${openCount})` : "";
 }
 
 function switchCorrectTab(name) {
@@ -1052,6 +1061,7 @@ function _renderCorrectTabBody(repoCfg) {
     if (st.correctTab === "text") renderCorrectText_stock(body, repoCfg);
     else if (st.correctTab === "panelist") renderCorrectPanelist_stock(body, repoCfg);
     else if (st.correctTab === "mentions") renderCorrectChannelMentions_stock(body, repoCfg);
+    else if (st.correctTab === "aiReview") renderCorrectAIReview_stock(body, repoCfg);
     else renderCorrectCards_stock(body, repoCfg);
   } else {
     // report 스키마엔 panelist/mentions 탭이 없으니 혹시 남아있던 상태여도
@@ -1087,7 +1097,7 @@ function renderCorrectText_stock(el, repoCfg) {
     </div>
     <div class="section-title" style="font-size:.92rem;margin:1.2rem 0 .6rem;">📇 종목 카드별 본문</div>
     ${cards.map(({bucket, idx, card}) => `
-      <details class="card-acc">
+      <details class="card-acc" id="card-acc-${bucket}-${idx}">
         <summary>${bucket === "market_leaders" ? "🏆" : "📌"} ${escapeHtml(card.name)}
           <span class="badge ${bucket === "market_leaders" ? "badge-orange" : "badge-blue"}" style="margin-left:auto;">
             ${bucket === "market_leaders" ? "대형 주도주" : "관심종목"}
@@ -1199,6 +1209,178 @@ function deleteCard_stock(bucket, name) {
   _markPending(repoCfg, { action: "delete_card", detail: `${name} (${bucket})` });
   showToast(`📝 ${name} 삭제 임시 반영 — 승인 전까지 저장 안 됨`);
   renderCorrectCards_stock(document.getElementById("correct-tab-body"), repoCfg);
+}
+
+// ────────────────────────────────────────────────────────────────
+// AI-REVIEW-1: AI 검토 — analyzer/ai_review.py가 브리핑 생성 시 함께 만든
+// data.ai_review(룰 검수·Gemini 내용 검수·애널리스트 리포트 대조·Claude
+// 팩트체크 diff)를 관리자에게 보여주고, 관리자가 제안 적용/확인/무시를
+// 판단하게 한다. AI는 여기서 아무것도 자동으로 덮어쓰지 않는다 — "제안
+// 적용" 버튼도 사람이 눌러야만 임시 반영(_markPending)되고, 최종 저장은
+// 기존과 동일하게 "변경 승인" 버튼을 거친다.
+// ────────────────────────────────────────────────────────────────
+const AI_REVIEW_SEVERITY_BADGE = { high: "badge-red", medium: "badge-orange", low: "badge-blue" };
+const AI_REVIEW_SEVERITY_LABEL = { high: "심각", medium: "주의", low: "참고" };
+const AI_REVIEW_OVERALL_BADGE  = { pass: "badge-green", warn: "badge-orange", fail: "badge-red", skip: "badge-blue" };
+const AI_REVIEW_OVERALL_LABEL  = {
+  pass: "✅ 이상 없음", warn: "⚠️ 검토 필요", fail: "🚨 심각한 이슈 발견", skip: "⏭ 검증 안 함 (API 키 없음)",
+};
+const AI_REVIEW_TYPE_LABEL = {
+  hallucinated_stock:     "종목 선정 오류 (근거 없는 종목)",
+  hidden_pick_unsourced:  "종목 선정 오류 (히든픽 근거 없음)",
+  stock_count_mismatch:   "종목 수 불일치",
+  missing_field:          "필수 필드 누락",
+  invalid_signal:         "signal 값 오류",
+  summary_too_short:      "시장 요약 부족",
+  signal_summary_mismatch:"signal-요약 논리 불일치",
+  overstatement:          "과장된 단정 표현",
+  analyst_report_mismatch:"애널리스트 리포트 불일치",
+  fact_check_diff:        "팩트 오류 의심",
+};
+
+function renderCorrectAIReview_stock(el, repoCfg) {
+  const data   = state[repoCfg.key].briefing;
+  const review = data.ai_review;
+
+  if (!review) {
+    el.innerHTML = `
+      <div class="notice">
+        ℹ️ 이 브리핑에는 AI 검토 데이터가 없습니다 (이 기능이 배포되기 전에 생성된 브리핑이거나,
+        검증 API 키가 설정되지 않아 검증이 스킵됐을 수 있습니다).
+      </div>`;
+    return;
+  }
+
+  const issues = review.issues || [];
+  const openIssues = issues.filter(i => i.status === "open");
+
+  const issueCardHtml = (issue, idx) => {
+    const sevBadge = AI_REVIEW_SEVERITY_BADGE[issue.severity] || "badge-blue";
+    const sevLabel = AI_REVIEW_SEVERITY_LABEL[issue.severity] || issue.severity;
+    const typeLabel = AI_REVIEW_TYPE_LABEL[issue.type] || issue.type;
+    const isDiff = issue.type === "fact_check_diff" && issue.suggested_text;
+    const isOpen = issue.status === "open";
+
+    const diffHtml = isDiff ? `
+      <div class="field-block" style="margin-top:.6rem;">
+        <div class="field-label">원본</div>
+        <div class="preview-card" style="margin:0;background:var(--bg);">${escapeHtml(issue.original_text || "")}</div>
+      </div>
+      <div class="field-block">
+        <div class="field-label">AI 제안</div>
+        <div class="preview-card" style="margin:0;border-color:var(--accent);">${escapeHtml(issue.suggested_text)}</div>
+      </div>` : "";
+
+    const canJump = !!issue.stock_name;
+    const statusNote = !isOpen
+      ? `<span class="badge badge-blue" style="margin-left:auto;">${issue.status === "resolved" ? "✅ 적용됨" : "☑️ 확인함"}</span>`
+      : "";
+
+    return `
+      <div class="card" style="padding:.9rem 1rem;">
+        <div class="card-header" style="padding:0;background:none;margin-bottom:.5rem;">
+          <span class="badge ${sevBadge}">${sevLabel}</span>
+          <span class="badge badge-purple">${escapeHtml(typeLabel)}</span>
+          ${issue.stock_name ? `<span class="card-meta" style="font-weight:700;color:var(--text);">${escapeHtml(issue.stock_name)}</span>` : ""}
+          ${statusNote}
+        </div>
+        <div class="card-body" style="padding:0;">
+          <div style="font-size:.86rem;">${escapeHtml(issue.message || "")}</div>
+          ${diffHtml}
+          ${isOpen ? `
+            <div class="btn-row">
+              ${isDiff ? `<button class="btn btn-approve btn-sm" onclick="applyAiSuggestion_stock(${idx})">✅ 제안 적용</button>` : ""}
+              ${canJump ? `<button class="btn btn-move btn-sm" onclick="jumpToAiIssueCard_stock('${escapeHtml(issue.stock_name).replace(/'/g, "\\'")}')">🗂 카드로 이동해 직접 수정</button>` : ""}
+              <button class="btn btn-reject btn-sm" onclick="ackAiIssue_stock(${idx})">☑️ 확인함 (무시)</button>
+            </div>` : ""}
+        </div>
+      </div>`;
+  };
+
+  el.innerHTML = `
+    <div class="section-title" style="margin-bottom:.5rem;">
+      <span class="badge ${AI_REVIEW_OVERALL_BADGE[review.overall] || "badge-blue"}">${AI_REVIEW_OVERALL_LABEL[review.overall] || review.overall}</span>
+      <span class="card-meta">이슈 ${issues.length}건 (미확인 ${openIssues.length}건) · 생성 ${escapeHtml(review.generated_at || "")}</span>
+    </div>
+    <div class="notice">
+      🧪 여기 표시되는 내용은 AI(Gemini 검수 + Claude 팩트체크)가 자동으로 찾아낸 <b>의심 항목</b>입니다.
+      AI가 데이터를 직접 고치지 않습니다 — "제안 적용"을 눌러야 임시 반영되고, 그 뒤에도 화면 하단
+      "변경 승인"을 눌러야 실제로 저장·재발행됩니다. 오탐일 수 있으니 반드시 사람이 최종 판단하세요.
+    </div>
+    ${issues.length ? issues.map(issueCardHtml).join("") : '<div class="empty">✅ AI가 찾아낸 이슈가 없습니다.</div>'}
+    <div class="card" style="padding:1rem;margin-top:1rem;">
+      <div class="card-body" style="padding:0;display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;">
+        <div style="font-size:.84rem;color:var(--muted);flex:1;min-width:200px;">
+          ${review.admin_reviewed
+            ? `✅ ${escapeHtml(review.admin_reviewed_at || "")}에 검토 완료 처리됨`
+            : "모든 이슈를 확인/적용했다면 검토 완료로 표시하세요 (남은 이슈가 있어도 판단해서 누를 수 있습니다)."}
+        </div>
+        <button class="btn btn-approve" onclick="markAiReviewComplete_stock()">${review.admin_reviewed ? "🔁 검토 완료 다시 표시" : "✅ 전체 검토 완료로 표시"}</button>
+      </div>
+    </div>`;
+}
+
+function applyAiSuggestion_stock(issueIdx) {
+  const repoCfg = REPOS[activeRepoKey];
+  const data = state[repoCfg.key].briefing;
+  const issue = (data.ai_review?.issues || [])[issueIdx];
+  if (!issue || !issue.stock_name || !issue.field) { showToast("이슈를 찾을 수 없습니다", "error"); return; }
+
+  const target = _stockAllCards(data).find(({card}) => card.name === issue.stock_name);
+  if (!target) { showToast(`'${issue.stock_name}' 카드를 찾을 수 없습니다 (이미 삭제/이동됐을 수 있음)`, "error"); return; }
+
+  target.card[issue.field] = issue.suggested_text;
+  issue.status = "resolved";
+  _markPending(repoCfg, {
+    action: "ai_apply_suggestion",
+    detail: `AI 제안 적용 — ${issue.stock_name} ${issue.field}`,
+  });
+  showToast(`📝 ${issue.stock_name} ${issue.field} 필드에 AI 제안 임시 반영`);
+  renderCorrectAIReview_stock(document.getElementById("correct-tab-body"), repoCfg);
+}
+
+function ackAiIssue_stock(issueIdx) {
+  const repoCfg = REPOS[activeRepoKey];
+  const data = state[repoCfg.key].briefing;
+  const issue = (data.ai_review?.issues || [])[issueIdx];
+  if (!issue) { showToast("이슈를 찾을 수 없습니다", "error"); return; }
+  issue.status = "acknowledged";
+  _markPending(repoCfg, {
+    action: "ai_ack_issue",
+    detail: `AI 이슈 확인함 — ${issue.stock_name || ""} ${AI_REVIEW_TYPE_LABEL[issue.type] || issue.type}`,
+  });
+  renderCorrectAIReview_stock(document.getElementById("correct-tab-body"), repoCfg);
+}
+
+function markAiReviewComplete_stock() {
+  const repoCfg = REPOS[activeRepoKey];
+  const data = state[repoCfg.key].briefing;
+  if (!data.ai_review) return;
+  data.ai_review.admin_reviewed = !data.ai_review.admin_reviewed;
+  data.ai_review.admin_reviewed_at = data.ai_review.admin_reviewed
+    ? new Date().toLocaleString("ko-KR", {timeZone: "Asia/Seoul"})
+    : null;
+  _markPending(repoCfg, {
+    action: "ai_review_complete",
+    detail: data.ai_review.admin_reviewed ? "AI 검토 완료 처리" : "AI 검토 완료 취소",
+  });
+  renderCorrectAIReview_stock(document.getElementById("correct-tab-body"), repoCfg);
+}
+
+function jumpToAiIssueCard_stock(stockName) {
+  const repoCfg = REPOS[activeRepoKey];
+  const data = state[repoCfg.key].briefing;
+  const target = _stockAllCards(data).find(({card}) => card.name === stockName);
+  state[repoCfg.key].correctTab = "text";
+  _renderCorrectInner(repoCfg);
+  if (!target) return;
+  requestAnimationFrame(() => {
+    const elDetails = document.getElementById(`card-acc-${target.bucket}-${target.idx}`);
+    if (elDetails) {
+      elDetails.open = true;
+      elDetails.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  });
 }
 
 // ────────────────────────────────────────────────────────────────

@@ -88,6 +88,32 @@ def _today_str() -> str:
     return datetime.now(kst).strftime("%Y년 %m월 %d일")
 
 
+# ── 이슈 정규화 헬퍼 (AI-REVIEW-1: 관리자 페이지 AI 검토용 구조화) ──────────
+# 아래 각 검수 함수가 만드는 issue dict의 공통 스키마.
+# briefing_data.json의 ai_review.issues에 그대로 저장된다.
+
+def _issue(
+    type_: str,
+    message: str,
+    *,
+    severity: str = "medium",
+    stock_name: str = None,
+    field: str = None,
+    source: str = "rule",
+) -> dict:
+    return {
+        "type": type_,
+        "severity": severity,
+        "stock_name": stock_name,
+        "field": field,
+        "message": message,
+        "original_text": None,
+        "suggested_text": None,
+        "source": source,
+        "status": "open",
+    }
+
+
 # ── 1. 코드 룰 검수 (비용 0, 항상 실행) ─────────────────────────────────────
 
 def run_rule_validation(result: dict, filtered_mentions: list) -> list:
@@ -95,60 +121,82 @@ def run_rule_validation(result: dict, filtered_mentions: list) -> list:
     Claude 반환 JSON을 코드 룰로 검수.
     Gemini 호출 없이 즉시 실행, 비용 0.
 
-    반환: 경고 문자열 목록 (비어 있으면 이상 없음)
+    반환: 구조화된 issue dict 목록 (비어 있으면 이상 없음). AI-REVIEW-1 이전에는
+    경고 문자열 목록을 반환했으나, 관리자 페이지 AI 검토 패널에 그대로
+    저장할 수 있도록 구조화했다.
     """
-    warnings      = []
+    issues         = []
     filtered_names = {name for name, _ in filtered_mentions}
     stocks         = result.get("stocks", [])
     expected       = len(filtered_mentions)
 
     # 1. 종목 수 검증
     if len(stocks) < expected:
-        warnings.append(
-            f"종목 수 부족: 기대 {expected}개 → 실제 {len(stocks)}개 반환"
-        )
+        issues.append(_issue(
+            "stock_count_mismatch",
+            f"종목 수 부족: 기대 {expected}개 → 실제 {len(stocks)}개 반환",
+            severity="medium",
+        ))
 
     # 2. hallucination 검증 — 수집 데이터에 없는 종목 탐지
     for s in stocks:
         name = s.get("name", "")
         if name and name not in filtered_names:
-            warnings.append(f"미수집 종목 포함: '{name}' (프롬프트에 없던 종목)")
+            issues.append(_issue(
+                "hallucinated_stock",
+                f"'{name}'은(는) 수집된 원문 데이터에서 언급을 찾을 수 없습니다 (프롬프트에 없던 종목).",
+                severity="high", stock_name=name,
+            ))
 
     # 3. 필수 필드 누락 검증
     required_fields = ["name", "code", "signal", "summary"]
     for s in stocks:
         for field in required_fields:
             if not s.get(field):
-                warnings.append(
-                    f"필수 필드 누락: '{s.get('name', '?')}' → {field} 없음"
-                )
+                issues.append(_issue(
+                    "missing_field",
+                    f"'{s.get('name', '?')}' → {field} 필드 누락",
+                    severity="medium", stock_name=s.get("name"), field=field,
+                ))
 
     # 4. signal 값 범위 검증
     valid_signals = {"긍정", "중립", "부정"}
     for s in stocks:
         sig = s.get("signal", "")
         if sig and sig not in valid_signals:
-            warnings.append(f"signal 비정상: '{s.get('name')}' → '{sig}'")
+            issues.append(_issue(
+                "invalid_signal",
+                f"'{s.get('name')}'의 signal 값이 비정상입니다: '{sig}'",
+                severity="high", stock_name=s.get("name"), field="signal",
+            ))
 
     # 5. market_summary 길이 검증
     ms = result.get("market_summary", "")
     if len(ms) < 200:
-        warnings.append(f"market_summary 너무 짧음: {len(ms)}자")
+        issues.append(_issue(
+            "summary_too_short",
+            f"market_summary가 너무 짧습니다: {len(ms)}자",
+            severity="low", field="market_summary",
+        ))
 
     # 6. 히든픽 수집 데이터 검증
-    hidden_picks   = result.get("hidden_picks", [])
+    hidden_picks = result.get("hidden_picks", [])
     for hp in hidden_picks:
         name = hp.get("name", "")
         if name and name not in filtered_names:
-            warnings.append(f"히든픽 미수집 종목: '{name}'")
+            issues.append(_issue(
+                "hidden_pick_unsourced",
+                f"히든픽 '{name}'은(는) 수집된 원문 데이터에서 근거를 찾을 수 없습니다.",
+                severity="high", stock_name=name,
+            ))
 
-    for w in warnings:
-        print(f"[룰검수] ⚠️  {w}")
+    for issue in issues:
+        print(f"[룰검수] ⚠️  {issue['message']}")
 
-    if not warnings:
+    if not issues:
         print("[룰검수] ✅ 이상 없음")
 
-    return warnings
+    return issues
 
 
 # ── 2. Gemini 내용 검수 (경고 있을 때만 실행) ────────────────────────────────
@@ -418,6 +466,51 @@ def patch_missing_stocks(result: dict, filtered_mentions: list) -> dict:
     return result
 
 
+# ── AI-REVIEW-1: Gemini 내용 검수 / 애널리스트 리포트 검수 결과 정규화 ──────
+
+def _normalize_content_issues(content_result: dict) -> list:
+    issues = []
+    for si in content_result.get("signal_issues", []):
+        issues.append(_issue(
+            "signal_summary_mismatch",
+            si.get("issue", "") or f"'{si.get('name')}'의 signal과 요약 내용이 논리적으로 맞지 않습니다.",
+            severity="high", stock_name=si.get("name"), field="signal", source="gemini",
+        ))
+    for text in content_result.get("overstatements", []):
+        issues.append(_issue(
+            "overstatement",
+            f"근거 없이 단정적인 표현: {text}",
+            severity="medium", source="gemini",
+        ))
+    return issues
+
+
+def _normalize_analyst_issues(analyst_results: list) -> list:
+    issues = []
+    for item in analyst_results:
+        stock_name = item.get("stock_name")
+        # _verify_via_text() fallback 결과: {"stock_name","issue"} 형태
+        if "issue" in item and "issues" not in item:
+            issues.append(_issue(
+                "analyst_report_mismatch", item.get("issue", ""),
+                severity="medium", stock_name=stock_name, source="analyst_check",
+            ))
+            continue
+        # PDF 대조 결과: {"verified","opinion_match","target_price_match","issues"}
+        mismatched = (
+            item.get("verified") is False
+            or item.get("opinion_match") is False
+            or item.get("target_price_match") is False
+        )
+        if mismatched:
+            detail = "; ".join(item.get("issues", [])) or "리포트 원문과 불일치"
+            issues.append(_issue(
+                "analyst_report_mismatch", f"{stock_name}: {detail}",
+                severity="high", stock_name=stock_name, source="analyst_check",
+            ))
+    return issues
+
+
 # ── 통합 검수 실행 함수 ──────────────────────────────────────────────────────
 
 def run_full_validation(
@@ -425,38 +518,45 @@ def run_full_validation(
     filtered_mentions: list,
     all_data: list,
     api_key: str,
-) -> dict:
+) -> tuple:
     """
-    전체 검수 파이프라인을 순서대로 실행하고 최종 result를 반환.
+    전체 검수 파이프라인을 순서대로 실행하고 (result, issues)를 반환.
 
     순서:
     1. 코드 룰 검수 (항상, 비용 0)
     2. 누락 종목 보충 (항상, 비용 0)
     3. Gemini 내용 검수 (경고 있을 때만)
     4. 애널리스트 리포트 검수 (항상, PDF 있을 때만)
+
+    AI-REVIEW-1: 예전에는 result만 반환하고 검수 issue는 버려졌으나,
+    관리자 페이지 AI 검토 패널에 노출하기 위해 issue 목록을 함께 반환한다.
     """
     print("\n" + "=" * 50)
     print("[검수] 브리핑 검수 파이프라인 시작")
 
     # 1. 코드 룰 검수
-    warnings = run_rule_validation(result, filtered_mentions)
+    rule_issues = run_rule_validation(result, filtered_mentions)
 
     # 2. 누락 종목 보충
     result = patch_missing_stocks(result, filtered_mentions)
 
     # 3. Gemini 내용 검수 (경고 있을 때만)
-    if warnings and api_key:
-        run_gemini_content_validation(result, warnings, api_key)
+    content_issues = []
+    if rule_issues and api_key:
+        content_result = run_gemini_content_validation(result, rule_issues, api_key)
+        content_issues = _normalize_content_issues(content_result)
     else:
         print("[Gemini내용검수] 경고 없음 → 스킵")
 
     # 4. 애널리스트 리포트 PDF 검수
+    analyst_issues = []
     if api_key:
-        verify_analyst_reports(all_data, api_key)
+        analyst_results = verify_analyst_reports(all_data, api_key)
+        analyst_issues = _normalize_analyst_issues(analyst_results)
     else:
         print("[GeminiRPT] API 키 없음 → 스킵")
 
     print("[검수] 파이프라인 완료")
     print("=" * 50 + "\n")
 
-    return result
+    return result, rule_issues + content_issues + analyst_issues
